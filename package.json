@@ -1,0 +1,23 @@
+{
+  "name": "cvsc_api",
+  "version": "1.0.0",
+  "description": "coachella valley smokers club back end event server",
+  "main": "server.js",
+  "author": "seanone",
+  "license": "MIT",
+  "scripts": {
+    "server": "nodemon server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^9.0.2",
+    "express": "^4.17.1",
+    "knex": "^0.95.6",
+    "morgan": "^1.10.0",
+    "pg": "^8.6.0",
+    "sqlite3": "^5.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
