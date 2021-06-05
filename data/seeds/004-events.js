@@ -27,7 +27,7 @@ exports.seed = function(knex) {
           location_id: 5,
           details: 'Lorem sit minim veniam pariatur incididunt eiusmod nisi do. Cillum quis laborum sunt exercitation minim. Ut reprehenderit nulla commodo veniam dolore amet.',
           brand_id: 4,
-          created_by: 1
+          created_by: 2
         },
         {
           id: 3,
@@ -51,7 +51,7 @@ exports.seed = function(knex) {
           location_id: 3,
           details: 'Pariatur adipisicing minim cupidatat sunt deserunt et dolor enim. Ipsum consequat dolore nostrud laboris. Dolor aliquip consectetur minim laborum elit. Dolor nisi ea ut consectetur laborum dolor cillum labore adipisicing quis nisi sit. Sunt aliqua labore exercitation aliquip. Id eiusmod dolore voluptate amet consequat laborum exercitation fugiat id culpa magna id pariatur aliquip. Pariatur ex elit eu proident consequat fugiat irure ea reprehenderit.',
           brand_id: 2,
-          created_by: 1
+          created_by: 2
         },
         {
           id: 5,
@@ -75,7 +75,7 @@ exports.seed = function(knex) {
           location_id: 1,
           details: 'Laborum ipsum in dolore voluptate enim dolor. Anim Lorem pariatur nostrud ut. Ex ex non reprehenderit pariatur sint irure cillum sunt esse ea. Dolor Lorem Lorem do dolor non duis.',
           brand_id: 5,
-          created_by: 1
+          created_by: 2
         },
         {
           id: 7,
@@ -99,7 +99,7 @@ exports.seed = function(knex) {
           location_id: 3,
           details: 'Sint sunt mollit dolore cupidatat proident ad. Eiusmod dolore nostrud in irure laborum do tempor amet. Occaecat excepteur enim culpa pariatur occaecat et ullamco minim dolor aute id duis. Ullamco adipisicing esse est labore duis pariatur quis cupidatat excepteur voluptate reprehenderit sit culpa consequat.',
           brand_id: 3,
-          created_by: 1
+          created_by: 2
         },
         {
           id: 9,
@@ -123,7 +123,7 @@ exports.seed = function(knex) {
           location_id: 2,
           details: 'Magna labore laboris fugiat cillum ut aliqua tempor aliquip veniam enim consequat labore in elit. Ipsum labore sunt incididunt deserunt quis excepteur ullamco ipsum. Consequat aliquip elit occaecat nisi fugiat exercitation mollit culpa dolor cupidatat id ea culpa. Sint laborum sint tempor anim in elit velit consectetur veniam commodo enim sunt. Proident fugiat duis magna tempor cupidatat id dolor Lorem. Incididunt cupidatat enim pariatur in amet labore ea incididunt dolor. Lorem consequat et consequat tempor occaecat enim ut deserunt reprehenderit excepteur.',
           brand_id: 5,
-          created_by: 1
+          created_by: 2
         },
         {
           id: 11,
@@ -147,7 +147,7 @@ exports.seed = function(knex) {
           location_id: 4,
           details: 'Pariatur non consequat ut enim nisi ad incididunt proident occaecat velit sit. Exercitation ea aliqua deserunt incididunt mollit reprehenderit sint reprehenderit est ad culpa deserunt culpa ut. Aliquip nisi dolor aliqua ipsum. Laboris tempor duis non minim enim enim magna do fugiat sint ut. Ullamco enim id est aliqua cillum consequat dolor veniam ut aliqua ipsum cillum incididunt dolor. Minim sunt esse occaecat minim. Eu reprehenderit excepteur ex velit dolore minim voluptate esse eiusmod magna.',
           brand_id: 4,
-          created_by: 1
+          created_by: 2
         },
         {
           id: 13,
@@ -171,7 +171,7 @@ exports.seed = function(knex) {
           location_id: 5,
           details: 'Non non sint reprehenderit mollit. Cillum et elit non labore do aute nisi occaecat mollit officia ipsum eiusmod pariatur. Laborum sint tempor labore elit quis irure aliquip enim voluptate.',
           brand_id: 2,
-          created_by: 1
+          created_by: 2
         }
       ]);
     });
