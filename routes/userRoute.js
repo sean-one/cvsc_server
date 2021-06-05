@@ -40,7 +40,8 @@ router.post('/login', async (req, res) => {
                 res.status(401).json({ message: 'invalid credentials'})
             } else {
                 const token = createToken(user);
-                res.status(200).json({ message: 'welcome', token });
+                user.token = token;
+                res.status(200).json(user);
             }
         }
     }
