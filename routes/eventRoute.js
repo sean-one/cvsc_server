@@ -30,4 +30,13 @@ router.get('/brand/:id', (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
+router.get('/user/:id', (req, res) => {
+    const { id } = req.params;
+    db.findByCreator(id)
+        .then(events => {
+            res.status(200).json(events);
+        })
+        .catch(err => res.status(500).json(err));
+})
+
 module.exports = router;
