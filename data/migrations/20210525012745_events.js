@@ -3,10 +3,22 @@ exports.up = function (knex) {
     return knex.schema.createTable('events', events => {
         events.increments('id')
 
-        events.string('eventname')
-        events.date('eventdate')
-        events.integer('start')
-        events.integer('end')
+        events
+            .string('eventname')
+            .notNullable()
+
+        events
+            .date('eventdate')
+            .notNullable()
+
+        events
+            .integer('start')
+            .notNullable()
+
+        events
+            .integer('end')
+            .notNullable()
+
         events.string('media')
 
         events
@@ -14,6 +26,7 @@ exports.up = function (knex) {
             .unsigned()
             .references('id')
             .inTable('locations')
+            .notNullable()
 
         events.text('details', 'longtext')
 

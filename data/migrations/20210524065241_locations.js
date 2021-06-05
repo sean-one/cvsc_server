@@ -3,13 +3,33 @@ exports.up = function(knex) {
     return knex.schema.createTable('locations', locations => {
         locations.increments('id')
 
-        locations.string('venue_name')
-        locations.string('street')
-        locations.string('city')
-        locations.string('state')
-        locations.string('zipcode')
-        locations.string('formatted')
-        locations.string('place_id')
+        locations
+            .string('venue_name')
+            .notNullable()
+
+        locations
+            .string('street')
+            .notNullable()
+
+        locations
+            .string('city')
+            .notNullable()
+
+        locations
+            .string('state')
+            .notNullable()
+
+        locations
+            .string('zipcode')
+            .notNullable()
+
+        locations
+            .string('formatted')
+            .notNullable()
+
+        locations
+            .string('place_id')
+            .notNullable()      
     })
   
 };

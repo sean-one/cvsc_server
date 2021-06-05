@@ -3,8 +3,14 @@ exports.up = function (knex) {
     return knex.schema.createTable('businesses', businesses => {
         businesses.increments('id')
 
-        businesses.string('name')
-        businesses.string('email')
+        businesses
+            .string('name')
+            .notNullable()
+
+        businesses
+            .string('email')
+            .notNullable()
+
         businesses.string('avatar')
 
         businesses
@@ -14,7 +20,11 @@ exports.up = function (knex) {
             .inTable('locations')
 
         businesses.text('description', 'longtext')
-        businesses.enu('type', ['brand', 'venue', 'both'])
+        
+        businesses
+            .enu('type', ['brand', 'venue', 'both'])
+            .notNullable()
+
         businesses.string('contact')
 
         businesses.timestamps(true, true)

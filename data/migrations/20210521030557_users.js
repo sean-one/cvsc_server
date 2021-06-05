@@ -12,8 +12,11 @@ exports.up = function(knex) {
             .notNullable()
             .unique()
             
+        users
+            .string('password')
+            .notNullable()
+            
         users.string('avatar')
-        users.string('password')
         users.string('role')
 
         users.timestamps(true, true)
