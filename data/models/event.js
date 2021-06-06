@@ -26,7 +26,8 @@ function find() {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name'
+                'businesses.name',
+                'events.created_by'
             ]
         )
 
@@ -52,7 +53,8 @@ function findByLocation(location) {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name'
+                'businesses.name',
+                'events.created_by'
             ]
         )
 }
@@ -77,7 +79,8 @@ function findByBrand(brand) {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name'
+                'businesses.name',
+                'events.created_by'
             ]
         )
 }
@@ -102,7 +105,8 @@ function findByCreator(user) {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name'
+                'businesses.name',
+                'events.created_by'
             ]
         )
 }
