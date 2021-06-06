@@ -22,7 +22,7 @@ exports.up = function (knex) {
         businesses.text('description', 'longtext')
         
         businesses
-            .enu('type', ['brand', 'venue', 'both'])
+            .enu('businesstype', ['brand', 'venue', 'both'])
             .notNullable()
 
         businesses.string('contact')

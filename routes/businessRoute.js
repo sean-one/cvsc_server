@@ -13,6 +13,22 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
+router.get('/brands', (req, res) => {
+    db.findBrands()
+        .then(brands => {
+            res.status(200).json(brands);
+        })
+        .catch(err => res.status(500).json(err));
+});
+
+router.get('/venues', (req, res) => {
+    db.findVenues()
+        .then(venues => {
+            res.status(200).json(venues);
+        })
+        .catch(err => res.status(500).json(err));
+});
+
 router.get('/:id', (req, res) => {
     const { id } = req.params;
     db.findById(id)
@@ -28,5 +44,7 @@ router.get('/:id', (req, res) => {
             res.status(500).json({ message: 'failure', error: err });
         });
 });
+
+
 
 module.exports = router;
