@@ -12,14 +12,14 @@ exports.up = function (knex) {
             .notNullable()
 
         events
-            .integer('start')
+            .integer('eventstart')
             .notNullable()
 
         events
-            .integer('end')
+            .integer('eventend')
             .notNullable()
 
-        events.string('media')
+        events.string('eventmedia')
 
         events
             .integer('location_id')

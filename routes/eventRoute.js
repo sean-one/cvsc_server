@@ -12,6 +12,16 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
+router.post('/', async (req, res) => {
+    const newEvent = req.body
+    console.log(newEvent)
+    await db.createEvent(newEvent)
+        .then(event => {
+            res.status(200).json(event);
+        })
+        .catch(err => res.status(500).json(err));
+});
+
 router.get('/location/:id', (req, res) => {
     const { id } = req.params;
     db.findByLocation(id)

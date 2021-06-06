@@ -4,7 +4,8 @@ module.exports = {
     find,
     findByLocation,
     findByBrand,
-    findByCreator
+    findByCreator,
+    createEvent
 };
 
 function find() {
@@ -16,9 +17,9 @@ function find() {
                 'events.id',
                 'events.eventname',
                 'events.eventdate',
-                'events.start',
-                'events.end',
-                'events.media',
+                'events.eventstart',
+                'events.eventend',
+                'events.eventmedia',
                 'events.details',
                 'events.location_id',
                 'locations.venue_name',
@@ -43,9 +44,9 @@ function findByLocation(location) {
                 'events.id',
                 'events.eventname',
                 'events.eventdate',
-                'events.start',
-                'events.end',
-                'events.media',
+                'events.eventstart',
+                'events.eventend',
+                'events.eventmedia',
                 'events.details',
                 'events.location_id',
                 'locations.venue_name',
@@ -69,9 +70,9 @@ function findByBrand(brand) {
                 'events.id',
                 'events.eventname',
                 'events.eventdate',
-                'events.start',
-                'events.end',
-                'events.media',
+                'events.eventstart',
+                'events.eventend',
+                'events.eventmedia',
                 'events.details',
                 'events.location_id',
                 'locations.venue_name',
@@ -95,9 +96,9 @@ function findByCreator(user) {
                 'events.id',
                 'events.eventname',
                 'events.eventdate',
-                'events.start',
-                'events.end',
-                'events.media',
+                'events.eventstart',
+                'events.eventend',
+                'events.eventmedia',
                 'events.details',
                 'events.location_id',
                 'locations.venue_name',
@@ -107,6 +108,23 @@ function findByCreator(user) {
                 'events.brand_id',
                 'businesses.name',
                 'events.created_by'
+            ]
+        )
+}
+
+async function createEvent(event) {
+    return await db('events')
+        .insert(
+            event,
+            [
+                'id',
+                'eventname',
+                'eventdate',
+                'eventstart',
+                'eventend',
+                'eventmedia',
+                'brand_id',
+                'location_id'
             ]
         )
 }
