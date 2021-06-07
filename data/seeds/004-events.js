@@ -6,7 +6,6 @@ exports.seed = function(knex) {
       // Inserts seed entries
       return knex('events').insert([
         {
-          id: 1,
           eventname: 'great upcoming event',
           eventdate: '06/02/21',
           eventstart: 800,
@@ -18,7 +17,6 @@ exports.seed = function(knex) {
           created_by: 1
         },
         {
-          id: 2,
           eventname: 'something fun to do',
           eventdate: '06/02/21',
           eventstart: 1400,
@@ -30,7 +28,6 @@ exports.seed = function(knex) {
           created_by: 2
         },
         {
-          id: 3,
           eventname: 'smokers only party',
           eventdate: '05/31/21',
           eventstart: 1500,
@@ -42,7 +39,6 @@ exports.seed = function(knex) {
           created_by: 1
         },
         {
-          id: 4,
           eventname: 'new product samples',
           eventdate: '06/12/21',
           eventstart: 1800,
@@ -54,7 +50,6 @@ exports.seed = function(knex) {
           created_by: 2
         },
         {
-          id: 5,
           eventname: 'free dabs for everyone',
           eventdate: '05/28/21',
           eventstart: 1200,
@@ -66,7 +61,6 @@ exports.seed = function(knex) {
           created_by: 1
         },
         {
-          id: 6,
           eventname: 'double the fun',
           eventdate: '06/06/21',
           eventstart: 2100,
@@ -78,7 +72,6 @@ exports.seed = function(knex) {
           created_by: 2
         },
         {
-          id: 7,
           eventname: 'buy one get one free',
           eventdate: '06/17/21',
           eventstart: 800,
@@ -90,7 +83,6 @@ exports.seed = function(knex) {
           created_by: 1
         },
         {
-          id: 8,
           eventname: 'smokers blow out',
           eventdate: '06/17/21',
           eventstart: 1200,
@@ -102,7 +94,6 @@ exports.seed = function(knex) {
           created_by: 2
         },
         {
-          id: 9,
           eventname: 'pre rollers only',
           eventdate: '06/20/21',
           eventstart: 1400,
@@ -114,7 +105,6 @@ exports.seed = function(knex) {
           created_by: 1
         },
         {
-          id: 10,
           eventname: 'new strain release',
           eventdate: '06/24/21',
           eventstart: 1600,
@@ -126,7 +116,6 @@ exports.seed = function(knex) {
           created_by: 2
         },
         {
-          id: 11,
           eventname: 'big party day',
           eventdate: '06/17/21',
           eventstart: 800,
@@ -138,7 +127,6 @@ exports.seed = function(knex) {
           created_by: 1
         },
         {
-          id: 12,
           eventname: 'the meet and greet with a really really long name',
           eventdate: '06/17/21',
           eventstart: 1900,
@@ -150,7 +138,6 @@ exports.seed = function(knex) {
           created_by: 2
         },
         {
-          id: 13,
           eventname: 'mean green machine',
           eventdate: '06/17/21',
           eventstart: 1100,
@@ -162,7 +149,6 @@ exports.seed = function(knex) {
           created_by: 1
         },
         {
-          id: 14,
           eventname: 'big day finale',
           eventdate: '06/17/21',
           eventstart: 2100,

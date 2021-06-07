@@ -6,7 +6,6 @@ exports.seed = function(knex) {
       // Inserts seed entries
       return knex('businesses').insert([
         {
-          id: 1,
           name: "STIIIZY",
           email: "stiiizy@gmail.com",
           avatar: "https://picsum.photos/100/100",
@@ -16,7 +15,6 @@ exports.seed = function(knex) {
           contact: "instagram"
         },
         {
-          id: 2,
           name: "West Coast Cure",
           email: "wcc@gmail.com",
           avatar: "https://picsum.photos/100/100",
@@ -26,7 +24,6 @@ exports.seed = function(knex) {
           contact: "instagram"
         },
         {
-          id: 3,
           name: "Old Pal",
           email: "oldPal@gmail.com",
           avatar: "https://picsum.photos/100/100",
@@ -36,7 +33,6 @@ exports.seed = function(knex) {
           contact: "instagram"
         },
         {
-          id: 4,
           name: "The Cure Company",
           email: "cureco@gmail.com",
           avatar: "https://picsum.photos/100/100",
@@ -46,7 +42,6 @@ exports.seed = function(knex) {
           contact: "instagram"
         },
         {
-          id: 5,
           name: "Green Dragon",
           email: "greendragon@gmail.com",
           avatar: "https://picsum.photos/100/100",
@@ -56,7 +51,6 @@ exports.seed = function(knex) {
           contact: "instagram"
         },
         {
-          id: 6,
           name: "BARE Dispensary",
           email: "Bare@gmail.com",
           avatar: "https://picsum.photos/100/100",
@@ -66,7 +60,6 @@ exports.seed = function(knex) {
           contact: "instagram"
         },
         {
-          id: 7,
           name: "Desert's Finest",
           email: "dFinest@gmail.com",
           avatar: "https://picsum.photos/100/100",
@@ -76,7 +69,6 @@ exports.seed = function(knex) {
           contact: "instagram"
         },
         {
-          id: 8,
           name: "No Wait Meds",
           email: "nowaiting@gmail.com",
           avatar: "https://picsum.photos/100/100",
@@ -86,7 +78,6 @@ exports.seed = function(knex) {
           contact: "instagram"
         },
         {
-          id: 9,
           name: "Palm Royal Cannabis",
           email: "PRC@gmail.com",
           avatar: "https://picsum.photos/100/100",
