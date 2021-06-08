@@ -14,7 +14,6 @@ router.get('/', (req, res) => {
 
 router.post('/', async (req, res) => {
     const newEvent = req.body
-    console.log(newEvent)
     await db.createEvent(newEvent)
         .then(event => {
             res.status(200).json(event);

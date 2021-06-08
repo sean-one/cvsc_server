@@ -16,13 +16,16 @@ router.get('/', (req, res) => {
 
 router.post('/register', async (req, res) => {
     const newUser = req.body
+    // during validation adjust '' to null or default before sending to server
     if(!newUser.username || !newUser.password || !newUser.email) {
         res.status(400).json({ message: 'please fill all required inputs' });
     } else {
         const hash = await hashPassword(newUser.password);
         newUser.password = hash;
         const user = await db.addUser(newUser);
-        res.status(200).json(user);
+        const token = createToken(user[0]);
+        user[0].token = token;
+        res.status(200).json(user[0]);
     }
 })
 

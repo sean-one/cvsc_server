@@ -26,7 +26,17 @@ async function findByUsername(user) {
 }
 
 async function addUser(user) {
-    return await db('users').insert(user, [ 'id', 'username', 'avatar', 'role', 'password' ])
+    return await db('users')
+        .insert(
+            user,
+            [
+                'id',
+                'username',
+                'avatar',
+                'role',
+                'password'
+            ]
+        )
 }
 
 function remove(id) {
