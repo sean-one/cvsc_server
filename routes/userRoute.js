@@ -44,6 +44,8 @@ router.post('/login', async (req, res) => {
             } else {
                 const token = createToken(user);
                 user.token = token;
+                // remove the hashed password from the return object
+                delete user['password']
                 res.status(200).json(user);
             }
         }

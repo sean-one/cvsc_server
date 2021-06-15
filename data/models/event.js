@@ -2,10 +2,12 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
+    findById,
     findByLocation,
     findByBrand,
     findByCreator,
-    createEvent
+    createEvent,
+    removeEvent
 };
 
 function find() {
@@ -32,6 +34,32 @@ function find() {
             ]
         )
 
+}
+
+function findById(eventId) {
+    return db('events')
+        .where({ id: eventId })
+        .join('locations', 'events.location_id', '=', 'locations.id')
+        .join('businesses', 'events.brand_id', '=', 'businesses.id')
+        .select(
+            [
+                'events.id',
+                'events.eventname',
+                'events.eventdate',
+                'events.eventstart',
+                'events.eventend',
+                'events.eventmedia',
+                'events.details',
+                'events.location_id',
+                'locations.venue_name',
+                'locations.street',
+                'locations.city',
+                'locations.formatted',
+                'events.brand_id',
+                'businesses.name',
+                'events.created_by'
+            ]
+        )
 }
 
 function findByLocation(location) {
@@ -113,18 +141,41 @@ function findByCreator(user) {
 }
 
 async function createEvent(event) {
-    return await db('events')
-        .insert(
-            event,
-            [
-                'id',
-                'eventname',
-                'eventdate',
-                'eventstart',
-                'eventend',
-                'eventmedia',
-                'brand_id',
-                'location_id'
-            ]
-        )
+    return await db('events').insert(event, ['id'])
+        .then(eventId => {
+            const id = eventId[0].id;
+            return db('events')
+                .where('events.id', id)
+                .join('locations', 'events.location_id', '=', 'locations.id')
+                .join('businesses', 'events.brand_id', '=', 'businesses.id')
+                .select(
+                    [
+                        'events.id',
+                        'events.eventname',
+                        'events.eventdate',
+                        'events.eventstart',
+                        'events.eventend',
+                        'events.eventmedia',
+                        'events.details',
+                        'events.location_id',
+                        'locations.venue_name',
+                        'locations.street',
+                        'locations.city',
+                        'locations.formatted',
+                        'events.brand_id',
+                        'businesses.name',
+                        'events.created_by'
+                    ]
+                )
+                .first()
+        })
+        .catch(err => console.log(err))
+}
+
+function removeEvent(details) {
+    console.log('inside remove')
+    return db('events')
+        .where({ id: details.event, created_by: details.user })
+        .first()
+        .del()
 }

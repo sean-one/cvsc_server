@@ -16,7 +16,7 @@ app.use(morgan('dev'));
 app.use(express.json())
 app.use(cors({
     origin: [process.env.FRONTEND_CLIENT],
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "DELETE", "OPTIONS"],
     credentials: true
 }));
 

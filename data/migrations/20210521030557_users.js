@@ -21,8 +21,6 @@ exports.up = function(knex) {
             // create a default profile pic to go here later
             .defaultTo('https://picsum.photos/100/100')
 
-        users.string('role')
-
         users.timestamps(true, true)
     })
 };
