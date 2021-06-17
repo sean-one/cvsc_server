@@ -36,11 +36,11 @@ router.post('/login', async (req, res) => {
     } else {
         const user = await db.findByUsername(userInfo)
         if (!user) {
-            res.status(404).json({ message: 'user not found' })
+            res.status(404).send({ message: 'user not found' })
         } else {
             const passwordVerify = await comparePassword(userInfo.password, user.password)
             if (!passwordVerify) {
-                res.status(401).json({ message: 'invalid credentials'})
+                res.status(401).send({ message: 'invalid credentials'})
             } else {
                 const token = createToken(user);
                 user.token = token;
