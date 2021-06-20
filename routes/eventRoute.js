@@ -15,12 +15,9 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', [ validateToken, validateUserCreate ], async (req, res, next) => {
-    // confirm newEvent.created_by is eqaul to subject (user) inside token
-    // also confirm user has admin role to at least one of either location_id or brand_id
     try {
         const newEvent = req.body
         newEvent.created_by = req.decodedToken.subject
-        // console.log(newEvent);
         const event = await db.createEvent(newEvent)
         res.status(200).json(event);
     } catch (err) {

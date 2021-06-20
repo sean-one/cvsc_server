@@ -61,7 +61,6 @@ function findById(eventId) {
 }
 
 function findByLocation(venue) {
-    console.log(venue)
     return db('events')
         .where({ 'events.venue_id' : venue })
         .join('locations', 'events.venue_id', '=', 'locations.venue_id')
