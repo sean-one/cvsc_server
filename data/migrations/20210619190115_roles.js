@@ -1,5 +1,5 @@
 
-exports.up = function(knex) {
+exports.up = function (knex) {
     return knex.schema.createTable('roles', roles => {
         roles.increments('id')
 
@@ -9,7 +9,7 @@ exports.up = function(knex) {
             .references('id')
             .inTable('users')
             .notNullable()
-        
+
         roles
             .integer('business_id')
             .unsigned()
@@ -19,6 +19,6 @@ exports.up = function(knex) {
     })
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
     return knex.schema.dropTableIfExists('roles');
 };

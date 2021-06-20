@@ -10,6 +10,7 @@ const userRouter = require('./routes/userRoute');
 const eventRouter = require('./routes/eventRoute');
 const businessRouter = require('./routes/businessRoute');
 const locationRouter = require('./routes/locationRoute');
+const roleRouter = require('./routes/roleRoute');
 
 app.use(morgan('dev'));
 
@@ -23,7 +24,8 @@ app.use(cors({
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
 app.use('/business', businessRouter);
-app.use('/locations', locationRouter)
+app.use('/locations', locationRouter);
+app.use('/roles', roleRouter);
 
 app.get('/', (req, res) => {
     res.send('WELCOME TO THE ROOT OF IT ALL')

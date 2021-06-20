@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/event');
-const { validateToken } = require('../helpers/jwt_helper');
+const { validateToken, validateUserCreate } = require('../helpers/jwt_helper');
 
 const router = express.Router();
 
@@ -14,16 +14,21 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
-router.post('/', async (req, res) => {
+router.post('/', [ validateToken, validateUserCreate ], async (req, res, next) => {
     // confirm newEvent.created_by is eqaul to subject (user) inside token
     // also confirm user has admin role to at least one of either location_id or brand_id
-    const newEvent = req.body
-    await db.createEvent(newEvent)
-        .then(event => {
-            console.log('event', event)
-            res.status(200).json(event);
-        })
-        .catch(err => res.status(500).json(err));
+    // console.log(newEvent);
+    try {
+        const newEvent = req.body
+        newEvent.created_by = req.decodedToken.subject
+        console.log(newEvent);
+        // const event = await db.createEvent(newEvent)
+        res.status(200).json(newEvent);
+    } catch (err) {
+        next(err)
+        // res.status(400).json({ message: 'there was an error'})
+    }
+    //     .catch(err => res.status(500).json(err));
 });
 
 router.get('/location/:id', (req, res) => {
@@ -32,7 +37,9 @@ router.get('/location/:id', (req, res) => {
         .then(events => {
             res.status(200).json(events);
         })
-        .catch(err => res.status(500).json(err));
+        .catch(err => {
+            res.status(500).json(err)
+        });
 })
 
 router.get('/brand/:id', (req, res) => {

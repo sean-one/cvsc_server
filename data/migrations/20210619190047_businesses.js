@@ -13,14 +13,8 @@ exports.up = function (knex) {
 
         businesses.string('avatar')
 
-        businesses
-            .integer('location')
-            .unsigned()
-            .references('id')
-            .inTable('locations')
-
         businesses.text('description', 'longtext')
-        
+
         businesses
             .enu('businesstype', ['brand', 'venue', 'both'])
             .notNullable()

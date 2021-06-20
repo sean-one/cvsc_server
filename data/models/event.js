@@ -12,24 +12,23 @@ module.exports = {
 
 function find() {
     return db('events')
-        .join('locations', 'events.location_id', '=', 'locations.id')
+        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
             [
-                'events.id',
+                'events.id as event_id',
                 'events.eventname',
                 'events.eventdate',
                 'events.eventstart',
                 'events.eventend',
                 'events.eventmedia',
                 'events.details',
-                'events.location_id',
+                'events.venue_id',
                 'locations.venue_name',
-                'locations.street',
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name',
+                'businesses.name as brand_name',
                 'events.created_by'
             ]
         )
@@ -39,50 +38,49 @@ function find() {
 function findById(eventId) {
     return db('events')
         .where({ id: eventId })
-        .join('locations', 'events.location_id', '=', 'locations.id')
+        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
             [
-                'events.id',
+                'events.id as event_id',
                 'events.eventname',
                 'events.eventdate',
                 'events.eventstart',
                 'events.eventend',
                 'events.eventmedia',
                 'events.details',
-                'events.location_id',
+                'events.venue_id',
                 'locations.venue_name',
-                'locations.street',
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name',
+                'businesses.name as brand_name',
                 'events.created_by'
             ]
         )
 }
 
-function findByLocation(location) {
+function findByLocation(venue) {
+    console.log(venue)
     return db('events')
-        .where({ location_id : location })
-        .join('locations', 'events.location_id', '=', 'locations.id')
+        .where({ 'events.venue_id' : venue })
+        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
             [
-                'events.id',
+                'events.id as event_id',
                 'events.eventname',
                 'events.eventdate',
                 'events.eventstart',
                 'events.eventend',
                 'events.eventmedia',
                 'events.details',
-                'events.location_id',
+                'events.venue_id',
                 'locations.venue_name',
-                'locations.street',
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name',
+                'businesses.name as brand_name',
                 'events.created_by'
             ]
         )
@@ -91,24 +89,23 @@ function findByLocation(location) {
 function findByBrand(brand) {
     return db('events')
         .where({ brand_id : brand })
-        .join('locations', 'events.location_id', '=', 'locations.id')
+        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
             [
-                'events.id',
+                'events.id as event_id',
                 'events.eventname',
                 'events.eventdate',
                 'events.eventstart',
                 'events.eventend',
                 'events.eventmedia',
                 'events.details',
-                'events.location_id',
+                'events.venue_id',
                 'locations.venue_name',
-                'locations.street',
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name',
+                'businesses.name as brand_name',
                 'events.created_by'
             ]
         )
@@ -117,24 +114,23 @@ function findByBrand(brand) {
 function findByCreator(user) {
     return db('events')
         .where({ created_by : user })
-        .join('locations', 'events.location_id', '=', 'locations.id')
+        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
             [
-                'events.id',
+                'events.id as event_id',
                 'events.eventname',
                 'events.eventdate',
                 'events.eventstart',
                 'events.eventend',
                 'events.eventmedia',
                 'events.details',
-                'events.location_id',
+                'events.venue_id',
                 'locations.venue_name',
-                'locations.street',
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name',
+                'businesses.name as brand_name',
                 'events.created_by'
             ]
         )
@@ -146,24 +142,23 @@ async function createEvent(event) {
             const id = eventId[0].id;
             return db('events')
                 .where('events.id', id)
-                .join('locations', 'events.location_id', '=', 'locations.id')
+                .join('locations', 'events.venue_id', '=', 'locations.venue_id')
                 .join('businesses', 'events.brand_id', '=', 'businesses.id')
                 .select(
                     [
-                        'events.id',
+                        'events.id as event_id',
                         'events.eventname',
                         'events.eventdate',
                         'events.eventstart',
                         'events.eventend',
                         'events.eventmedia',
                         'events.details',
-                        'events.location_id',
+                        'events.venue_id',
                         'locations.venue_name',
-                        'locations.street',
                         'locations.city',
                         'locations.formatted',
                         'events.brand_id',
-                        'businesses.name',
+                        'businesses.name as brand_name',
                         'events.created_by'
                     ]
                 )

@@ -34,8 +34,7 @@ function findVenues() {
         .select(
             [
                 'id',
-                'name',
-                'location'
+                'name'
             ]
         )
 }

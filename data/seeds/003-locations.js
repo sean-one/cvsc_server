@@ -7,6 +7,7 @@ exports.seed = function(knex) {
       return knex('locations').insert([
         {
           venue_name: "Green Dragon",
+          venue_id: 5,
           street: "353 South Palm Canyon Drive",
           city: "Palm Springs",
           state: "CA",
@@ -16,6 +17,7 @@ exports.seed = function(knex) {
         },
         {
           venue_name: "BARE Dispensary",
+          venue_id: 6,
           street: "690 Garnet Avenue",
           city: "Palm Springs",
           state: "CA",
@@ -25,6 +27,7 @@ exports.seed = function(knex) {
         },
         {
           venue_name: "Desert's Finest",
+          venue_id: 7,
           street: "12106 Palm Drive",
           city: "Desert Hot Springs",
           state: "CA",
@@ -34,6 +37,7 @@ exports.seed = function(knex) {
         },
         {
           venue_name: "No Wait Meds",
+          venue_id: 8,
           street: "68860 Ramon Road #2",
           city: "Cathedral City",
           state: "CA",
@@ -43,6 +47,7 @@ exports.seed = function(knex) {
         },
         {
           venue_name: "Palm Royal Cannabis",
+          venue_id: 9,
           street: "75048 Gerald Ford Drive #101",
           city: "Palm Desert",
           state: "CA",

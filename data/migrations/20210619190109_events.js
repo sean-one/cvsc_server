@@ -22,10 +22,10 @@ exports.up = function (knex) {
         events.string('eventmedia')
 
         events
-            .integer('location_id')
+            .integer('venue_id')
             .unsigned()
             .references('id')
-            .inTable('locations')
+            .inTable('businesses')
             .notNullable()
 
         events.text('details', 'longtext')

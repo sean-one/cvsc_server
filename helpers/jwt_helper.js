@@ -4,7 +4,7 @@ const createToken = (user) => {
     const payload = {
         subject: user.id,
         name: user.username,
-        role: user.role
+        roles: user.roles
     }
 
     const secret = process.env.JWT_SECRET;
@@ -16,22 +16,36 @@ const createToken = (user) => {
 }
 
 const validateToken = (req, res, next) => {
-    const token = req.headers.authorization.split(' ')[1];
-    if (token) {
-        jwt.verify(token, process.env.JWT_SECRET, {ignoreExpiration: true}, (err, decodedToken) => {
-            if (err) {
-                res.status(401).json({ message: 'invalid token'})
-            } else {
-                req.decodedToken = decodedToken;
-                next()
-            }
-        })
-    } else {
-        res.status(401).json({ message: 'please sign in' })
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        req.decodedToken = decoded;
+        next()
+    } catch (error) {
+        if(error.name === 'TypeError') {
+            res.status(401).json({ message: 'missing token' })
+        } else if(error.name === 'JsonWebTokenError') {
+            console.log('error!')
+            res.status(401).json({ message: 'invalid signature' })
+        } else {
+            res.status(500).json({ message: 'server error' })
+        }
     }
+}
+
+const validateUserCreate = (req, res, next) => {
+    if (req.decodedToken.roles.includes(req.body.location_id) || req.decodedToken.roles.includes(req.body.brand_id)) {
+        console.log('access!')
+    } else {
+        res.status(403).json({ message: 'invalid admin role' });
+    }
+    console.log(req.body.location_id, req.body.brand_id, req.decodedToken.roles)
+    // console.log(req.decodedToken)
+    // next()
 }
 
 module.exports = {
     createToken,
-    validateToken
+    validateToken,
+    validateUserCreate
 }
