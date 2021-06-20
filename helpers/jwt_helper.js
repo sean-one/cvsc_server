@@ -22,10 +22,10 @@ const validateToken = (req, res, next) => {
         req.decodedToken = decoded;
         next()
     } catch (error) {
+        // console.log(error.name, error.message, error.expiredAt)
         if(error.name === 'TypeError') {
             res.status(401).json({ message: 'missing token' })
         } else if(error.name === 'JsonWebTokenError') {
-            console.log('error!')
             res.status(401).json({ message: 'invalid signature' })
         } else {
             res.status(500).json({ message: 'server error' })
@@ -34,14 +34,13 @@ const validateToken = (req, res, next) => {
 }
 
 const validateUserCreate = (req, res, next) => {
-    if (req.decodedToken.roles.includes(req.body.location_id) || req.decodedToken.roles.includes(req.body.brand_id)) {
-        console.log('access!')
+    if (req.decodedToken.roles.includes(req.body.venue_id) || req.decodedToken.roles.includes(req.body.brand_id)) {
+        // validated user roles
+        next()
     } else {
         res.status(403).json({ message: 'invalid admin role' });
     }
-    console.log(req.body.location_id, req.body.brand_id, req.decodedToken.roles)
-    // console.log(req.decodedToken)
-    // next()
+    // console.log(req.body.venue_id, req.body.brand_id, req.decodedToken.roles)
 }
 
 module.exports = {
