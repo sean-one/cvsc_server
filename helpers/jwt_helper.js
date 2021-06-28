@@ -22,12 +22,14 @@ const validateToken = (req, res, next) => {
         req.decodedToken = decoded;
         next()
     } catch (error) {
-        // console.log(error.name, error.message, error.expiredAt)
+        console.log(error.name, error.message, error.expiredAt)
         if(error.name === 'TypeError') {
             res.status(401).json({ message: 'missing token' })
         } else if(error.name === 'JsonWebTokenError') {
             res.status(401).json({ message: 'invalid signature' })
         } else {
+            console.log('error')
+            console.log(error)
             res.status(500).json({ message: 'server error' })
         }
     }

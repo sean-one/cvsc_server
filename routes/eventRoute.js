@@ -62,10 +62,12 @@ router.delete('/remove/:eventid', validateToken, async (req, res) => {
             user: req.decodedToken.subject,
             event: parseInt(req.params.eventid)
         }
+        // console.log(deleteDetails)
         const deletedEvent = await db.removeEvent(deleteDetails)
         if (deletedEvent >= 1) {
             res.status(204).json();
         } else {
+            console.log(deletedEvent)
             res.status(400).json({ message: 'invalid credentials' })
         }
     } catch (err) {

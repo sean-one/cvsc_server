@@ -167,9 +167,13 @@ async function createEvent(event) {
 }
 
 function removeEvent(details) {
-    console.log('inside remove')
+    // console.log(details)
+    // console.log('inside remove')
     return db('events')
-        .where({ id: details.event, created_by: details.user })
+        .where({ created_by: details.user })
+        .andWhere(function() {
+            this.where({ id: details.event })
+        })
         .first()
         .del()
 }
