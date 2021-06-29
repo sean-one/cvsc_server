@@ -12,6 +12,7 @@ module.exports = {
 
 function find() {
     return db('events')
+        .where('events.eventdate', '>=', new Date())
         .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
