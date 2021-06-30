@@ -7,7 +7,7 @@ exports.seed = function(knex) {
       return knex('events').insert([
         {
           eventname: 'great upcoming event',
-          eventdate: '06/22/21',
+          eventdate: '07/01/21',
           eventstart: 800,
           eventend: 1000,
           eventmedia: 'https://picsum.photos/300/300',
@@ -18,7 +18,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'something fun to do',
-          eventdate: '06/24/21',
+          eventdate: '07/02/21',
           eventstart: 1400,
           eventend: 1600,
           eventmedia: 'https://picsum.photos/300/300',
@@ -40,7 +40,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'new product samples',
-          eventdate: '06/30/21',
+          eventdate: '07/10/21',
           eventstart: 1800,
           eventend: 2000,
           eventmedia: 'https://picsum.photos/300/300',
@@ -51,7 +51,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'free dabs for everyone',
-          eventdate: '06/28/21',
+          eventdate: '07/11/21',
           eventstart: 1200,
           eventend: 1700,
           eventmedia: 'https://picsum.photos/300/300',
@@ -62,7 +62,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'double the fun',
-          eventdate: '06/22/21',
+          eventdate: '07/11/21',
           eventstart: 2100,
           eventend: 2300,
           eventmedia: 'https://picsum.photos/300/300',
@@ -73,7 +73,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'buy one get one free',
-          eventdate: '06/29/21',
+          eventdate: '07/06/21',
           eventstart: 800,
           eventend: 1700,
           eventmedia: 'https://picsum.photos/300/300',
@@ -84,7 +84,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'smokers blow out',
-          eventdate: '06/28/21',
+          eventdate: '07/07/21',
           eventstart: 1200,
           eventend: 1500,
           eventmedia: 'https://picsum.photos/300/300',
@@ -95,7 +95,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'pre rollers only',
-          eventdate: '06/20/21',
+          eventdate: '07/09/21',
           eventstart: 1400,
           eventend: 1600,
           eventmedia: 'https://picsum.photos/300/300',
@@ -106,7 +106,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'new strain release',
-          eventdate: '06/24/21',
+          eventdate: '07/04/21',
           eventstart: 1600,
           eventend: 2200,
           eventmedia: 'https://picsum.photos/300/300',
@@ -117,7 +117,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'big party day',
-          eventdate: '06/26/21',
+          eventdate: '07/10/21',
           eventstart: 800,
           eventend: 1000,
           eventmedia: 'https://picsum.photos/300/300',
@@ -128,7 +128,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'the meet and greet with a really really long name',
-          eventdate: '06/26/21',
+          eventdate: '07/10/21',
           eventstart: 1900,
           eventend: 2100,
           eventmedia: 'https://picsum.photos/300/300',
@@ -139,7 +139,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'mean green machine',
-          eventdate: '06/26/21',
+          eventdate: '07/10/21',
           eventstart: 1100,
           eventend: 1300,
           eventmedia: 'https://picsum.photos/300/300',
@@ -150,7 +150,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'big day finale',
-          eventdate: '06/26/21',
+          eventdate: '07/10/21',
           eventstart: 2100,
           eventend: 2300,
           eventmedia: 'https://picsum.photos/300/300',
