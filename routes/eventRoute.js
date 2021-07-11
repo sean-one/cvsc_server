@@ -14,6 +14,17 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
+router.get('/:id', (req, res) => {
+    const { id } = req.params
+    db.findById(id)
+        .then(event => {
+            res.status(200).json(event);
+        })
+        .catch(err => {
+            res.status(500).json(err);
+        });
+})
+
 router.post('/', [ validateToken, validateUserCreate ], async (req, res, next) => {
     try {
         const newEvent = req.body

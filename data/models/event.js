@@ -38,7 +38,7 @@ function find() {
 
 function findById(eventId) {
     return db('events')
-        .where({ id: eventId })
+        .where({ 'events.id' : eventId })
         .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
@@ -59,6 +59,7 @@ function findById(eventId) {
                 'events.created_by'
             ]
         )
+        .first()
 }
 
 function findByLocation(venue) {
