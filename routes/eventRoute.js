@@ -68,6 +68,7 @@ router.get('/user/:id', (req, res) => {
 })
 
 router.delete('/remove/:eventid', validateToken, async (req, res) => {
+    console.log(req)
     try {
         const deleteDetails = {
             user: req.decodedToken.subject,
