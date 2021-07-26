@@ -19,6 +19,7 @@ const validateToken = (req, res, next) => {
     try {
         const token = req.headers.authorization.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        console.log(decoded)
         req.decodedToken = decoded;
         next()
     } catch (error) {
@@ -35,7 +36,8 @@ const validateToken = (req, res, next) => {
     }
 }
 
-const validateUserCreate = (req, res, next) => {
+const validateUser = (req, res, next) => {
+    console.log(req.decoded)
     if (req.decodedToken.roles.includes(req.body.venue_id) || req.decodedToken.roles.includes(req.body.brand_id)) {
         // validated user roles
         next()
@@ -48,5 +50,5 @@ const validateUserCreate = (req, res, next) => {
 module.exports = {
     createToken,
     validateToken,
-    validateUserCreate
+    validateUser
 }

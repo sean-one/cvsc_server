@@ -7,6 +7,7 @@ module.exports = {
     findByBrand,
     findByCreator,
     createEvent,
+    updateEvent,
     removeEvent
 };
 
@@ -166,6 +167,12 @@ async function createEvent(event) {
                 .first()
         })
         .catch(err => console.log(err))
+}
+
+function updateEvent(eventId, eventChanges) {
+    return db('events')
+        .where({ id: eventId })
+        .update(eventChanges);
 }
 
 function removeEvent(details) {

@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/event');
-const { validateToken, validateUserCreate } = require('../helpers/jwt_helper');
+const { validateToken, validateUser } = require('../helpers/jwt_helper');
 
 const router = express.Router();
 
@@ -25,7 +25,23 @@ router.get('/:id', (req, res) => {
         });
 })
 
-router.post('/', [ validateToken, validateUserCreate ], async (req, res, next) => {
+router.put('/:id', [ validateToken, validateUser ], (req, res) => {
+    const { id } = req.params
+    const changes = req.body;
+    db.updateEvent(id, changes)
+        .then(count => {
+            if (count) {
+                res.status(200).json({ message: `${count} event updated` });
+            } else {
+                res.status(404).json({ message: "event not found" });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({ message: "server not connected", err });
+        });
+})
+
+router.post('/', [ validateToken, validateUser ], async (req, res, next) => {
     try {
         const newEvent = req.body
         newEvent.created_by = req.decodedToken.subject
