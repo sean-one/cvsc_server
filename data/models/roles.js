@@ -2,7 +2,7 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
-    // findByUser
+    findByUser
 }
 
 function find() {
@@ -10,14 +10,14 @@ function find() {
 }
 
 // returns an array of business_id(s) for given user id
-// function findByUser(userId) {
-//     return db('roles')
-//         .where({ user_id: userId })
-//         .select(
-//             [
-//                 db.raw('ARRAY_AGG(roles.business_id) as roles')
-//             ]
-//         )
-//         .groupBy('roles.user_id')
-//         .first()
-// }
+function findByUser(userId) {
+    return db('roles')
+        .where({ user_id: userId })
+        .select(
+            [
+                db.raw('ARRAY_AGG(roles.business_id) as roles')
+            ]
+        )
+        .groupBy('roles.user_id')
+        .first()
+}

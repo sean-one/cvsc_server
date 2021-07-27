@@ -15,17 +15,14 @@ function find() {
 async function findByUsername(user) {
     return await db('users')
         .where({ username: user.username })
-        .innerJoin('roles', 'users.id', '=', 'roles.user_id')
-        // .first()
         .select(
             [
                 'users.id',
                 'users.username',
                 'users.avatar',
-                'users.password',
-                db.raw('ARRAY_AGG(roles.business_id) as roles')
-            ])
-        .groupBy('users.id', 'users.username')
+                'users.password'
+            ]
+        )
         .first()
 }
 

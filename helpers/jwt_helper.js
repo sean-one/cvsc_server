@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 
+const db = require('../data/models/roles');
+
 const createToken = (user) => {
     const payload = {
         subject: user.id,
@@ -36,9 +38,13 @@ const validateToken = (req, res, next) => {
     }
 }
 
-const validateUser = (req, res, next) => {
-    console.log(req.decoded)
-    if (req.decodedToken.roles.includes(req.body.venue_id) || req.decodedToken.roles.includes(req.body.brand_id)) {
+const validateUser = async (req, res, next) => {
+    const userRoles = await db.findByUser(req.decodedToken.subject)
+        .then(roles => {
+            return roles.roles
+        })
+        .catch(err => console.log(err))
+    if (userRoles.includes(req.body.venue_id) || userRoles.includes(req.body.brand_id)) {
         // validated user roles
         next()
     } else {

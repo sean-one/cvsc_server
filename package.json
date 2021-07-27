@@ -9,6 +9,7 @@
     "server": "nodemon server.js"
   },
   "dependencies": {
+    "aws-sdk": "^2.953.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^9.0.2",
