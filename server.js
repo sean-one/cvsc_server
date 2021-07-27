@@ -13,7 +13,7 @@ const locationRouter = require('./routes/locationRoute');
 const roleRouter = require('./routes/roleRoute');
 const s3Router = require('./routes/s3Route');
 
-app.use(morgan('dev'));
+app.use(morgan(':date[clf] :method :url :status :response-time ms - :res[content-length]'));
 
 app.use(express.json())
 app.use(cors({
