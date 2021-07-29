@@ -6,6 +6,7 @@ exports.up = function(knex) {
         users
             .string('username')
             .notNullable()
+            .unique()
         
         users
             .string('email')

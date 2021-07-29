@@ -19,7 +19,8 @@ router.post('/register', async (req, res) => {
     // during validation adjust '' to null or default before sending to server
     if(!newUser.username || !newUser.password || !newUser.email) {
         res.status(400).json({ message: 'please fill all required inputs' });
-    } else {
+    }
+    try {
         const hash = await hashPassword(newUser.password);
         newUser.password = hash;
         const user = await db.addUser(newUser);
@@ -27,7 +28,19 @@ router.post('/register', async (req, res) => {
         user[0].token = token;
         // remove hashed password from the return object
         delete user[0]['password']
-        res.status(200).json(user[0]);
+        res.status(200).json(user[0]);    
+    } catch (error) {
+        if(error.constraint === 'users_username_unique') {
+            res.status(400).json({ message: 'username is not available', type: 'username' })
+            // console.log('username error')
+        }
+
+        if(error.constraint === 'users_email_unique') {
+            res.status(400).json({ message: 'email duplicate', type: 'email' })
+            // console.log('email error')
+        }
+
+        res.status(500).json({ message: 'something went wrong', error })
     }
 })
 
@@ -38,7 +51,6 @@ router.post('/login', async (req, res) => {
         res.status(400).json({ message: 'please fill all required inputs' });
     } else {
         const user = await db.findByUsername(userInfo)
-        console.log(user)
         if (!user) {
             res.status(404).send({ message: 'user not found' })
         } else {
