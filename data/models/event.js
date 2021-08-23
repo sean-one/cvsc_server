@@ -136,6 +136,7 @@ function findByCreator(user) {
                 'events.created_by'
             ]
         )
+        .orderBy('events.eventdate')
 }
 
 async function createEvent(event) {
