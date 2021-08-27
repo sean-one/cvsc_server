@@ -40,9 +40,15 @@ const validateToken = (req, res, next) => {
 const validateUser = async (req, res, next) => {
     const userRoles = await db.findByUser(req.decodedToken.subject)
         .then(roles => {
-            return roles.roles
+            if(roles) {
+                return roles.roles
+            } else {
+                return []
+            }
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            console.log(err)
+        })
     if (userRoles.includes(req.body.venue_id) || userRoles.includes(req.body.brand_id)) {
         // validated user roles
         next()

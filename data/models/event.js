@@ -116,6 +116,7 @@ function findByBrand(brand) {
 function findByCreator(user) {
     return db('events')
         .where({ created_by : user })
+        .where('events.eventdate', '>=', new Date())
         .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
