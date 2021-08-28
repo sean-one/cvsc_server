@@ -20,6 +20,7 @@ async function findByUsername(user) {
                 'users.id',
                 'users.username',
                 'users.avatar',
+                'users.isAdmin',
                 'users.password'
             ]
         )
@@ -34,6 +35,7 @@ async function addUser(user) {
                 'id',
                 'username',
                 'avatar',
+                'isAdmin',
                 'password'
             ]
         )
