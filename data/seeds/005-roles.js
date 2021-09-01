@@ -5,15 +5,15 @@ exports.seed = function(knex) {
     .then(function () {
       // Inserts seed entries
       return knex('roles').insert([
-        { user_id: 1, business_id: 1 },
-        { user_id: 2, business_id: 2 },
-        { user_id: 1, business_id: 3 },
-        { user_id: 2, business_id: 4 },
-        { user_id: 1, business_id: 5 },
-        { user_id: 2, business_id: 6 },
-        { user_id: 1, business_id: 7 },
-        { user_id: 2, business_id: 8 },
-        { user_id: 1, business_id: 9 }
+        { user_id: 1, business_id: 1, roletype: 'admin' },
+        { user_id: 2, business_id: 2, roletype: 'admin' },
+        { user_id: 1, business_id: 3, roletype: 'admin' },
+        { user_id: 2, business_id: 4, roletype: 'admin' },
+        { user_id: 1, business_id: 5, roletype: 'admin' },
+        { user_id: 2, business_id: 6, roletype: 'admin' },
+        { user_id: 1, business_id: 7, roletype: 'admin' },
+        { user_id: 2, business_id: 8, roletype: 'admin' },
+        { user_id: 1, business_id: 9, roletype: 'admin' }
       ]);
     });
 };

@@ -54,6 +54,7 @@ router.post('/login', async (req, res) => {
         if (!user) {
             res.status(404).send({ message: 'user not found' })
         } else {
+            console.log(user)
             const passwordVerify = await comparePassword(userInfo.password, user.password)
             if (!passwordVerify) {
                 res.status(401).send({ message: 'invalid credentials'})
@@ -61,7 +62,7 @@ router.post('/login', async (req, res) => {
                 const token = createToken(user);
                 user.token = token;
                 // remove the hashed password & roles from the return object
-                delete user['roles']
+                // delete user['roles']
                 delete user['password']
                 res.status(200).json(user);
             }

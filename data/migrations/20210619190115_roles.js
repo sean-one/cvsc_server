@@ -16,6 +16,10 @@ exports.up = function (knex) {
             .references('id')
             .inTable('businesses')
             .notNullable()
+        roles
+            .enu('roletype', ['admin', 'creator'])
+            .notNullable()
+            .defaultTo('creator')
     })
 };
 

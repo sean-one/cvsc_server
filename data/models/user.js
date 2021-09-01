@@ -12,19 +12,23 @@ function find() {
 }
 
 // this is the function used to login
+// leftjoin is used to create a array of null in the instance that there are no roles set for the user
 async function findByUsername(user) {
     return await db('users')
         .where({ username: user.username })
+        .leftJoin('roles', 'users.id', '=', 'roles.user_id')
         .select(
             [
                 'users.id',
                 'users.username',
                 'users.avatar',
-                'users.isAdmin',
-                'users.password'
+                'users.isCreator',
+                'users.password',
+                db.raw('JSON_AGG(roles.*) as roles')
             ]
         )
         .first()
+        .groupBy('users.id')
 }
 
 async function addUser(user) {
@@ -35,7 +39,7 @@ async function addUser(user) {
                 'id',
                 'username',
                 'avatar',
-                'isAdmin',
+                'isCreator',
                 'password'
             ]
         )
