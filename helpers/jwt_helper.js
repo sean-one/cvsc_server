@@ -6,7 +6,6 @@ const createToken = (user) => {
     const payload = {
         subject: user.id,
         name: user.username,
-        roles: user.roles
     }
 
     const secret = process.env.JWT_SECRET;
@@ -53,6 +52,7 @@ const validateUser = async (req, res, next) => {
         // validated user roles
         next()
     } else {
+        console.log('invalid admin roles')
         res.status(403).json({ message: 'invalid admin role' });
     }
     // console.log(req.body.venue_id, req.body.brand_id, req.decodedToken.roles)
