@@ -13,13 +13,13 @@ router.get('/', (req, res) => {
 })
 
 // returns an array of business_id(s) for given user id
-// router.get('/user/:id', (req, res) => {
-//     const { id } = req.params
-//     db.findByUser(id)
-//         .then(userevents => {
-//             res.status(200).json(userevents);
-//         })
-//         .catch(err => res.status(500).json(err));
-// })
+router.get('/user/:id', (req, res) => {
+    const { id } = req.params
+    db.findByUser(id)
+        .then(userevents => {
+            res.status(200).json(userevents);
+        })
+        .catch(err => res.status(500).json(err));
+})
 
 module.exports = router;

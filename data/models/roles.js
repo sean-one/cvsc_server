@@ -15,9 +15,11 @@ function findByUser(userId) {
         .where({ user_id: userId })
         .select(
             [
-                db.raw('ARRAY_AGG(roles.business_id) as roles')
+                'business_id',
+                'roletype'
+                // db.raw('ARRAY_AGG(roles.business_id) as roles')
             ]
         )
-        .groupBy('roles.user_id')
-        .first()
+        // .groupBy('roles.user_id')
+        // .first()
 }
