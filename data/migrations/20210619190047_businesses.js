@@ -21,6 +21,14 @@ exports.up = function (knex) {
 
         businesses.string('contact')
 
+        businesses
+            .specificType('useradmin', 'integer []')
+
+        businesses
+            .boolean('requestOpen')
+            .defaultTo(true)
+            .notNullable()
+
         businesses.timestamps(true, true)
     })
 };
