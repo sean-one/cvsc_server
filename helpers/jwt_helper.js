@@ -58,8 +58,13 @@ const validateUser = async (req, res, next) => {
     // console.log(req.body.venue_id, req.body.brand_id, req.decodedToken.roles)
 }
 
+// const validateUserRequest = async (req, res, next) => {
+//     const userId
+// }
+
 module.exports = {
     createToken,
     validateToken,
-    validateUser
+    validateUser,
+    // validateUserRequest
 }
