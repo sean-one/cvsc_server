@@ -46,7 +46,6 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const userInfo = req.body
-    console.log('body', userInfo)
     if(!userInfo.username || !userInfo.password) {
         res.status(400).json({ message: 'please fill all required inputs' });
     } else {
@@ -54,7 +53,6 @@ router.post('/login', async (req, res) => {
         if (!user) {
             res.status(404).send({ message: 'user not found' })
         } else {
-            console.log(user)
             const passwordVerify = await comparePassword(userInfo.password, user.password)
             if (!passwordVerify) {
                 res.status(401).send({ message: 'invalid credentials'})
