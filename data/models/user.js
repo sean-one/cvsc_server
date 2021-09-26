@@ -20,7 +20,7 @@ async function findByUsername(user) {
                 'users.id',
                 'users.username',
                 'users.avatar',
-                'users.isCreator',
+                'users.editor',
                 'users.password',
                 // db.raw('JSON_OBJECT_AGG(roles.business_id, roles.roletype) as roles')
             ]
@@ -37,7 +37,7 @@ async function addUser(user) {
                 'id',
                 'username',
                 'avatar',
-                'isCreator',
+                'editor',
                 'password'
             ]
         )

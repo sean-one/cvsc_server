@@ -23,7 +23,7 @@ exports.up = function(knex) {
             .defaultTo('https://picsum.photos/100/100')
         
         users
-            .boolean('isCreator')
+            .boolean('editor')
             .defaultTo(false)
             .notNullable()
 
