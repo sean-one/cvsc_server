@@ -50,6 +50,7 @@ router.post('/login', async (req, res) => {
         res.status(400).json({ message: 'please fill all required inputs' });
     } else {
         const user = await db.findByUsername(userInfo)
+        console.log(user)
         if (!user) {
             res.status(404).send({ message: 'user not found' })
         } else {

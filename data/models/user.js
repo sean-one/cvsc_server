@@ -14,6 +14,7 @@ function find() {
 async function findByUsername(user) {
     return await db('users')
         .where({ username: user.username })
+        // .join('roles', 'users.id', '=', 'roles.user_id')
         .select(
             [
                 'users.id',
@@ -21,8 +22,10 @@ async function findByUsername(user) {
                 'users.avatar',
                 'users.isCreator',
                 'users.password',
+                // db.raw('JSON_OBJECT_AGG(roles.business_id, roles.roletype) as roles')
             ]
         )
+        // .groupBy('users.id')
         .first()
 }
 
