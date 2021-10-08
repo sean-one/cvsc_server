@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/event');
-const { validateToken, validateUser } = require('../helpers/jwt_helper');
+const { validateToken, validateUser, validateUserRole } = require('../helpers/jwt_helper');
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ router.get('/:id', (req, res) => {
         });
 })
 
-router.put('/:id', [ validateToken, validateUser ], (req, res) => {
+router.put('/:id', [ validateToken, validateUserRole ], (req, res) => {
     const { id } = req.params
     const changes = req.body;
     db.updateEvent(id, changes)
@@ -41,7 +41,7 @@ router.put('/:id', [ validateToken, validateUser ], (req, res) => {
         });
 })
 
-router.post('/', [ validateToken, validateUser ], async (req, res, next) => {
+router.post('/', [ validateToken, validateUserRole ], async (req, res, next) => {
     try {
         const newEvent = req.body
         newEvent.created_by = req.decodedToken.subject
@@ -74,7 +74,7 @@ router.get('/brand/:id', (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
-router.get('/user/:id', (req, res) => {
+router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
     const { id } = req.params;
     db.findByCreator(id)
         .then(events => {

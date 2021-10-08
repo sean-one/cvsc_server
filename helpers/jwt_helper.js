@@ -23,20 +23,28 @@ const validateToken = (req, res, next) => {
         req.decodedToken = decoded;
         next()
     } catch (error) {
-        console.log(error.name, error.message, error.expiredAt)
+        // console.log(error.name, error.message, error.expiredAt)
         if(error.name === 'TypeError') {
             res.status(401).json({ message: 'missing token' })
         } else if(error.name === 'JsonWebTokenError') {
             res.status(401).json({ message: 'invalid signature' })
         } else {
-            console.log('error')
-            console.log(error)
+            // console.log('error')
+            // console.log(error)
             res.status(500).json({ message: 'server error' })
         }
     }
 }
 
-const validateUser = async (req, res, next) => {
+const validateUser = (req, res, next) => {
+    if (req.params.id.toString() === req.decodedToken.subject.toString()) {
+        next()
+    } else {
+        res.status(404).json({ message: 'wrong user' })
+    }
+}
+
+const validateUserRole = async (req, res, next) => {
     const userRoles = await db.findByUser(req.decodedToken.subject)
         .then(roles => {
             if(roles) {
@@ -66,5 +74,6 @@ module.exports = {
     createToken,
     validateToken,
     validateUser,
+    validateUserRole,
     // validateUserRequest
 }
