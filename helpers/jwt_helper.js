@@ -44,6 +44,7 @@ const validateUser = (req, res, next) => {
     }
 }
 
+
 const validateUserRole = async (req, res, next) => {
     const userRoles = await db.findByUser(req.decodedToken.subject)
         .then(roles => {

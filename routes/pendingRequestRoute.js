@@ -15,6 +15,14 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
+router.post('/businesses', (req, res) => {
+    db.findRequestByBusinessId(req.body)
+        .then(response => {
+            res.status(200).json(response)
+        })
+        .catch(err => console.log(err))
+})
+
 router.post('/', [ validateToken ], async (req, res) => {
     const requestInfo = req.body
     requestInfo.user_id = req.decodedToken.subject
