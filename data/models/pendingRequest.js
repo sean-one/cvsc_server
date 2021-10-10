@@ -19,4 +19,15 @@ async function addRequest(request) {
 async function findRequestByBusinessId(ids) {
     return await db('pendingRequests')
         .whereIn('business_id', ids)
+        .join('businesses', 'pendingRequests.business_id', '=', 'businesses.id')
+        .select(
+            [
+                'pendingRequests.id',
+                'pendingRequests.business_id',
+                'pendingRequests.request_for',
+                'pendingRequests.user_id',
+                'pendingRequests.username',
+                'businesses.name'
+            ]
+        )
 }
