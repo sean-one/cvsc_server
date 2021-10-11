@@ -46,8 +46,10 @@ const validateUser = (req, res, next) => {
 
 
 const validateUserRole = async (req, res, next) => {
-    const userRoles = await db.findByUser(req.decodedToken.subject)
+    console.log(req.decodedToken.subject)
+    const userRoles = await db.getEventRolesByUser(req.decodedToken.subject)
         .then(roles => {
+            console.log(roles)
             if(roles) {
                 return roles.roles
             } else {
@@ -57,6 +59,7 @@ const validateUserRole = async (req, res, next) => {
         .catch(err => {
             console.log(err)
         })
+    console.log(userRoles)
     if (userRoles.includes(req.body.venue_id) || userRoles.includes(req.body.brand_id)) {
         // validated user roles
         next()
