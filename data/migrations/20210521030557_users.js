@@ -23,11 +23,6 @@ exports.up = function(knex) {
             .defaultTo('https://picsum.photos/100/100')
         
         users
-            .enu('accounttype', ['basic', 'editor'])
-            .notNullable()
-            .defaultTo('basic')
-        
-        users
             .boolean('isAdmin')
             .defaultTo(false)
             .notNullable()
