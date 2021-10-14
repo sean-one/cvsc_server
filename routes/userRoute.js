@@ -24,6 +24,7 @@ router.post('/register', async (req, res) => {
         const hash = await hashPassword(newUser.password);
         newUser.password = hash;
         const user = await db.addUser(newUser);
+        user[0].business_roles = [];
         const token = createToken(user[0]);
         user[0].token = token;
         // remove hashed password from the return object
@@ -32,12 +33,10 @@ router.post('/register', async (req, res) => {
     } catch (error) {
         if(error.constraint === 'users_username_unique') {
             res.status(400).json({ message: 'username is not available', type: 'username' })
-            // console.log('username error')
         }
 
         if(error.constraint === 'users_email_unique') {
             res.status(400).json({ message: 'email duplicate', type: 'email' })
-            // console.log('email error')
         }
 
         res.status(500).json({ message: 'something went wrong', error })
@@ -50,7 +49,6 @@ router.post('/login', async (req, res) => {
         res.status(400).json({ message: 'please fill all required inputs' });
     } else {
         const user = await db.findByUsername(userInfo)
-        console.log(user)
         if (!user) {
             res.status(404).send({ message: 'user not found' })
         } else {
@@ -60,8 +58,6 @@ router.post('/login', async (req, res) => {
             } else {
                 const token = createToken(user);
                 user.token = token;
-                // remove the hashed password & roles from the return object
-                // delete user['roles']
                 delete user['password']
                 res.status(200).json(user);
             }
