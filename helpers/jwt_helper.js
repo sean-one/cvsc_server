@@ -6,6 +6,7 @@ const createToken = (user) => {
     const payload = {
         subject: user.id,
         name: user.username,
+        roles: user.business_roles
     }
 
     const secret = process.env.JWT_SECRET;

@@ -14,7 +14,7 @@ function find() {
 async function findByUsername(user) {
     return await db('users')
         .where({ username: user.username })
-        // .leftJoin('roles', 'users.id', '=', 'roles.user_id')
+        .leftJoin('roles', 'users.id', '=', 'roles.user_id')
         .select(
             [
                 'users.id',
@@ -23,11 +23,11 @@ async function findByUsername(user) {
                 'users.accounttype',
                 'users.isAdmin',
                 'users.password',
-                // db.raw('JSON_OBJECT_AGG(roles.business_id, roles.roletype) as roles')
+                db.raw('ARRAY_AGG(roles.business_id) as business_roles')
             ]
         )
         .first()
-        // .groupBy('users.id')
+        .groupBy('users.id')
 }
 
 async function addUser(user) {
