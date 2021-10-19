@@ -23,14 +23,12 @@ router.get('/user/:id', (req, res) => {
 })
 
 router.post('/editUserRoles', (req, res) => {
-    const user_roles = req.body.approved;
-    console.log(user_roles)
-    res.status(200).json({ message: 'hit' });
-    // db.addUserRoles(user_roles)
-    //     .then(response => {
-    //         res.status(200).json(response)
-    //     })
-    //     .catch(err => console.log(err))
+    const user_roles = req.body;
+    db.addUserRoles(user_roles)
+        .then(response => {
+            res.status(200).json(response)
+        })
+        .catch(err => console.log(err))
 })
 
 module.exports = router;

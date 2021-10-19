@@ -16,7 +16,6 @@ const s3Router = require('./routes/s3Route');
 
 app.use(morgan(':date[clf] :method :url :status :response-time ms - :res[content-length]'));
 
-// just a test line
 app.use(express.json())
 app.use(cors({
     origin: [process.env.FRONTEND_CLIENT],

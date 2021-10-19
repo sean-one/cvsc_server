@@ -3,7 +3,8 @@ const db = require('../dbConfig')
 module.exports = {
     find,
     addRequest,
-    findRequestByBusinessId
+    findRequestByBusinessId,
+    removeRequest
 
 }
 
@@ -30,4 +31,10 @@ async function findRequestByBusinessId(ids) {
                 'businesses.name'
             ]
         )
+}
+
+function removeRequest(id) {
+    return db('pendingRequests')
+        .where(id)
+        .del()
 }

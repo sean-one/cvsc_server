@@ -27,6 +27,11 @@ exports.up = function(knex) {
         pendingRequests
             .enu('request_for', ['admin', 'creator'])
             .notNullable()
+        
+        pendingRequests
+            .enu('request_status', ['open', 'rejected'])
+            .defaultTo('open')
+            .notNullable()
     })
   
 };

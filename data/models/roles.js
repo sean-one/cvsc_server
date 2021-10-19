@@ -25,36 +25,36 @@ function findByUser(userId) {
     
 async function addUserRoles(user_roles) {
     try {
-        // const approvedList = []
-        // const rejectedList = []
+        await db.transaction(async trx => {
+            
+            // iterate through approved request and insert into roles
+            for (let userRequest of user_roles.approved) {
+                // insert each request into the roles table
+                await db('roles')
+                    .transacting(trx)
+                    .insert(
+                        { 
+                            user_id: userRequest.user_id,
+                            business_id: userRequest.business_id,
+                            roletype: userRequest.roletype
+                        }
+                    )
+                    .into('roles')
+                    
+                // delete each of the approved request from the pendingrequest table
+                await db('pendingRequests').where({ id: userRequest.requestId }).first().del()
+            }
 
-        // iterate through user roles and find request for each one
-        // for (let userRequest of user_roles) {
-        //     if (userRequest[1] === 'approved') {
-        //         approvedList.push(userRequest[0])
-        //     } else if (userRequest[1] === 'rejected') {
-        //         rejectedList.push(userRequest[0])
-        //     } else {
-        //         continue
-        //     }
-        // }
-        // create transaction (tx) so that if there is an error somewhere everything fails or succeeds
-        // await db.transaction(async trx => {
+            // iterate through rejected request and update the status
+            for (let rejectedRequest of user_roles.rejected) {
+                await db('pendingRequests').where({ id: rejectedRequest.id }).update({ request_status: 'rejected' })
+            }
 
-        //     // create array for approved and rejected
-
-
-        // })
-
-        // console.log(approvedList)
-        // console.log(rejectedList)
+        })
         return db('roles')
     } catch (error) {
         throw error;
     }
-    // check if each request is 'approved' or 'rejected'
-        // if approved add elements { user_id, business_id, request_for } to roles insert
-        // if rejected update request status to rejected 
 }
 
 // returns an array of business_id(s) for given user id
