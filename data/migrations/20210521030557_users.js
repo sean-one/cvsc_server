@@ -21,11 +21,6 @@ exports.up = function(knex) {
             .string('avatar')
             // create a default profile pic to go here later
             .defaultTo('https://picsum.photos/100/100')
-        
-        users
-            .boolean('isAdmin')
-            .defaultTo(false)
-            .notNullable()
 
         users.timestamps(true, true)
     })

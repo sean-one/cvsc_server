@@ -20,7 +20,6 @@ function find() {
 //                 'users.id',
 //                 'users.username',
 //                 'users.avatar',
-//                 'users.isAdmin',
 //                 'users.password',
 //                 db.raw('ARRAY_AGG(roles.business_id) as business_roles')
 //             ]
@@ -37,7 +36,6 @@ async function findByUsername(user) {
                 'users.id',
                 'users.username',
                 'users.avatar',
-                'users.isAdmin',
                 'users.password',
             ]
         )
@@ -52,7 +50,6 @@ async function addUser(user) {
                 'id',
                 'username',
                 'avatar',
-                'isAdmin',
                 'password'
             ]
         )
