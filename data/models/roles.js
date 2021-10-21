@@ -4,6 +4,7 @@ module.exports = {
     find,
     findByUser,
     addUserRoles,
+    getUserAdminRoles,
     getEventRolesByUser
 }
 
@@ -23,7 +24,7 @@ function findByUser(userId) {
         )
 }
     
-async function addUserRoles(user_roles) {
+async function addUserRoles(user_roles, userId) {
     try {
         await db.transaction(async trx => {
             
@@ -47,14 +48,25 @@ async function addUserRoles(user_roles) {
 
             // iterate through rejected request and update the status
             for (let rejectedRequest of user_roles.rejected) {
-                await db('pendingRequests').where({ id: rejectedRequest.id }).update({ request_status: 'rejected' })
+                await db('pendingRequests').where({ id: rejectedRequest.id, request_status: 'open' }).update({ request_status: 'rejected' })
             }
 
         })
-        return db('roles')
+        return userId
     } catch (error) {
         throw error;
     }
+}
+
+function getUserAdminRoles(userId) {
+    return db('roles')
+        .where({ user_id: userId, roletype: 'admin' })
+        .select(
+            [
+                db.raw('ARRAY_AGG(roles.business_id) as admin')
+            ]
+        )
+        .first()
 }
 
 // returns an array of business_id(s) for given user id

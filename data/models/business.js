@@ -9,6 +9,18 @@ module.exports = {
 
 function find() {
     return db('businesses')
+        .select(
+            [
+                'id',
+                'name',
+                'email',
+                'avatar',
+                'description',
+                'businesstype',
+                'contact',
+                'requestOpen'
+            ]
+        )
 }
 
 function findById(id) {

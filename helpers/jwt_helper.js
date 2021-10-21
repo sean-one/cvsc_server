@@ -37,6 +37,23 @@ const validateToken = (req, res, next) => {
     }
 }
 
+const validateAdmin = async (req, res, next) => {
+    
+    // roles.admin returns [business_id] with admin rights
+    const roles = await db.getUserAdminRoles(req.decodedToken.subject)
+    const roleRequest = [ ...req.body.approved, ...req.body.rejected ]
+    
+    // validate approved & rejected list
+    for (let requestLine of roleRequest) {
+        if (!roles.admin.includes(requestLine.business_id)) {
+            res.status(403).json({ message: 'forbidden - invalid role' })
+        }
+    }
+
+    // console.log('checked & passed!')
+    next()
+}
+
 const validateUser = (req, res, next) => {
     if (req.params.id.toString() === req.decodedToken.subject.toString()) {
         next()
@@ -78,6 +95,7 @@ const validateUserRole = async (req, res, next) => {
 module.exports = {
     createToken,
     validateToken,
+    validateAdmin,
     validateUser,
     validateUserRole,
     // validateUserRequest

@@ -11,10 +11,27 @@ function find() {
     return db('users')
 }
 
+// async function findByUsername(user) {
+//     return await db('users')
+//         .where({ username: user.username })
+//         .leftJoin('roles', 'users.id', '=', 'roles.user_id')
+//         .select(
+//             [
+//                 'users.id',
+//                 'users.username',
+//                 'users.avatar',
+//                 'users.isAdmin',
+//                 'users.password',
+//                 db.raw('ARRAY_AGG(roles.business_id) as business_roles')
+//             ]
+//         )
+//         .first()
+//         .groupBy('users.id')
+// }
+
 async function findByUsername(user) {
     return await db('users')
         .where({ username: user.username })
-        .leftJoin('roles', 'users.id', '=', 'roles.user_id')
         .select(
             [
                 'users.id',
@@ -22,11 +39,9 @@ async function findByUsername(user) {
                 'users.avatar',
                 'users.isAdmin',
                 'users.password',
-                db.raw('ARRAY_AGG(roles.business_id) as business_roles')
             ]
         )
         .first()
-        .groupBy('users.id')
 }
 
 async function addUser(user) {
