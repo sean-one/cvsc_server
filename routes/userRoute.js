@@ -23,7 +23,7 @@ router.post('/register', async (req, res) => {
     try {
         const hash = await hashPassword(newUser.password);
         newUser.password = hash;
-        const user = await db.addUser(newUser);
+        const user = await db.userRegister(newUser);
         user[0].business_roles = [];
         const token = createToken(user[0]);
         user[0].token = token;
@@ -48,7 +48,7 @@ router.post('/login', async (req, res) => {
     if(!userInfo.username || !userInfo.password) {
         res.status(400).json({ message: 'please fill all required inputs' });
     } else {
-        const user = await db.findByUsername(userInfo)
+        const user = await db.userSignIn(userInfo)
         if (!user) {
             res.status(404).send({ message: 'user not found' })
         } else {

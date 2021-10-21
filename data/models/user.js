@@ -2,8 +2,8 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
-    findByUsername,
-    addUser,
+    userSignIn,
+    userRegister,
     remove
 };
 
@@ -11,24 +11,7 @@ function find() {
     return db('users')
 }
 
-// async function findByUsername(user) {
-//     return await db('users')
-//         .where({ username: user.username })
-//         .leftJoin('roles', 'users.id', '=', 'roles.user_id')
-//         .select(
-//             [
-//                 'users.id',
-//                 'users.username',
-//                 'users.avatar',
-//                 'users.password',
-//                 db.raw('ARRAY_AGG(roles.business_id) as business_roles')
-//             ]
-//         )
-//         .first()
-//         .groupBy('users.id')
-// }
-
-async function findByUsername(user) {
+async function userSignIn(user) {
     return await db('users')
         .where({ username: user.username })
         .select(
@@ -42,7 +25,7 @@ async function findByUsername(user) {
         .first()
 }
 
-async function addUser(user) {
+async function userRegister(user) {
     return await db('users')
         .insert(
             user,
