@@ -5,7 +5,9 @@ module.exports = {
     findByUser,
     addUserRoles,
     getUserAdminRoles,
-    getEventRolesByUser
+    findRolesByBusinessIds,
+    getEventRolesByUser,
+    removeRoles
 }
 
 function find() {
@@ -69,6 +71,23 @@ function getUserAdminRoles(userId) {
         .first()
 }
 
+async function findRolesByBusinessIds(businessIds) {
+    return await db('roles')
+        .whereIn('business_id', businessIds)
+        .join('users', 'roles.user_id', '=', 'users.id')
+        .join('businesses', 'roles.business_id', '=', 'businesses.id')
+        .select(
+            [
+                'roles.id',
+                'roles.user_id',
+                'users.username',
+                'roles.business_id',
+                'businesses.name',
+                'roles.roletype',
+            ]
+        )
+}
+
 // returns an array of business_id(s) for given user id
 function getEventRolesByUser(userId) {
     return db('roles')
@@ -80,4 +99,10 @@ function getEventRolesByUser(userId) {
         )
         .groupBy('roles.user_id')
         .first()
+}
+
+async function removeRoles(roleIds) {
+    return await db('roles')
+        .whereIn('id', roleIds)
+        .delete()
 }

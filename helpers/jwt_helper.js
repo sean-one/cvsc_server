@@ -54,6 +54,32 @@ const validateAdmin = async (req, res, next) => {
     next()
 }
 
+const validateAdminRoleDelete = async (req, res, next) => {
+    const roleIds = []
+    const userRoles = await db.getEventRolesByUser(req.decodedToken.subject)
+        .then(roles => {
+            if (roles) {
+                return roles.roles
+            } else {
+                return []
+            }
+        })
+        .catch(err => {
+            console.log(err)
+        })
+    for (let roleEdit of req.body) {
+        if (userRoles.includes(roleEdit.business_id)) {
+            roleIds.push(roleEdit.id)
+            continue
+        } else {
+            res.status(403).json({ message: 'invalid admin role' });
+        }
+    }
+    req.body.roleIds = roleIds
+    console.log('admin checked')
+    next()
+}
+
 const validateUser = (req, res, next) => {
     if (req.params.id.toString() === req.decodedToken.subject.toString()) {
         next()
@@ -96,6 +122,7 @@ module.exports = {
     createToken,
     validateToken,
     validateAdmin,
+    validateAdminRoleDelete,
     validateUser,
     validateUserRole,
     // validateUserRequest

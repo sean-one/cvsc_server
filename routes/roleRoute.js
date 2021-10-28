@@ -1,7 +1,7 @@
 const express = require('express');
 
 const db = require('../data/models/roles');
-const { validateToken, validateAdmin } = require('../helpers/jwt_helper')
+const { validateToken, validateAdmin, validateAdminRoleDelete } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
@@ -30,6 +30,23 @@ router.post('/editUserRoles', [ validateToken, validateAdmin ], (req, res) => {
     db.addUserRoles(user_roles, userId)
         .then(response => {
             console.log(response)
+            res.status(200).json(response)
+        })
+        .catch(err => console.log(err))
+})
+
+router.post('/byBusinesses', (req, res) => {
+    const business_ids = req.body;
+    db.findRolesByBusinessIds(business_ids)
+        .then(response => {
+            res.status(200).json(response)
+        })
+        .catch(err => console.log(err))
+})
+
+router.delete('/deleteUserRoles', [ validateToken, validateAdminRoleDelete ], async (req, res) => {
+    db.removeRoles(req.body.roleIds)
+        .then(response => {
             res.status(200).json(response)
         })
         .catch(err => console.log(err))
