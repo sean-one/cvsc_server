@@ -19,7 +19,11 @@ exports.up = function (knex) {
             .enu('businesstype', ['brand', 'venue', 'both'])
             .notNullable()
 
-        businesses.string('contact')
+        businesses
+            .integer('contact_id')
+            .unsigned()
+            .references('id')
+            .inTable('contacts')
 
         businesses
             .boolean('requestOpen')

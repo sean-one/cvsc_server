@@ -40,7 +40,7 @@ router.get('/:id', (req, res) => {
             }
         })
         .catch(err => {
-            // console.log(err)
+            console.log(err)
             res.status(500).json({ message: 'failure', error: err });
         });
 });

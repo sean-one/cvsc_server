@@ -17,7 +17,6 @@ function find() {
                 'avatar',
                 'description',
                 'businesstype',
-                'contact',
                 'requestOpen'
             ]
         )

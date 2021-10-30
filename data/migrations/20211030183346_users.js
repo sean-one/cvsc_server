@@ -1,5 +1,5 @@
 
-exports.up = function(knex) {
+exports.up = function (knex) {
     return knex.schema.createTable('users', users => {
         users.increments('id')
 
@@ -7,16 +7,22 @@ exports.up = function(knex) {
             .string('username')
             .notNullable()
             .unique()
-        
+
         users
             .string('email')
             .notNullable()
             .unique()
-            
+
+        users
+            .integer('contact_id')
+            .unsigned()
+            .references('id')
+            .inTable('contacts')
+
         users
             .string('password')
             .notNullable()
-            
+
         users
             .string('avatar')
             // create a default profile pic to go here later
@@ -26,6 +32,6 @@ exports.up = function(knex) {
     })
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
     return knex.schema.dropTableIfExists('users');
 };
