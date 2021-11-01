@@ -25,8 +25,7 @@ exports.up = function (knex) {
 
         users
             .string('avatar')
-            // create a default profile pic to go here later
-            .defaultTo('https://picsum.photos/100/100')
+            .defaultTo("https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png")
 
         users.timestamps(true, true)
     })

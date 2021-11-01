@@ -4,6 +4,7 @@ module.exports = {
     find,
     userSignIn,
     userRegister,
+    addUserAvatar,
     remove
 };
 
@@ -36,6 +37,17 @@ async function userRegister(user) {
                 'password'
             ]
         )
+}
+
+async function addUserAvatar(userId, imgLink) {
+    console.log(userId)
+    console.log(imgLink)
+    return await db('users')
+        .where({ id: userId })
+        .update({
+            avatar: imgLink
+        })
+
 }
 
 function remove(id) {
