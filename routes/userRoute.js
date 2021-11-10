@@ -15,33 +15,52 @@ router.get('/', (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
-    const newUser = req.body
-    // during validation adjust '' to null or default before sending to server
-    if(!newUser.username || !newUser.password || !newUser.email) {
-        res.status(400).json({ message: 'please fill all required inputs' });
+    const new_user = { username: req.body.username, email: req.body.email, password: req.body.password };
+    
+    if(req.body.instagram) {
+        // add instagram to contacts table, add returned id to new_user
+        const contactId = await db.addUserContact({ 'instagram' : req.body.instagram })
+        new_user['contact_id'] = contactId[0].id
+
     }
+
     try {
-        const hash = await hashPassword(newUser.password);
-        newUser.password = hash;
-        const user = await db.userRegister(newUser);
+        // hash password, save hashed password to new_user
+        const hash = await hashPassword(new_user.password);
+        new_user.password = hash;
+        // insert the new_user into the users table
+        const user = await db.userRegister(new_user);
+        // add roles if any
         user[0].business_roles = [];
+        // create token then save to user
         const token = createToken(user[0]);
         user[0].token = token;
         // remove hashed password from the return object
         delete user[0]['password']
+        // return user added to users
         res.status(200).json(user[0]);    
     } catch (error) {
         if(error.constraint === 'users_username_unique') {
             res.status(400).json({ message: 'username is not available', type: 'username' })
         }
 
-        if(error.constraint === 'users_email_unique') {
+        else if(error.constraint === 'users_email_unique') {
             res.status(400).json({ message: 'email duplicate', type: 'email' })
         }
 
-        res.status(500).json({ message: 'something went wrong', error })
+        else {
+            res.status(500).json({ message: 'something went wrong', error })
+        }
     }
 })
+
+// router.post('/register', async (req, res) => {
+//     const newUser = req.body
+//     // during validation adjust '' to null or default before sending to server
+//     if(!newUser.username || !newUser.password || !newUser.email) {
+//         res.status(400).json({ message: 'please fill all required inputs' });
+//     }
+// })
 
 router.post('/login', async (req, res) => {
     const userInfo = req.body

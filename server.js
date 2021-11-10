@@ -7,6 +7,7 @@ const cors = require('cors');
 const fileUpload = require('express-fileupload');
 
 // routes
+const contactRouter = require('./routes/contactRoute')
 const userRouter = require('./routes/userRoute');
 const eventRouter = require('./routes/eventRoute');
 const businessRouter = require('./routes/businessRoute');
@@ -29,6 +30,7 @@ app.use(cors({
     credentials: true
 }));
 
+app.use('/contacts', contactRouter);
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
 app.use('/business', businessRouter);

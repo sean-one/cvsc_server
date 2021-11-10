@@ -4,6 +4,7 @@ module.exports = {
     find,
     userSignIn,
     userRegister,
+    addUserContact,
     addUserAvatar,
     remove
 };
@@ -21,6 +22,8 @@ async function userSignIn(user) {
                 'users.username',
                 'users.avatar',
                 'users.password',
+                'users.email',
+                'contact_id'
             ]
         )
         .first()
@@ -34,7 +37,36 @@ async function userRegister(user) {
                 'id',
                 'username',
                 'avatar',
-                'password'
+                'password',
+                'email',
+                'contact_id'
+            ]
+        )
+}
+
+async function registerUser(user) {
+    try {
+        await db.transaction(async trx => {
+            // check for contacts
+            if(user.contacts) {
+                console.log('has contacts')
+            }
+            // if contacts
+                // insert contact into contacts and return id
+                // save id to contact field
+            // insert new user into users
+        })
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function addUserContact(contact) {
+    return await db('contacts')
+        .insert(
+            contact,
+            [
+                'id'
             ]
         )
 }
