@@ -9,11 +9,6 @@ exports.up = function (knex) {
             .unique()
 
         users
-            .string('email')
-            .notNullable()
-            .unique()
-
-        users
             .integer('contact_id')
             .unsigned()
             .references('id')

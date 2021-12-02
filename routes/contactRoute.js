@@ -24,22 +24,35 @@ router.get('/:id', (req, res) => {
             }
         })
         .catch(err => {
-            console.log(err)
+            // console.log(err)
             res.status(500).json({ message: 'failure', error: err });
         });
 });
 
+router.post('/update', [ validateToken ], (req, res) => {
+    const contactUpdate = req.body;
+    const userId = req.decodedToken.subject;
+    db.updateContact(contactUpdate, userId)
+        .then(newContact => {
+            res.status(200).json(newContact)
+        })
+        .catch(err => {
+            // console.log(err)
+            res.status(500).json({ message: 'something is a miss!', error: err })
+        })
+})
+
 router.post('/addUserContact', [ validateToken ], (req, res) => {
     const contact = req.body;
     const userId = req.decodedToken.subject
-    db.addInstagram(contact, userId)
+    db.addContact(contact, userId)
         .then(response => {
-            
+            console.log(response)
             res.status(200).json(response)
         })
         .catch(err => {
-            console.log(err)
-            res.status(500).json({ message: 'something not working' })
+            // console.log(err)
+            res.status(500).json({ message: 'something not working', error: err })
         })
 })
 

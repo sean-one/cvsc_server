@@ -13,17 +13,22 @@ function find() {
     return db('users')
 }
 
+// userroute login
 async function userSignIn(user) {
     return await db('users')
         .where({ username: user.username })
+        .join('contacts', 'users.contact_id', '=', 'contacts.id')
         .select(
             [
                 'users.id',
                 'users.username',
                 'users.avatar',
                 'users.password',
-                'users.email',
-                'contact_id'
+                'users.contact_id',
+                'contacts.email',
+                'contacts.instagram',
+                // add facebook for example
+                // 'contacts.facebook'
             ]
         )
         .first()

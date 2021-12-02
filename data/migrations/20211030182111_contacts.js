@@ -4,6 +4,10 @@ exports.up = function(knex) {
         contacts.increments('id')
 
         contacts
+            .string('email')
+            .notNullable()
+
+        contacts
             .string('instagram')
       
         contacts

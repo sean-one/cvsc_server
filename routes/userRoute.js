@@ -77,7 +77,14 @@ router.post('/login', async (req, res) => {
             } else {
                 const token = createToken(user);
                 user.token = token;
+                user.contact = { email: user['email'], instagram: user['instagram'] }
+                // add facebook example
+                // user.contact = { email: user['email'], instagram: user['instagram'], facebook: user['facebook] }
                 delete user['password']
+                delete user['email']
+                delete user['instagram']
+                // add facebook example
+                // delete user['facebook']
                 res.status(200).json(user);
             }
         }
