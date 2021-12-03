@@ -42,6 +42,7 @@ async function registerNewUser(user, contact) {
     const newUser = await db('users').insert(user, [ 'id' ])
     
     return db('users')
+        // need to put in to a trx so that all or nothing is saved
         .where({ 'users.id': newUser[0].id })
         .join('contacts', 'users.contact_id', '=', 'contacts.id')
         .select(

@@ -30,6 +30,11 @@ router.post('/register', async (req, res) => {
         // create token then save to user
         const token = createToken(user);
         user.token = token;
+        // create contact object and remove from user
+        user.contact = { email: user['email'], instagram: user['instagram'] }
+        delete user['email']
+        delete user['instagram']
+
         res.status(200).json(user);    
     } catch (error) {
         if(error.constraint === 'users_username_unique') {
