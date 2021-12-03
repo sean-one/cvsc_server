@@ -3,9 +3,9 @@ const db = require('../dbConfig');
 module.exports = {
     find,
     userSignIn,
+    registerNewUser,
     userRegister,
     addUserContact,
-    addUserAvatar,
     remove
 };
 
@@ -34,6 +34,30 @@ async function userSignIn(user) {
         .first()
 }
 
+async function registerNewUser(user, contact) {
+    const newContact = await db('contacts').insert(contact, [ 'id' ])
+    
+    user['contact_id'] = newContact[0].id
+
+    const newUser = await db('users').insert(user, [ 'id' ])
+    
+    return db('users')
+        .where({ 'users.id': newUser[0].id })
+        .join('contacts', 'users.contact_id', '=', 'contacts.id')
+        .select(
+            [
+                'users.id',
+                'users.username',
+                'users.avatar',
+                // 'users.password',
+                'users.contact_id',
+                'contacts.email',
+                'contacts.instagram'
+            ]
+        )
+        .first()
+}
+
 async function userRegister(user) {
     return await db('users')
         .insert(
@@ -49,23 +73,6 @@ async function userRegister(user) {
         )
 }
 
-async function registerUser(user) {
-    try {
-        await db.transaction(async trx => {
-            // check for contacts
-            if(user.contacts) {
-                console.log('has contacts')
-            }
-            // if contacts
-                // insert contact into contacts and return id
-                // save id to contact field
-            // insert new user into users
-        })
-    } catch (error) {
-        throw error;
-    }
-}
-
 async function addUserContact(contact) {
     return await db('contacts')
         .insert(
@@ -74,17 +81,6 @@ async function addUserContact(contact) {
                 'id'
             ]
         )
-}
-
-async function addUserAvatar(userId, imgLink) {
-    console.log(userId)
-    console.log(imgLink)
-    return await db('users')
-        .where({ id: userId })
-        .update({
-            avatar: imgLink
-        })
-
 }
 
 function remove(id) {

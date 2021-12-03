@@ -15,30 +15,22 @@ router.get('/', (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
-    const new_user = { username: req.body.username, email: req.body.email, password: req.body.password };
+    const newUser = req.body.user
+    const userContact = req.body.contact
     
-    if(req.body.instagram) {
-        // add instagram to contacts table, add returned id to new_user
-        const contactId = await db.addUserContact({ 'instagram' : req.body.instagram })
-        new_user['contact_id'] = contactId[0].id
-
-    }
-
+    // console.log(req.body)
     try {
         // hash password, save hashed password to new_user
-        const hash = await hashPassword(new_user.password);
-        new_user.password = hash;
+        const hash = await hashPassword(newUser.password);
+        newUser.password = hash;
         // insert the new_user into the users table
-        const user = await db.userRegister(new_user);
+        const user = await db.registerNewUser(newUser, userContact);
         // add roles if any
-        user[0].business_roles = [];
+        user.business_roles = [];
         // create token then save to user
-        const token = createToken(user[0]);
-        user[0].token = token;
-        // remove hashed password from the return object
-        delete user[0]['password']
-        // return user added to users
-        res.status(200).json(user[0]);    
+        const token = createToken(user);
+        user.token = token;
+        res.status(200).json(user);    
     } catch (error) {
         if(error.constraint === 'users_username_unique') {
             res.status(400).json({ message: 'username is not available', type: 'username' })
@@ -49,18 +41,11 @@ router.post('/register', async (req, res) => {
         }
 
         else {
+            console.log(error)
             res.status(500).json({ message: 'something went wrong', error })
         }
     }
 })
-
-// router.post('/register', async (req, res) => {
-//     const newUser = req.body
-//     // during validation adjust '' to null or default before sending to server
-//     if(!newUser.username || !newUser.password || !newUser.email) {
-//         res.status(400).json({ message: 'please fill all required inputs' });
-//     }
-// })
 
 router.post('/login', async (req, res) => {
     const userInfo = req.body
