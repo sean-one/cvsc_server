@@ -4,8 +4,7 @@ module.exports = {
     find,
     userSignIn,
     registerNewUser,
-    userRegister,
-    addUserContact,
+    updateAvatar,
     remove
 };
 
@@ -59,31 +58,13 @@ async function registerNewUser(user, contact) {
         .first()
 }
 
-async function userRegister(user) {
-    return await db('users')
-        .insert(
-            user,
-            [
-                'id',
-                'username',
-                'avatar',
-                'password',
-                'email',
-                'contact_id'
-            ]
-        )
-}
-
-async function addUserContact(contact) {
-    return await db('contacts')
-        .insert(
-            contact,
-            [
-                'id'
-            ]
-        )
+async function updateAvatar(userId, avatar) {
+    return db('users')
+        .where({ 'users.id': userId })
+        .update(avatar, [ 'id', 'username', 'avatar', 'contact_id' ])
 }
 
 function remove(id) {
+    // this needs to remove the contact at the contact_id too
     return db('users').where(id).del();
 }

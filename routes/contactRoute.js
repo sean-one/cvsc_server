@@ -42,18 +42,18 @@ router.post('/update', [ validateToken ], (req, res) => {
         })
 })
 
-router.post('/addUserContact', [ validateToken ], (req, res) => {
-    const contact = req.body;
-    const userId = req.decodedToken.subject
-    db.addContact(contact, userId)
-        .then(response => {
-            console.log(response)
-            res.status(200).json(response)
-        })
-        .catch(err => {
-            // console.log(err)
-            res.status(500).json({ message: 'something not working', error: err })
-        })
-})
+// router.post('/addUserContact', [ validateToken ], (req, res) => {
+//     const contact = req.body;
+//     const userId = req.decodedToken.subject
+//     db.addContact(contact, userId)
+//         .then(response => {
+//             console.log(response)
+//             res.status(200).json(response)
+//         })
+//         .catch(err => {
+//             // console.log(err)
+//             res.status(500).json({ message: 'something not working', error: err })
+//         })
+// })
 
 module.exports = router;

@@ -21,7 +21,7 @@ const s3 = new aws.S3({
 
 const generateUploadURL = async () => {
     const rawBytes = await randomBytes(16)
-    const imageName = rawBytes.toString('hex')
+    const imageName = `${rawBytes.toString('hex')}.png`
 
     const params = ({
         Bucket: bucketName,

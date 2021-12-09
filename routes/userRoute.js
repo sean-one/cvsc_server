@@ -2,7 +2,7 @@ const express = require('express');
 
 const db = require('../data/models/user')
 const { hashPassword, comparePassword } = require('../helpers/bcrypt_helper');
-const { createToken } = require('../helpers/jwt_helper');
+const { createToken, validateToken } = require('../helpers/jwt_helper');
 
 const router = express.Router();
 
@@ -18,7 +18,6 @@ router.post('/register', async (req, res) => {
     const newUser = req.body.user
     const userContact = req.body.contact
     
-    // console.log(req.body)
     try {
         // hash password, save hashed password to new_user
         const hash = await hashPassword(newUser.password);
@@ -78,6 +77,22 @@ router.post('/login', async (req, res) => {
                 res.status(200).json(user);
             }
         }
+    }
+})
+
+router.post('/updateAvatar', [ validateToken ], async (req, res) => {
+    try {
+        const avatarLink = req.body
+        const userId = req.decodedToken.subject
+        console.log(avatarLink)
+        console.log(userId)
+        await db.updateAvatar(userId, avatarLink)
+            .then(response => {
+                res.status(200).json(response)
+            })
+            .catch(err => console.log(err))
+    } catch (error) {
+        console.log(error)
     }
 })
 
