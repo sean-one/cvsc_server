@@ -27,8 +27,13 @@ exports.up = function (knex) {
 
         businesses
             .boolean('requestOpen')
+            .nullable()
             .defaultTo(true)
-            .notNullable()
+        
+        businesses
+            .boolean('activeBusiness')
+            .nullable()
+            .defaultTo(false)
 
         businesses.timestamps(true, true)
     })

@@ -6,7 +6,7 @@ exports.seed = function(knex) {
       // Inserts seed entries
       return knex('users').insert([
         { username: 'seanone', avatar: 'https://coachellavalleysmokers-images.s3.amazonaws.com/23988.jpeg', password: '$2a$14$tswDPo02q2gg/DcwH11e3.C2sziAWdSjnBeL35bQ9L36qdWeadM9e', contact_id: 1 },
-        { username: 'janet', avatar: 'https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png', password: '$2a$14$3HABR4cxzl.uP/.QosYes.Kkjnj72g9eR1Z7wkQ2413rQ8btNaZjC', contact_id: 2 }
+        { username: 'janet', avatar: "https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png", password: '$2a$14$3HABR4cxzl.uP/.QosYes.Kkjnj72g9eR1Z7wkQ2413rQ8btNaZjC', contact_id: 2 }
       ]);
     });
 };
