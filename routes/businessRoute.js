@@ -1,4 +1,5 @@
 const express = require('express');
+const googleMapsClient = require('../helpers/geocoder');
 
 const db = require('../data/models/business');
 const locationDb = require('../data/models/location');
@@ -12,6 +13,23 @@ router.get('/', (req, res) => {
         })
         .catch(err => res.status(500).json(err));
 });
+
+router.post('/add', async (req, res) => {
+    const businessDetails = req.body
+    try {
+        db.addBusiness(businessDetails)
+            .then(business => {
+                res.status(200).json(business);
+            })
+            .catch(err => {
+                console.log(err)
+                res.status(500).json(err)
+            });
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+})
 
 router.get('/brands', (req, res) => {
     db.findBrands()

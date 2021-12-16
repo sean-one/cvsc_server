@@ -7,10 +7,6 @@ exports.up = function (knex) {
             .string('name')
             .notNullable()
 
-        businesses
-            .string('email')
-            .notNullable()
-
         businesses.string('avatar')
 
         businesses.text('description', 'longtext')
