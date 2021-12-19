@@ -60,6 +60,14 @@ router.get('/venues', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
+router.get('/pending-approval', (req, res) => {
+    db.findPending()
+        .then(businesses => {
+            res.status(200).json(businesses);
+        })
+        .catch(err => res.status(500).json(err));
+});
+
 router.get('/:id', (req, res) => {
     const { id } = req.params;
     db.findById(id)
