@@ -1,8 +1,7 @@
 const express = require('express');
-const googleMapsClient = require('../helpers/geocoder');
 
 const db = require('../data/models/business');
-const locationDb = require('../data/models/location');
+const { validateToken, validateUserAdmin } = require('../helpers/jwt_helper');
 
 const router = express.Router()
 
@@ -14,16 +13,19 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
-router.post('/add', async (req, res) => {
+router.post('/add', [ validateToken ], async (req, res) => {
+    
     const businessDetails = req.body
+    businessDetails.business['business_admin'] = req.decodedToken.subject
+    
     try {
         
         const newBusiness = await db.addBusiness(businessDetails)
         
-        res.status(200).json(newBusiness);
+        res.status(201).json(newBusiness);
 
     } catch (err) {
-        // console.log(err)
+        console.log(err)
         if (err.constraint === 'contacts_email_unique') {
             res.status(400).json({ message: 'duplicate email', type: 'email' })
 
@@ -73,6 +75,29 @@ router.get('/:id', (req, res) => {
             res.status(500).json({ message: 'failure', error: err });
         });
 });
+
+router.delete('/remove/:id', [ validateUserAdmin ], async (req, res, next) => {
+    try {
+        const { id } = req.params
+        const deletedUser = await db.remove(id)
+
+        if (deletedUser >= 1) {
+            res.status(204).json();
+        } else {
+            const error = new Error('invalid id')
+            error.message = 'not found';
+            error.status = 404;
+            throw error;
+        }
+    } catch (error) {
+        console.log(error)
+        if (error.errors) {
+            res.status(400).json({ message: 'bad request', path: error.path, error: `${error.params.path} failed validation` });
+        } else {
+            next(error)
+        }
+    }
+})
 
 
 

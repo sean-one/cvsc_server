@@ -21,6 +21,7 @@ exports.up = function (knex) {
             .unsigned()
             .references('id')
             .inTable('contacts')
+            .onDelete('cascade')
 
         businesses
             .boolean('requestOpen')
@@ -29,6 +30,18 @@ exports.up = function (knex) {
         
         businesses
             .boolean('activeBusiness')
+            .nullable()
+            .defaultTo(false)
+        
+        businesses
+            .integer('business_admin')
+            .unsigned()
+            .references('id')
+            .inTable('users')
+            .notNullable()
+        
+        businesses
+            .boolean('approval')
             .nullable()
             .defaultTo(false)
 

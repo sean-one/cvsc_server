@@ -6,12 +6,14 @@ module.exports = {
     findById,
     findBrands,
     findVenues,
-    addBusiness
+    addBusiness,
+    remove
 };
 
 function find() {
     return db('businesses')
         // .where({ activeBusiness: true })
+        // .where({ approval: true })
         .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
@@ -23,6 +25,8 @@ function find() {
                 'businesses.businesstype',
                 'businesses.requestOpen',
                 'businesses.activeBusiness',
+                'businesses.business_admin',
+                'businesses.approval',
                 'contacts.email',
                 'contacts.instagram',
                 'contacts.facebook',
@@ -110,6 +114,8 @@ async function addBusiness(business) {
                         'businesses.businesstype',
                         'businesses.requestOpen',
                         'businesses.activeBusiness',
+                        'businesses.business_admin',
+                        'businesses.approval',
                         'contacts.email',
                         'contacts.instagram',
                         'contacts.facebook',
@@ -124,4 +130,45 @@ async function addBusiness(business) {
         throw error
     }
 
+}
+
+async function remove(id) {
+    try {
+        return await db.transaction(async trx => {
+            // get business info
+            const business = await db('businesses')
+                .transacting(trx)    
+                .where({ id: id })
+                .select(
+                    [
+                        'contact_id'
+                    ]
+                )
+                .first()
+            console.log(business.contact_id)
+            
+            // delete location for business to be deleted
+            await db('locations')
+            .transacting(trx)
+            .where({ venue_id: id })
+            .del()
+            
+            //! need to delete from admin roles
+            //! need to delete business avatar from s3 bucket
+            
+            // delete business account
+            await db('businesses')
+            .transacting(trx)
+            .where({ id: id })
+            .del()
+            
+            // delete contact for business to be deleted
+            return db('contacts')
+                    .transacting(trx)
+                    .where({ id: business.contact_id })
+                    .del()
+        })
+    } catch (error) {
+        throw error
+    }
 }

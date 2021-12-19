@@ -90,7 +90,6 @@ const validateUser = (req, res, next) => {
 
 
 const validateUserRole = async (req, res, next) => {
-    console.log(req.decodedToken.subject)
     const userRoles = await db.getEventRolesByUser(req.decodedToken.subject)
         .then(roles => {
             console.log(roles)
@@ -114,6 +113,31 @@ const validateUserRole = async (req, res, next) => {
     // console.log(req.body.venue_id, req.body.brand_id, req.decodedToken.roles)
 }
 
+const validateUserAdmin = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        console.log(decoded)
+        if (decoded.subject === Number(process.env.ADMIN_ID) && decoded.name === process.env.ADMIN_NAME) {
+            next()
+        } else {
+            //! need to add some sort of alarm if this is hit
+            res.status(403).json({ message: 'invalid user'})
+        }
+    } catch (error) {
+        // console.log(error.name, error.message, error.expiredAt)
+        if (error.name === 'TypeError') {
+            res.status(401).json({ message: 'missing token' })
+        } else if (error.name === 'JsonWebTokenError') {
+            res.status(401).json({ message: 'invalid signature' })
+        } else {
+            // console.log('error')
+            // console.log(error)
+            res.status(500).json({ message: 'server error' })
+        }
+    }
+}
+
 // const validateUserRequest = async (req, res, next) => {
 //     const userId
 // }
@@ -125,5 +149,6 @@ module.exports = {
     validateAdminRoleDelete,
     validateUser,
     validateUserRole,
+    validateUserAdmin,
     // validateUserRequest
 }
