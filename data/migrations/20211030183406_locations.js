@@ -13,6 +13,7 @@ exports.up = function (knex) {
             .references('id')
             .inTable('businesses')
             .notNullable()
+            .unique()
 
         locations
             .string('street')
@@ -37,6 +38,7 @@ exports.up = function (knex) {
         locations
             .string('place_id')
             .notNullable()
+            .unique()
     })
 
 };

@@ -5,7 +5,7 @@ exports.up = function(knex) {
 
         contacts
             .string('email')
-            .notNullable()
+            .unique()
 
         contacts
             .string('instagram')

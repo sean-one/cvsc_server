@@ -6,6 +6,7 @@ exports.up = function (knex) {
         businesses
             .string('name')
             .notNullable()
+            .unique()
 
         businesses.string('avatar')
 

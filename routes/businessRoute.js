@@ -17,17 +17,28 @@ router.get('/', (req, res) => {
 router.post('/add', async (req, res) => {
     const businessDetails = req.body
     try {
-        db.addBusiness(businessDetails)
-            .then(business => {
-                res.status(200).json(business);
-            })
-            .catch(err => {
-                console.log(err)
-                res.status(500).json(err)
-            });
-    } catch (error) {
-        console.log(error)
-        throw error
+        
+        const newBusiness = await db.addBusiness(businessDetails)
+        
+        res.status(200).json(newBusiness);
+
+    } catch (err) {
+        // console.log(err)
+        if (err.constraint === 'contacts_email_unique') {
+            res.status(400).json({ message: 'duplicate email', type: 'email' })
+
+        } else if (err.constraint === 'locations_place_id_unique') {
+            res.status(400).json({ message: 'duplicate address', type: 'street_address' })
+
+        } else if (err.constraint === 'businesses_name_unique') {
+            res.status(400).json({ message: 'duplicate business name', type: 'business_name' })
+
+        } else if (err instanceof TypeError) {
+            res.status(400).json({ message: 'invalid address', type: 'street_address' })
+            
+        } else {
+            res.status(500).json({ message: 'something went wrong', err })
+        }
     }
 })
 
