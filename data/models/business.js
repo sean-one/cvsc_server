@@ -8,13 +8,14 @@ module.exports = {
     findVenues,
     addBusiness,
     findPending,
+    approveBusiness,
     remove
 };
 
 function find() {
     return db('businesses')
         // .where({ activeBusiness: true })
-        // .where({ approval: true })
+        .where({ approval: true })
         .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
@@ -148,6 +149,12 @@ function findPending() {
                 'users.username'
             ]
         )
+}
+
+async function approveBusiness(businessIds) {
+    return db('businesses')
+        .whereIn('id', businessIds)
+        .update({ approval: true })
 }
 
 async function remove(id) {

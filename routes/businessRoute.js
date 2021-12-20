@@ -68,6 +68,29 @@ router.get('/pending-approval', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
+router.post('/update-approval', async (req, res, next) => {
+    try {
+        const businessIds = req.body
+        const approved = await db.approveBusiness(businessIds)
+        if (approved >= 1) {
+            res.status(204).json()
+        } else {
+            const error = new Error('invalid id');
+            error.message = 'invalid id, not found';
+            error.status = 404;
+            throw error;
+        }
+    } catch (error) {
+        if (error.errors) {
+            res.status(400).json({ message: 'bad request', path: error.path, error: `${error.params.path} failed validation` });
+        } else {
+            next(error)
+        }
+        
+    }
+    // console.log(req.body)
+})
+
 router.get('/:id', (req, res) => {
     const { id } = req.params;
     db.findById(id)
