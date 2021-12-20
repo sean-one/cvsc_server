@@ -136,24 +136,16 @@ async function addBusiness(business) {
 function findPending() {
     return db('businesses')
         .where({ approval: false })
-        .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
-        .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+        .leftJoin('users', 'businesses.business_admin', '=', 'users.id')
         .select(
             [
                 'businesses.id',
                 'businesses.name',
-                'businesses.avatar',
-                'businesses.description',
                 'businesses.businesstype',
-                'businesses.requestOpen',
-                'businesses.activeBusiness',
                 'businesses.business_admin',
                 'businesses.approval',
-                'contacts.email',
-                'contacts.instagram',
-                'contacts.facebook',
-                'contacts.website',
-                'locations.formatted'
+                'users.id as user_id',
+                'users.username'
             ]
         )
 }
