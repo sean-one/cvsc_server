@@ -54,6 +54,17 @@ router.post('/', [ validateToken, validateUserRole ], async (req, res, next) => 
     //     .catch(err => res.status(500).json(err));
 });
 
+router.get('/business/:id', (req, res) => {
+    const { id } = req.params;
+    db.findByBusiness(id)
+        .then(events => {
+            res.status(200).json(events);
+        })
+        .catch(err => {
+            res.status(500).json(err)
+        })
+})
+
 router.get('/location/:id', (req, res) => {
     const { id } = req.params;
     db.findByLocation(id)

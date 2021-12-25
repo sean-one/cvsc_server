@@ -40,7 +40,27 @@ function find() {
 
 function findById(id) {
     return db('businesses')
-        .where({ id })
+        .where({ 'businesses.id': id })
+        .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
+        .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+        .select(
+            [
+                'businesses.id',
+                'businesses.name',
+                'businesses.avatar',
+                'businesses.description',
+                'businesses.businesstype',
+                'businesses.requestOpen',
+                'businesses.activeBusiness',
+                'businesses.business_admin',
+                'businesses.approval',
+                'contacts.email',
+                'contacts.instagram',
+                'contacts.facebook',
+                'contacts.website',
+                'locations.formatted'
+            ]
+        )
         .first();
 }
 

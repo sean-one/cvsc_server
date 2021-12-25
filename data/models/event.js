@@ -3,6 +3,7 @@ const db = require('../dbConfig');
 module.exports = {
     find,
     findById,
+    findByBusiness,
     findByLocation,
     findByBrand,
     findByCreator,
@@ -61,6 +62,33 @@ function findById(eventId) {
             ]
         )
         .first()
+}
+
+function findByBusiness(id) {
+    return db('events')
+        .where({ 'events.venue_id' : id })
+        .orWhere({ 'events.brand_id' : id })
+        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
+        .join('businesses', 'events.brand_id', '=', 'businesses.id')
+        .select(
+            [
+                'events.id as event_id',
+                'events.eventname',
+                'events.eventdate',
+                'events.eventstart',
+                'events.eventend',
+                'events.eventmedia',
+                'events.details',
+                'events.venue_id',
+                'locations.venue_name',
+                'locations.city',
+                'locations.formatted',
+                'events.brand_id',
+                'businesses.name as brand_name',
+                'events.created_by'
+            ]
+        )
+        .orderBy('events.eventdate')
 }
 
 function findByLocation(venue) {
