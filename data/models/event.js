@@ -199,10 +199,34 @@ async function createEvent(event) {
         .catch(err => console.log(err))
 }
 
-function updateEvent(eventId, eventChanges) {
-    return db('events')
-        .where({ id: eventId })
-        .update(eventChanges);
+async function updateEvent(eventId, eventChanges) {
+    return await db('events').where({ id: eventId }).update(eventChanges, ['id'])
+        .then(eventId => {
+            const { id } = eventId[0]
+            return db('events')
+                .where('events.id', id)
+                .join('locations', 'events.venue_id', '=', 'locations.venue_id')
+                .join('businesses', 'events.brand_id', '=', 'businesses.id')
+                .select(
+                    [
+                        'events.id as event_id',
+                        'events.eventname',
+                        'events.eventdate',
+                        'events.eventstart',
+                        'events.eventend',
+                        'events.eventmedia',
+                        'events.details',
+                        'events.venue_id',
+                        'locations.venue_name',
+                        'locations.city',
+                        'locations.formatted',
+                        'events.brand_id',
+                        'businesses.name as brand_name',
+                        'events.created_by'
+                    ]
+                )
+                .first()
+        })
 }
 
 function removeEvent(details) {
