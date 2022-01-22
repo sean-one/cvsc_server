@@ -14,16 +14,16 @@ function find() {
     return db('roles')
 }
 
-
 function findByUser(userId) {
     return db('roles')
-    .where({ user_id: userId })
+    // return active_role false to get pending role request
+    .where({ user_id: userId, active_role: true })
     .select(
         [
             'business_id',
-            'roletype'
+            'role_type',
         ]
-        )
+    )
 }
     
 async function addUserRoles(user_roles, userId) {
@@ -62,7 +62,7 @@ async function addUserRoles(user_roles, userId) {
 
 function getUserAdminRoles(userId) {
     return db('roles')
-        .where({ user_id: userId, roletype: 'admin' })
+        .where({ user_id: userId, role_type: 'admin', active_role: true })
         .select(
             [
                 db.raw('ARRAY_AGG(roles.business_id) as admin')
@@ -74,6 +74,7 @@ function getUserAdminRoles(userId) {
 async function findRolesByBusinessIds(businessIds) {
     return await db('roles')
         .whereIn('business_id', businessIds)
+        .where({ active_role: false })
         .join('users', 'roles.user_id', '=', 'users.id')
         .join('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
@@ -83,7 +84,7 @@ async function findRolesByBusinessIds(businessIds) {
                 'users.username',
                 'roles.business_id',
                 'businesses.name',
-                'roles.roletype',
+                'roles.role_type',
             ]
         )
 }

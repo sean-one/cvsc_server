@@ -40,7 +40,11 @@ router.post('/register', async (req, res) => {
             res.status(400).json({ message: 'username is not available', type: 'username' })
         }
 
-        else if(error.constraint === 'users_email_unique') {
+        // else if(error.constraint === 'users_email_unique') {
+        //     res.status(400).json({ message: 'email duplicate', type: 'email' })
+        // }
+        
+        else if(error.constraint === 'contacts_email_unique') {
             res.status(400).json({ message: 'email duplicate', type: 'email' })
         }
 

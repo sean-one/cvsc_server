@@ -16,10 +16,24 @@ exports.up = function (knex) {
             .references('id')
             .inTable('businesses')
             .notNullable()
+
         roles
-            .enu('roletype', ['admin', 'creator'])
+            .unique(['user_id', 'business_id'])
+        
+        roles
+            .enu('role_type', ['admin', 'creator'])
             .notNullable()
             .defaultTo('creator')
+        
+        roles
+            .boolean('active_role')
+            .defaultTo(false)
+        
+        roles
+            .integer('approved_by')
+            .unsigned()
+            .references('id')
+            .inTable('users')
     })
 };
 

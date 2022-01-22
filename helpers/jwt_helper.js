@@ -82,12 +82,18 @@ const validateAdminRoleDelete = async (req, res, next) => {
 
 const validateUser = (req, res, next) => {
     if (req.params.id.toString() === req.decodedToken.subject.toString()) {
+        console.log(`${req.params.id.toString()}, ${req.decodedToken.subject.toString()}`)
         next()
     } else {
         res.status(404).json({ message: 'wrong user' })
     }
 }
 
+const validateRoles = async (req, res, next) => {
+    const admin_roles = await db.getUserAdminRoles(req.decodedToken.subject)
+    req.roles = admin_roles.admin
+    next()
+}
 
 const validateUserRole = async (req, res, next) => {
     const userRoles = await db.getEventRolesByUser(req.decodedToken.subject)
@@ -138,17 +144,13 @@ const validateUserAdmin = async (req, res, next) => {
     }
 }
 
-// const validateUserRequest = async (req, res, next) => {
-//     const userId
-// }
-
 module.exports = {
     createToken,
     validateToken,
     validateAdmin,
     validateAdminRoleDelete,
     validateUser,
+    validateRoles,
     validateUserRole,
     validateUserAdmin,
-    // validateUserRequest
 }
