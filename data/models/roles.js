@@ -4,6 +4,7 @@ module.exports = {
     find,
     findByUser,
     addUserRoles,
+    updateRoleRequest,
     getUserAdminRoles,
     findRolesByBusinessIds,
     getEventRolesByUser,
@@ -58,6 +59,12 @@ async function addUserRoles(user_roles, userId) {
     } catch (error) {
         throw error;
     }
+}
+
+function updateRoleRequest(requestResults) {
+    console.log(requestResults.approvedReq)
+    console.log(requestResults.rejectedReq)
+    return
 }
 
 function getUserAdminRoles(userId) {

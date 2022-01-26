@@ -2,6 +2,7 @@ const express = require('express');
 
 const db = require('../data/models/roles');
 const { validateRoles, validateUser, validateToken, validateAdmin, validateAdminRoleDelete } = require('../helpers/jwt_helper')
+const { updateRole } = require('../helpers/dataClean')
 
 const router = express.Router();
 
@@ -31,6 +32,15 @@ router.get('/pending-request', [ validateToken, validateRoles ], (req, res) => {
         })
         .catch(err => console.log(err))
 
+})
+
+router.post('/update-request', [ validateToken ], (req, res) => {
+    const cleanData = updateRole(req.body)
+    db.updateRoleRequest(cleanData)
+        .then(response => {
+            res.status(200).json(response)
+        })
+        .catch(err => console.log(err))
 })
 
 router.post('/editUserRoles', [ validateToken, validateAdmin ], (req, res) => {
