@@ -1,4 +1,3 @@
-const { request } = require('express');
 const express = require('express');
 
 const db = require('../data/models/pendingRequest')

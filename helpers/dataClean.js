@@ -5,11 +5,11 @@ const updateRole = (data) => {
     for (const requestLine in data) {
         
         if(data[requestLine] === 'approved') {
-            approvedReq.push(requestLine)
+            approvedReq.push(parseInt(requestLine))
         }
 
         if (data[requestLine] === 'rejected') {
-            rejectedReq.push(requestLine)
+            rejectedReq.push(parseInt(requestLine))
         }
     }
 

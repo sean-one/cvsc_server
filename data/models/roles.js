@@ -5,6 +5,7 @@ module.exports = {
     findByUser,
     addUserRoles,
     updateRoleRequest,
+    addRequest,
     getUserAdminRoles,
     findRolesByBusinessIds,
     getEventRolesByUser,
@@ -61,10 +62,54 @@ async function addUserRoles(user_roles, userId) {
     }
 }
 
-function updateRoleRequest(requestResults) {
-    console.log(requestResults.approvedReq)
-    console.log(requestResults.rejectedReq)
-    return
+async function updateRoleRequest(requestResults, userId, userRoles) {
+    try {
+        await db.transaction(async trx => {
+            if (requestResults.approvedReq.length > 0) {
+                await db('roles')
+                    .transacting(trx)
+                    .whereIn('id', requestResults.approvedReq)
+                    .update({ active_role: true,  approved_by: parseInt(userId) })
+
+            }
+
+            if (requestResults.rejectedReq.length > 0) {
+                await db('roles')
+                    .transacting(trx)
+                    .whereIn('id', requestResults.rejectedReq)
+                    .delete()
+            }
+
+        })
+
+        return await db('roles')
+            .whereIn('business_id', userRoles)
+            .where({ active_role: false })
+            .join('users', 'roles.user_id', '=', 'users.id')
+            .join('businesses', 'roles.business_id', '=', 'businesses.id')
+            .select(
+                [
+                    'roles.id',
+                    'roles.user_id',
+                    'users.username',
+                    'roles.business_id',
+                    'businesses.name',
+                    'roles.role_type',
+                ]
+            )
+    } catch (error) {
+        throw error;
+    }
+}
+
+function addRequest(request_data, user_id) {
+    return db('roles')
+        .insert({ 
+            user_id: user_id,
+            business_id: request_data.business_id,
+            role_type: request_data.request_for
+        }, [ 'id' ])
+
 }
 
 function getUserAdminRoles(userId) {
