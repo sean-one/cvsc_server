@@ -7,7 +7,8 @@ module.exports = {
     updateRoleRequest,
     addRequest,
     getUserAdminRoles,
-    findRolesByBusinessIds,
+    getPendingRolesByBusiness,
+    getRolesByBusiness,
     getEventRolesByUser,
     removeRoles
 }
@@ -123,10 +124,30 @@ function getUserAdminRoles(userId) {
         .first()
 }
 
-async function findRolesByBusinessIds(businessIds) {
+// roles/pending-request
+async function getPendingRolesByBusiness(business_ids) {
     return await db('roles')
-        .whereIn('business_id', businessIds)
+        .whereIn('business_id', business_ids)
         .where({ active_role: false })
+        .join('users', 'roles.user_id', '=', 'users.id')
+        .join('businesses', 'roles.business_id', '=', 'businesses.id')
+        .select(
+            [
+                'roles.id',
+                'roles.user_id',
+                'users.username',
+                'roles.business_id',
+                'businesses.name',
+                'roles.role_type',
+            ]
+        )
+}
+
+// roles/business-request
+async function getRolesByBusiness(business_ids) {
+    return await db('roles')
+        .whereIn('business_id', business_ids)
+        .where({ active_role: true })
         .join('users', 'roles.user_id', '=', 'users.id')
         .join('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(

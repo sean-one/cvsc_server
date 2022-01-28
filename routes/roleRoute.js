@@ -24,25 +24,30 @@ router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
+// add role request via the creatorRequestForm
 router.post('/request', [ validateToken ], (req, res) => {
     const user_id = req.decodedToken.subject
     const new_request = req.body
-    db.addRequest(new_request, user_id)
-        .then(response => {
-            res.status(200).json(response)
-        })
-        .catch(err => {
-            if (err.constraint === 'roles_user_id_business_id_unique') {
-                res.status(400).json({ message: 'duplicate request', type: 'duplicate' })
-            } else {
-                res.status(400).json(err)
-            }
-        })
+    if (!new_request.business_id || !new_request.request_for) {
+        res.status(400).json({ message: 'missing input', type: 'missing input' })
+    } else {
+        db.addRequest(new_request, user_id)
+            .then(response => {
+                res.status(200).json(response)
+            })
+            .catch(err => {
+                if (err.constraint === 'roles_user_id_business_id_unique') {
+                    res.status(400).json({ message: 'duplicate request', type: 'duplicate' })
+                } else {
+                    res.status(400).json(err)
+                }
+            })
+    }
 })
 
 router.get('/pending-request', [ validateToken, validateRoles ], (req, res) => {
     const business_ids = req.roles
-    db.findRolesByBusinessIds(business_ids)
+    db.getPendingRolesByBusiness(business_ids)
         .then(response => {
             res.status(200).json(response)
         })
@@ -60,6 +65,17 @@ router.post('/update-request', [ validateToken, validateRoles ], (req, res) => {
         })
         .catch(err => console.log(err))
 })
+
+router.get('/business-request', [ validateToken, validateRoles ], (req, res) => {
+    const userRoles = req.roles
+    db.getRolesByBusiness(userRoles)
+        .then(response => {
+            res.status(200).json(response)
+        })
+        .catch(err => console.log(err))
+})
+
+
 
 router.post('/editUserRoles', [ validateToken, validateAdmin ], (req, res) => {
     const user_roles = req.body;
