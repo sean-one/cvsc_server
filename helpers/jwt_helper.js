@@ -37,58 +37,35 @@ const validateToken = (req, res, next) => {
     }
 }
 
-const validateAdmin = async (req, res, next) => {
-    
-    // roles.admin returns [business_id] with admin rights
-    const roles = await db.getUserAdminRoles(req.decodedToken.subject)
-    const roleRequest = [ ...req.body.approved, ...req.body.rejected ]
-    
-    // validate approved & rejected list
-    for (let requestLine of roleRequest) {
-        if (!roles.admin.includes(requestLine.business_id)) {
-            res.status(403).json({ message: 'forbidden - invalid role' })
-        }
-    }
-
-    // console.log('checked & passed!')
-    next()
-}
-
-const validateAdminRoleDelete = async (req, res, next) => {
-    const roleIds = []
-    const userRoles = await db.getEventRolesByUser(req.decodedToken.subject)
-        .then(roles => {
-            if (roles) {
-                return roles.roles
-            } else {
-                return []
-            }
-        })
-        .catch(err => {
-            console.log(err)
-        })
-    for (let roleEdit of req.body) {
-        if (userRoles.includes(roleEdit.business_id)) {
-            roleIds.push(roleEdit.id)
-            continue
-        } else {
-            res.status(403).json({ message: 'invalid admin role' });
-        }
-    }
-    req.body.roleIds = roleIds
-    console.log('admin checked')
-    next()
-}
-
 const validateUser = (req, res, next) => {
     if (req.params.id.toString() === req.decodedToken.subject.toString()) {
-        console.log(`${req.params.id.toString()}, ${req.decodedToken.subject.toString()}`)
+        // console.log(`${req.params.id.toString()}, ${req.decodedToken.subject.toString()}`)
         next()
     } else {
         res.status(404).json({ message: 'wrong user' })
     }
 }
 
+// used at /roles/delete-roles
+const validateBusinessAdmin = async (req, res, next) => {
+    const businessAdminRoles = await db.getBusinessAdmin(req.decodedToken.subject)
+    const user_business_admin = businessAdminRoles[0].business_ids
+    const nullRemoved = Object.fromEntries(Object.entries(req.body).filter(([_, v]) => v != null))
+    const business_roles = Object.values(nullRemoved)
+    
+    const checkAdmin = business_roles.every(business => {
+        return user_business_admin.includes(parseInt(business))
+    })
+
+    if (checkAdmin) {
+        req.toDelete = Object.keys(nullRemoved)
+        next()
+    } else {
+        res.status(404).json({ message: 'invalid credentials'})
+    }
+}
+
+// used at /roles/pending-request, /roles/update-request
 const validateRoles = async (req, res, next) => {
     const admin_roles = await db.getUserAdminRoles(req.decodedToken.subject)
     req.roles = admin_roles.admin
@@ -147,9 +124,8 @@ const validateUserAdmin = async (req, res, next) => {
 module.exports = {
     createToken,
     validateToken,
-    validateAdmin,
-    validateAdminRoleDelete,
     validateUser,
+    validateBusinessAdmin,
     validateRoles,
     validateUserRole,
     validateUserAdmin,

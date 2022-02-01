@@ -3,14 +3,15 @@ const db = require('../dbConfig');
 module.exports = {
     find,
     findByUser,
-    addUserRoles,
     updateRoleRequest,
     addRequest,
     getUserAdminRoles,
     getPendingRolesByBusiness,
     getRolesByBusiness,
+    getRolesByBusinessAdmin,
     getEventRolesByUser,
-    removeRoles
+    getBusinessAdmin,
+    deleteRoles
 }
 
 function find() {
@@ -28,39 +29,12 @@ function findByUser(userId) {
         ]
     )
 }
-    
-async function addUserRoles(user_roles, userId) {
-    try {
-        await db.transaction(async trx => {
-            
-            // iterate through approved request and insert into roles
-            for (let userRequest of user_roles.approved) {
-                // insert each request into the roles table
-                await db('roles')
-                    .transacting(trx)
-                    .insert(
-                        { 
-                            user_id: userRequest.user_id,
-                            business_id: userRequest.business_id,
-                            roletype: userRequest.roletype
-                        }
-                    )
-                    .into('roles')
-                    
-                // delete each of the approved request from the pendingrequest table
-                await db('pendingRequests').where({ id: userRequest.requestId }).first().del()
-            }
 
-            // iterate through rejected request and update the status
-            for (let rejectedRequest of user_roles.rejected) {
-                await db('pendingRequests').where({ id: rejectedRequest.id, request_status: 'open' }).update({ request_status: 'rejected' })
-            }
-
-        })
-        return userId
-    } catch (error) {
-        throw error;
-    }
+// creates an array of busienss ids of businesses with user id listed as admin (business creators)
+async function getBusinessAdmin(user_admin) {
+    return await db('businesses')
+        .where({ business_admin: user_admin })
+        .select([ db.raw('JSON_AGG(businesses.id) as business_ids') ])
 }
 
 async function updateRoleRequest(requestResults, userId, userRoles) {
@@ -162,6 +136,37 @@ async function getRolesByBusiness(business_ids) {
         )
 }
 
+async function getRolesByBusinessAdmin(admin_id) {
+    const business_ids = await getBusinessAdmin(admin_id)
+    const business_list = business_ids[0].business_ids
+    if (!!business_list) {
+        return await db('roles')
+            .whereIn('business_id', business_list)
+            .where({ active_role: true })
+            .join('users', 'roles.user_id', '=', 'users.id')
+            .join('businesses', 'roles.business_id', '=', 'businesses.id')
+            .select(
+                [
+                    'roles.id',
+                    'roles.user_id',
+                    'users.username',
+                    'roles.business_id',
+                    'businesses.name',
+                    'roles.role_type'
+                ]
+            )
+    } else {
+        return []
+    }
+}
+
+// /roles/delete-roles
+async function deleteRoles(toDelete) {
+    return await db('roles')
+        .whereIn('id', toDelete)
+        .del()
+}
+
 // returns an array of business_id(s) for given user id
 function getEventRolesByUser(userId) {
     return db('roles')
@@ -173,10 +178,4 @@ function getEventRolesByUser(userId) {
         )
         .groupBy('roles.user_id')
         .first()
-}
-
-async function removeRoles(roleIds) {
-    return await db('roles')
-        .whereIn('id', roleIds)
-        .delete()
 }

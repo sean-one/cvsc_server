@@ -1,7 +1,7 @@
 const express = require('express');
 
 const db = require('../data/models/roles');
-const { validateRoles, validateUser, validateToken, validateAdmin, validateAdminRoleDelete } = require('../helpers/jwt_helper')
+const { validateRoles, validateUser, validateToken, validateBusinessAdmin } = require('../helpers/jwt_helper')
 const { updateRole } = require('../helpers/dataClean')
 
 const router = express.Router();
@@ -45,6 +45,7 @@ router.post('/request', [ validateToken ], (req, res) => {
     }
 })
 
+// gets the pending request for the PendingRequest component
 router.get('/pending-request', [ validateToken, validateRoles ], (req, res) => {
     const business_ids = req.roles
     db.getPendingRolesByBusiness(business_ids)
@@ -55,6 +56,7 @@ router.get('/pending-request', [ validateToken, validateRoles ], (req, res) => {
 
 })
 
+// inside PendingRequest sendRequestStatus function to confirm or delete role request
 router.post('/update-request', [ validateToken, validateRoles ], (req, res) => {
     const cleanData = updateRole(req.body)
     const userId = req.decodedToken.subject
@@ -66,42 +68,22 @@ router.post('/update-request', [ validateToken, validateRoles ], (req, res) => {
         .catch(err => console.log(err))
 })
 
-router.get('/business-request', [ validateToken, validateRoles ], (req, res) => {
-    const userRoles = req.roles
-    db.getRolesByBusiness(userRoles)
+// inside EditRoles component -- returns a list of current roles for business admin
+router.get('/current-roles', [ validateToken ], (req, res) => {
+    const userId = req.decodedToken.subject
+    db.getRolesByBusinessAdmin(userId)
         .then(response => {
             res.status(200).json(response)
         })
         .catch(err => console.log(err))
 })
 
-
-
-router.post('/editUserRoles', [ validateToken, validateAdmin ], (req, res) => {
-    const user_roles = req.body;
-    const userId = req.decodedToken.subject;
-    // res.status(200).json({ message: 'hitter' })
-    db.addUserRoles(user_roles, userId)
+// inside EditRoles component -- deletes an array of current roles for business admin
+router.delete('/delete-roles', [ validateToken, validateBusinessAdmin ], (req, res) => {
+    const toDelete = req.toDelete.map(role => parseInt(role))
+    db.deleteRoles(toDelete)
         .then(response => {
-            console.log(response)
-            res.status(200).json(response)
-        })
-        .catch(err => console.log(err))
-})
-
-router.post('/byBusinesses', (req, res) => {
-    const business_ids = req.body;
-    db.findRolesByBusinessIds(business_ids)
-        .then(response => {
-            res.status(200).json(response)
-        })
-        .catch(err => console.log(err))
-})
-
-router.delete('/deleteUserRoles', [ validateToken, validateAdminRoleDelete ], async (req, res) => {
-    db.removeRoles(req.body.roleIds)
-        .then(response => {
-            res.status(200).json(response)
+            res.status(204).json(response)
         })
         .catch(err => console.log(err))
 })
