@@ -4,8 +4,6 @@ const googleMapsClient = require('../../helpers/geocoder');
 module.exports = {
     find,
     findById,
-    findBrands,
-    findVenues,
     addBusiness,
     findPending,
     approveBusiness,
@@ -64,24 +62,28 @@ function findById(id) {
         .first();
 }
 
-function findBrands() {
+// used in postman to get pending request
+function findPending() {
     return db('businesses')
-        .whereNot({businesstype: 'venue'})
+        .where({ approval: false })
+        .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
+        .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
-                'id',
-                'name'
-            ]
-        )
-}
-
-function findVenues() {
-    return db('businesses')
-        .whereNot({ businesstype: 'brand' })
-        .select(
-            [
-                'id',
-                'name'
+                'businesses.id',
+                'businesses.name',
+                'businesses.avatar',
+                'businesses.description',
+                'businesses.businesstype',
+                'businesses.requestOpen',
+                'businesses.activeBusiness',
+                'businesses.business_admin',
+                'businesses.approval',
+                'contacts.email',
+                'contacts.instagram',
+                'contacts.facebook',
+                'contacts.website',
+                'locations.formatted'
             ]
         )
 }
@@ -152,23 +154,6 @@ async function addBusiness(business) {
         throw error
     }
 
-}
-
-function findPending() {
-    return db('businesses')
-        .where({ approval: false })
-        .leftJoin('users', 'businesses.business_admin', '=', 'users.id')
-        .select(
-            [
-                'businesses.id',
-                'businesses.name',
-                'businesses.businesstype',
-                'businesses.business_admin',
-                'businesses.approval',
-                'users.id as user_id',
-                'users.username'
-            ]
-        )
 }
 
 async function approveBusiness(businessIds) {
