@@ -72,10 +72,10 @@ const validateRoles = async (req, res, next) => {
     next()
 }
 
+// validates a user when creating or making changes to an event
 const validateUserRole = async (req, res, next) => {
     const userRoles = await db.getEventRolesByUser(req.decodedToken.subject)
         .then(roles => {
-            console.log(roles)
             if(roles) {
                 return roles.roles
             } else {
@@ -85,7 +85,6 @@ const validateUserRole = async (req, res, next) => {
         .catch(err => {
             console.log(err)
         })
-    console.log(userRoles)
     if (userRoles.includes(req.body.venue_id) || userRoles.includes(req.body.brand_id)) {
         // validated user roles
         next()
@@ -93,7 +92,6 @@ const validateUserRole = async (req, res, next) => {
         console.log('invalid admin roles')
         res.status(403).json({ message: 'invalid admin role' });
     }
-    // console.log(req.body.venue_id, req.body.brand_id, req.decodedToken.roles)
 }
 
 const validateUserAdmin = async (req, res, next) => {
