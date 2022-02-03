@@ -102,7 +102,7 @@ async function addBusiness(business) {
             // create new business
             const newBusiness = await db('businesses')
                 .transacting(trx)
-                .insert(business.business, ['id', 'name'])
+                .insert(business.business, ['id', 'name', 'business_admin'])
         
             // check for location
             if (business.location) {
@@ -123,6 +123,16 @@ async function addBusiness(business) {
                     .insert(location)
                 // console.log(geoCode.json.results[0])
             }
+
+            await db('roles')
+                .transacting(trx)
+                .insert({
+                    user_id: newBusiness[0].business_admin,
+                    business_id: newBusiness[0].id,
+                    role_type: "admin",
+                    active_role: true,
+                    approved_by: newBusiness[0].business_admin
+                })
 
             return db('businesses')
                 .transacting(trx)
