@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
-// inside the BusinessRequestForm on submit
+// inside the createBusiness on submit
 // creates a new business with activeBusiness & arppoval set to false also creates a top user admin role
 router.post('/create/business-request', [ validateToken ], async (req, res) => {
     

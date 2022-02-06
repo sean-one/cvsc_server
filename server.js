@@ -24,7 +24,7 @@ app.use(morgan(':date[clf] :method :url :status :response-time ms - :res[content
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({
-    origin: ['http://localhost:3000', process.env.FRONTEND_CLIENT],
+    origin: ['http://localhost:3000', process.env.FRONTEND_CLIENT, /\.localhost:3000/],
     methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
     credentials: true
 }));

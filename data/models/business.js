@@ -88,6 +88,7 @@ function findPending() {
         )
 }
 
+// creates new business & new admin role for the user requesting the new business
 async function addBusiness(business) {
     try {
         return await db.transaction(async trx => {
