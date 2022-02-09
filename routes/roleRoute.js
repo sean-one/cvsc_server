@@ -44,9 +44,10 @@ router.post('/request', [ validateToken ], (req, res) => {
     }
 })
 
-router.get('/business-admin', [ validateToken ], (req, res) => {
-    const userId = req.decodedToken.subject
-    db.gelAllRolesByBusinessAdmin(userId)
+// get an array of pending request based on business admin rights
+router.get('/pending-request', [ validateToken ], (req, res) => {
+    const user_id = req.decodedToken.subject
+    db.getPendingRequest(user_id)
         .then(response => {
             res.status(200).json(response)
         })

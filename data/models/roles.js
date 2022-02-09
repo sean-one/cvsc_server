@@ -4,7 +4,7 @@ module.exports = {
     getBusinessAdminBusinessIds,
     getRequestBusinessIds,
     findByUser,
-    gelAllRolesByBusinessAdmin,
+    getPendingRequest,
     updateRolesByBusinessAdmin,
 
     addRequest,
@@ -41,8 +41,8 @@ function findByUser(userId) {
         )
 }
     
-async function gelAllRolesByBusinessAdmin(admin_id) {
-    // roles/business-admin
+async function getPendingRequest(admin_id) {
+    // roles/pending-request
     
     // get business ids that user has business admin rights to
     const { business_ids } = await getBusinessAdminBusinessIds(admin_id)
@@ -50,7 +50,7 @@ async function gelAllRolesByBusinessAdmin(admin_id) {
     if (!!business_ids) {
         return await db('roles')
             .whereIn('business_id', business_ids)
-            // .where({ active_role: true })
+            .where({ active_role: false })
             .whereNot({ user_id: admin_id })
             .join('users', 'roles.user_id', '=', 'users.id')
             .join('businesses', 'roles.business_id', '=', 'businesses.id')
@@ -92,6 +92,7 @@ async function updateRolesByBusinessAdmin(approved, rejected, admin_id) {
 
         return await db('roles')
             .whereIn('business_id', business_ids)
+            .where({ active_role: false })
             .whereNot({ user_id: admin_id })
             .leftJoin('users', 'roles.user_id', '=', 'users.id')
             .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
@@ -112,6 +113,12 @@ async function updateRolesByBusinessAdmin(approved, rejected, admin_id) {
         throw error
     }
 }
+
+
+
+
+
+
 
 function addRequest(request_data, user_id) {
     return db('roles')
