@@ -16,8 +16,8 @@ function find() {
 async function userSignIn(user) {
     return await db('users')
         .where({ username: user.username })
-        .join('contacts', 'users.contact_id', '=', 'contacts.id')
-        .join('roles', 'users.id', '=', 'roles.user_id')
+        .leftJoin('contacts', 'users.contact_id', '=', 'contacts.id')
+        .leftJoin('roles', 'users.id', '=', 'roles.user_id')
         .select(
             [
                 'users.id',

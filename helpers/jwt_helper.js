@@ -48,13 +48,12 @@ const validateUser = (req, res, next) => {
 
 // used at /roles/delete-roles
 const validateBusinessAdmin = async (req, res, next) => {
-    const businessAdminRoles = await db.getBusinessAdmin(req.decodedToken.subject)
-    const user_business_admin = businessAdminRoles[0].business_ids
+    const { business_ids } = await db.getBusinessAdminBusinessIds(req.decodedToken.subject)
     const nullRemoved = Object.fromEntries(Object.entries(req.body).filter(([_, v]) => v != null))
     const business_roles = Object.values(nullRemoved)
     
     const checkAdmin = business_roles.every(business => {
-        return user_business_admin.includes(parseInt(business))
+        return business_ids.includes(parseInt(business))
     })
 
     if (checkAdmin) {
@@ -65,11 +64,41 @@ const validateBusinessAdmin = async (req, res, next) => {
     }
 }
 
-// used at /roles/pending-request, /roles/update-request
-const validateRoles = async (req, res, next) => {
-    const admin_roles = await db.getUserAdminRoles(req.decodedToken.subject)
-    req.roles = admin_roles.admin
-    next()
+//! single business admin validation
+const validateBusinessAdminRights = async (req, res, next) => {
+    const data = req.body
+    const { business_ids } = await db.getBusinessAdminBusinessIds(req.decodedToken.subject)
+    const validatedRoles = {
+        approved_ids: [],
+        rejected_ids: [],
+        toDelete_ids: []
+    }
+
+    for (const [k, v] of Object.entries(data)) {
+        if (v === 'approved') {
+            validatedRoles.approved_ids.push(k)
+        } else if (v === 'rejected') {
+            validatedRoles.rejected_ids.push(k)
+        } else if (v === 'toDelete') {
+            validatedRoles.toDelete_ids.push(k)
+        } else {
+            res.status(400).json({ message: 'invalid inputs' })
+        }
+    }
+
+    const requestList = [ ...validatedRoles.approved_ids, ...validatedRoles.rejected_ids, ...validatedRoles.toDelete_ids ]
+    const { business_id_request } = await db.getRequestBusinessIds(requestList)
+    
+    const checkValidation = business_id_request.every(business => {
+        return business_ids.includes(parseInt(business))
+    })
+
+    if (checkValidation) {
+        req.validatedRoles = validatedRoles
+        next()
+    } else {
+        res.status(404).json({ message: 'invalid credentials' })
+    }
 }
 
 // validates a user when creating or making changes to an event
@@ -124,7 +153,7 @@ module.exports = {
     validateToken,
     validateUser,
     validateBusinessAdmin,
-    validateRoles,
+    validateBusinessAdminRights,
     validateUserRole,
     validateUserAdmin,
 }

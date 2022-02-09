@@ -1,65 +1,57 @@
 const db = require('../dbConfig');
 
 module.exports = {
-    find,
+    getBusinessAdminBusinessIds,
+    getRequestBusinessIds,
     findByUser,
-    updateRoleRequest,
+    gelAllRolesByBusinessAdmin,
+    updateRolesByBusinessAdmin,
+
     addRequest,
     getUserAdminRoles,
-    getPendingRolesByBusiness,
     getRolesByBusiness,
-    getRolesByBusinessAdmin,
     getEventRolesByUser,
-    getBusinessAdmin,
-    deleteRoles
 }
 
-function find() {
-    return db('roles')
+async function getBusinessAdminBusinessIds(user_admin) {
+    // creates an array of business ids of businesses with user id listed as admin (business creators)
+    return await db('businesses')
+        .where({ business_admin: user_admin })
+        .select([db.raw('JSON_AGG(businesses.id) as business_ids')])
+        .first()
+}
+
+async function getRequestBusinessIds(request_ids) {
+    // creates an array of business ids from an array of request ids
+    return await db('roles')
+        .whereIn('id', request_ids)
+        .select([db.raw('JSON_AGG(roles.business_id) as business_id_request')])
+        .first()
 }
 
 function findByUser(userId) {
+    // used at profile
     return db('roles')
-    // return active_role false to get pending role request
-    .where({ user_id: userId, active_role: true })
-    .select(
-        [
-            'business_id',
-            'role_type',
-        ]
-    )
+        .where({ user_id: userId, active_role: true })
+        .select(
+            [
+                'business_id',
+                'role_type',
+            ]
+        )
 }
-
-// creates an array of busienss ids of businesses with user id listed as admin (business creators)
-async function getBusinessAdmin(user_admin) {
-    return await db('businesses')
-        .where({ business_admin: user_admin })
-        .select([ db.raw('JSON_AGG(businesses.id) as business_ids') ])
-}
-
-async function updateRoleRequest(requestResults, userId, userRoles) {
-    try {
-        await db.transaction(async trx => {
-            if (requestResults.approvedReq.length > 0) {
-                await db('roles')
-                    .transacting(trx)
-                    .whereIn('id', requestResults.approvedReq)
-                    .update({ active_role: true,  approved_by: parseInt(userId) })
-
-            }
-
-            if (requestResults.rejectedReq.length > 0) {
-                await db('roles')
-                    .transacting(trx)
-                    .whereIn('id', requestResults.rejectedReq)
-                    .delete()
-            }
-
-        })
-
+    
+async function gelAllRolesByBusinessAdmin(admin_id) {
+    // roles/business-admin
+    
+    // get business ids that user has business admin rights to
+    const { business_ids } = await getBusinessAdminBusinessIds(admin_id)
+    
+    if (!!business_ids) {
         return await db('roles')
-            .whereIn('business_id', userRoles)
-            .where({ active_role: false })
+            .whereIn('business_id', business_ids)
+            // .where({ active_role: true })
+            .whereNot({ user_id: admin_id })
             .join('users', 'roles.user_id', '=', 'users.id')
             .join('businesses', 'roles.business_id', '=', 'businesses.id')
             .select(
@@ -70,10 +62,54 @@ async function updateRoleRequest(requestResults, userId, userRoles) {
                     'roles.business_id',
                     'businesses.name',
                     'roles.role_type',
+                    'roles.active_role'
+                ]
+            )
+    } else {
+        return []
+    }
+}
+
+// roles/update-request
+async function updateRolesByBusinessAdmin(approved, rejected, admin_id) {
+    const { business_ids } = await getBusinessAdminBusinessIds(admin_id)
+    try {
+        await db.transaction(async trx => {
+            if (approved.length > 0) {
+                await db('roles')
+                    .transacting(trx)
+                    .whereIn('id', approved)
+                    .update({ active_role: true, approved_by: parseInt(admin_id) })
+            }
+
+            if (rejected.length > 0) {
+                await db('roles')
+                    .transacting(trx)
+                    .whereIn('id', rejected)
+                    .delete()
+            }
+        })
+
+        return await db('roles')
+            .whereIn('business_id', business_ids)
+            .whereNot({ user_id: admin_id })
+            .leftJoin('users', 'roles.user_id', '=', 'users.id')
+            .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
+            .select(
+                [
+                    'roles.id',
+                    'roles.user_id',
+                    'users.username',
+                    'roles.business_id',
+                    'businesses.name',
+                    'roles.role_type',
+                    'roles.active_role'
                 ]
             )
     } catch (error) {
-        throw error;
+        console.log('error in catch')
+        console.log(error)
+        throw error
     }
 }
 
@@ -98,25 +134,6 @@ function getUserAdminRoles(userId) {
         .first()
 }
 
-// roles/pending-request
-async function getPendingRolesByBusiness(business_ids) {
-    return await db('roles')
-        .whereIn('business_id', business_ids)
-        .where({ active_role: false })
-        .join('users', 'roles.user_id', '=', 'users.id')
-        .join('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.id',
-                'roles.user_id',
-                'users.username',
-                'roles.business_id',
-                'businesses.name',
-                'roles.role_type',
-            ]
-        )
-}
-
 // roles/business-request
 async function getRolesByBusiness(business_ids) {
     return await db('roles')
@@ -134,37 +151,6 @@ async function getRolesByBusiness(business_ids) {
                 'roles.role_type',
             ]
         )
-}
-
-async function getRolesByBusinessAdmin(admin_id) {
-    const business_ids = await getBusinessAdmin(admin_id)
-    const business_list = business_ids[0].business_ids
-    if (!!business_list) {
-        return await db('roles')
-            .whereIn('business_id', business_list)
-            .where({ active_role: true })
-            .join('users', 'roles.user_id', '=', 'users.id')
-            .join('businesses', 'roles.business_id', '=', 'businesses.id')
-            .select(
-                [
-                    'roles.id',
-                    'roles.user_id',
-                    'users.username',
-                    'roles.business_id',
-                    'businesses.name',
-                    'roles.role_type'
-                ]
-            )
-    } else {
-        return []
-    }
-}
-
-// /roles/delete-roles
-async function deleteRoles(toDelete) {
-    return await db('roles')
-        .whereIn('id', toDelete)
-        .del()
 }
 
 // returns an array of business_id(s) for given user id
