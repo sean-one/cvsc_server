@@ -1,16 +1,27 @@
 const db = require('../dbConfig');
 
 module.exports = {
+    getUserBusinessRoles,
     getBusinessAdminBusinessIds,
     getRequestBusinessIds,
     findByUser,
     getPendingRequest,
     updateRolesByBusinessAdmin,
+    createRequest,
+}
 
-    addRequest,
-    getUserAdminRoles,
-    getRolesByBusiness,
-    getEventRolesByUser,
+// returns an array of business_id(s) for given user id
+// used validateUserRole for create and update events
+function getUserBusinessRoles(user_id) {
+    return db('roles')
+        .where({ user_id: user_id })
+        .select(
+            [
+                db.raw('ARRAY_AGG(roles.business_id) as business_ids')
+            ]
+        )
+        .groupBy('roles.user_id')
+        .first()
 }
 
 async function getBusinessAdminBusinessIds(user_admin) {
@@ -29,8 +40,8 @@ async function getRequestBusinessIds(request_ids) {
         .first()
 }
 
+// used at profile
 function findByUser(userId) {
-    // used at profile
     return db('roles')
         .where({ user_id: userId, active_role: true })
         .select(
@@ -41,9 +52,8 @@ function findByUser(userId) {
         )
 }
     
-async function getPendingRequest(admin_id) {
-    // roles/pending-request
-    
+// roles/pending-request
+async function getPendingRequest(admin_id) {    
     // get business ids that user has business admin rights to
     const { business_ids } = await getBusinessAdminBusinessIds(admin_id)
     
@@ -114,13 +124,8 @@ async function updateRolesByBusinessAdmin(approved, rejected, admin_id) {
     }
 }
 
-
-
-
-
-
-
-function addRequest(request_data, user_id) {
+// roles/create-request
+function createRequest(request_data, user_id) {
     return db('roles')
         .insert({ 
             user_id: user_id,
@@ -128,47 +133,4 @@ function addRequest(request_data, user_id) {
             role_type: request_data.request_for
         }, [ 'id' ])
 
-}
-
-function getUserAdminRoles(userId) {
-    return db('roles')
-        .where({ user_id: userId, role_type: 'admin', active_role: true })
-        .select(
-            [
-                db.raw('ARRAY_AGG(roles.business_id) as admin')
-            ]
-        )
-        .first()
-}
-
-// roles/business-request
-async function getRolesByBusiness(business_ids) {
-    return await db('roles')
-        .whereIn('business_id', business_ids)
-        .where({ active_role: true })
-        .join('users', 'roles.user_id', '=', 'users.id')
-        .join('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.id',
-                'roles.user_id',
-                'users.username',
-                'roles.business_id',
-                'businesses.name',
-                'roles.role_type',
-            ]
-        )
-}
-
-// returns an array of business_id(s) for given user id
-function getEventRolesByUser(userId) {
-    return db('roles')
-        .where({ user_id: userId })
-        .select(
-            [
-                db.raw('ARRAY_AGG(roles.business_id) as roles')
-            ]
-        )
-        .groupBy('roles.user_id')
-        .first()
 }

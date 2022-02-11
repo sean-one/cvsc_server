@@ -1,7 +1,7 @@
 const express = require('express');
 
 const db = require('../data/models/roles');
-const { validateUser, validateToken, validateBusinessAdmin, validateBusinessAdminRights } = require('../helpers/jwt_helper')
+const { validateUser, validateToken, validateBusinessAdminRights } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
@@ -24,13 +24,13 @@ router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
 })
 
 // add role request via the creatorRequestForm
-router.post('/request', [ validateToken ], (req, res) => {
+router.post('/create-request', [ validateToken ], (req, res) => {
     const user_id = req.decodedToken.subject
     const new_request = req.body
     if (!new_request.business_id || !new_request.request_for) {
         res.status(400).json({ message: 'missing input', type: 'missing input' })
     } else {
-        db.addRequest(new_request, user_id)
+        db.createRequest(new_request, user_id)
             .then(response => {
                 res.status(200).json(response)
             })

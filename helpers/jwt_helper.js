@@ -46,25 +46,6 @@ const validateUser = (req, res, next) => {
     }
 }
 
-// used at /roles/delete-roles
-const validateBusinessAdmin = async (req, res, next) => {
-    const { business_ids } = await db.getBusinessAdminBusinessIds(req.decodedToken.subject)
-    const nullRemoved = Object.fromEntries(Object.entries(req.body).filter(([_, v]) => v != null))
-    const business_roles = Object.values(nullRemoved)
-    
-    const checkAdmin = business_roles.every(business => {
-        return business_ids.includes(parseInt(business))
-    })
-
-    if (checkAdmin) {
-        req.toDelete = Object.keys(nullRemoved)
-        next()
-    } else {
-        res.status(404).json({ message: 'invalid credentials'})
-    }
-}
-
-//! single business admin validation
 const validateBusinessAdminRights = async (req, res, next) => {
     const data = req.body
     const { business_ids } = await db.getBusinessAdminBusinessIds(req.decodedToken.subject)
@@ -103,18 +84,8 @@ const validateBusinessAdminRights = async (req, res, next) => {
 
 // validates a user when creating or making changes to an event
 const validateUserRole = async (req, res, next) => {
-    const userRoles = await db.getEventRolesByUser(req.decodedToken.subject)
-        .then(roles => {
-            if(roles) {
-                return roles.roles
-            } else {
-                return []
-            }
-        })
-        .catch(err => {
-            console.log(err)
-        })
-    if (userRoles.includes(req.body.venue_id) || userRoles.includes(req.body.brand_id)) {
+    const { business_ids } = await db.getUserBusinessRoles(req.decodedToken.subject)
+    if (business_ids.includes(req.body.venue_id) || business_ids.includes(req.body.brand_id)) {
         // validated user roles
         next()
     } else {
@@ -152,7 +123,6 @@ module.exports = {
     createToken,
     validateToken,
     validateUser,
-    validateBusinessAdmin,
     validateBusinessAdminRights,
     validateUserRole,
     validateUserAdmin,
