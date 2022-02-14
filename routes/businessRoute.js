@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
 
 // inside the createBusiness on submit
 // creates a new business with activeBusiness & arppoval set to false also creates a top user admin role
-router.post('/create/business-request', [ validateToken ], async (req, res) => {
+router.post('/create', [ validateToken ], async (req, res) => {
     
     const businessDetails = req.body
     businessDetails.business['business_admin'] = req.decodedToken.subject
@@ -44,6 +44,11 @@ router.post('/create/business-request', [ validateToken ], async (req, res) => {
             res.status(500).json({ message: 'something went wrong', err })
         }
     }
+})
+
+router.post('/new-business', [ validateToken ], async (req, res) => {
+    
+
 })
 
 // used in postman to get pending request
@@ -93,19 +98,6 @@ router.delete('/remove/:id', [ validateUserAdmin ], async (req, res, next) => {
         }
     }
 })
-
-
-
-
-
-//! inside pendingBusiness component
-router.get('/pending-approval', (req, res) => {
-    db.findPending()
-        .then(businesses => {
-            res.status(200).json(businesses);
-        })
-        .catch(err => res.status(500).json(err));
-});
 
 router.post('/update-approval', async (req, res, next) => {
     try {

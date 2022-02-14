@@ -5,6 +5,7 @@ module.exports = {
     find,
     findById,
     addBusiness,
+    createBusiness,
     findPending,
     approveBusiness,
     remove
@@ -165,6 +166,11 @@ async function addBusiness(business) {
         throw error
     }
 
+}
+
+async function createBusiness(business) {
+    console.log(business)
+    return
 }
 
 async function approveBusiness(businessIds) {
