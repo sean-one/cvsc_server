@@ -5,16 +5,13 @@ module.exports = {
     find,
     findById,
     addBusiness,
-    createBusiness,
     findPending,
-    approveBusiness,
     remove
 };
 
 function find() {
     return db('businesses')
-        // .where({ activeBusiness: true })
-        .where({ approval: true })
+        .where({ activeBusiness: true })
         .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
@@ -27,7 +24,6 @@ function find() {
                 'businesses.requestOpen',
                 'businesses.activeBusiness',
                 'businesses.business_admin',
-                'businesses.approval',
                 'contacts.email',
                 'contacts.instagram',
                 'contacts.facebook',
@@ -52,7 +48,6 @@ function findById(id) {
                 'businesses.requestOpen',
                 'businesses.activeBusiness',
                 'businesses.business_admin',
-                'businesses.approval',
                 'contacts.email',
                 'contacts.instagram',
                 'contacts.facebook',
@@ -66,7 +61,7 @@ function findById(id) {
 // used in postman to get pending request
 function findPending() {
     return db('businesses')
-        .where({ approval: false })
+        .where({ activeBusiness: false })
         .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
@@ -79,7 +74,6 @@ function findPending() {
                 'businesses.requestOpen',
                 'businesses.activeBusiness',
                 'businesses.business_admin',
-                'businesses.approval',
                 'contacts.email',
                 'contacts.instagram',
                 'contacts.facebook',
@@ -93,6 +87,7 @@ function findPending() {
 async function addBusiness(business) {
     try {
         return await db.transaction(async trx => {
+
             // create a new contact and get ID
             const newContact = await db('contacts')
                 .transacting(trx)
@@ -126,6 +121,7 @@ async function addBusiness(business) {
                 // console.log(geoCode.json.results[0])
             }
 
+            // create an business admin role for the user requesting the new business
             await db('roles')
                 .transacting(trx)
                 .insert({
@@ -136,6 +132,7 @@ async function addBusiness(business) {
                     approved_by: newBusiness[0].business_admin
                 })
 
+            // return the newly created business with contact and location if created
             return db('businesses')
                 .transacting(trx)
                 .where({ 'businesses.id': newBusiness[0].id})
@@ -151,7 +148,6 @@ async function addBusiness(business) {
                         'businesses.requestOpen',
                         'businesses.activeBusiness',
                         'businesses.business_admin',
-                        'businesses.approval',
                         'contacts.email',
                         'contacts.instagram',
                         'contacts.facebook',
@@ -162,21 +158,10 @@ async function addBusiness(business) {
                 .first()
         })
     } catch (error) {
-        // console.log(error)
+        console.log(error)
         throw error
     }
 
-}
-
-async function createBusiness(business) {
-    console.log(business)
-    return
-}
-
-async function approveBusiness(businessIds) {
-    return db('businesses')
-        .whereIn('id', businessIds)
-        .update({ approval: true })
 }
 
 async function remove(id) {

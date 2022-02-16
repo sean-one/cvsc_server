@@ -99,27 +99,4 @@ router.delete('/remove/:id', [ validateUserAdmin ], async (req, res, next) => {
     }
 })
 
-router.post('/update-approval', async (req, res, next) => {
-    try {
-        const businessIds = req.body
-        const approved = await db.approveBusiness(businessIds)
-        if (approved >= 1) {
-            res.status(204).json()
-        } else {
-            const error = new Error('invalid id');
-            error.message = 'invalid id, not found';
-            error.status = 404;
-            throw error;
-        }
-    } catch (error) {
-        if (error.errors) {
-            res.status(400).json({ message: 'bad request', path: error.path, error: `${error.params.path} failed validation` });
-        } else {
-            next(error)
-        }
-        
-    }
-    // console.log(req.body)
-})
-
 module.exports = router;

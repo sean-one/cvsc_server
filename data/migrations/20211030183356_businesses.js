@@ -23,6 +23,7 @@ exports.up = function (knex) {
             .inTable('contacts')
             .onDelete('cascade')
 
+        // business open to user creator request, defaults to true
         businesses
             .boolean('requestOpen')
             .nullable()
@@ -39,11 +40,6 @@ exports.up = function (knex) {
             .references('id')
             .inTable('users')
             .notNullable()
-        
-        businesses
-            .boolean('approval')
-            .nullable()
-            .defaultTo(false)
 
         businesses.timestamps(true, true)
     })

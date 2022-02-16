@@ -13,7 +13,6 @@ exports.seed = function(knex) {
           businesstype: "brand",
           activeBusiness: "true",
           business_admin: 1,
-          approval: true
         },
         {
           name: "West Coast Cure",
@@ -23,7 +22,6 @@ exports.seed = function(knex) {
           businesstype: "brand",
           activeBusiness: "true",
           business_admin: 1,
-          approval: true
         },
         {
           name: "Old Pal",
@@ -33,7 +31,6 @@ exports.seed = function(knex) {
           businesstype: "brand",
           activeBusiness: "true",
           business_admin: 1,
-          approval: true
         },
         {
           name: "The Cure Company",
@@ -43,7 +40,6 @@ exports.seed = function(knex) {
           businesstype: "brand",
           activeBusiness: "true",
           business_admin: 1,
-          approval: true
         },
         {
           name: "Green Dragon",
@@ -53,7 +49,6 @@ exports.seed = function(knex) {
           businesstype: "both",
           activeBusiness: "true",
           business_admin: 1,
-          approval: true
         },
         {
           name: "BARE Dispensary",
@@ -63,7 +58,6 @@ exports.seed = function(knex) {
           businesstype: "both",
           activeBusiness: "true",
           business_admin: 1,
-          approval: true
         },
         {
           name: "Desert's Finest",
@@ -73,7 +67,6 @@ exports.seed = function(knex) {
           businesstype: "venue",
           activeBusiness: "true",
           business_admin: 1,
-          approval: true
         },
         {
           name: "No Wait Meds",
@@ -83,7 +76,6 @@ exports.seed = function(knex) {
           businesstype: "venue",
           activeBusiness: "true",
           business_admin: 1,
-          approval: true
         },
         {
           name: "Palm Royal Cannabis",
@@ -93,7 +85,6 @@ exports.seed = function(knex) {
           businesstype: "venue",
           activeBusiness: "true",
           business_admin: 1,
-          approval: true
         },
         {
           name: "Brand New Business",
@@ -103,7 +94,6 @@ exports.seed = function(knex) {
           businesstype: "both",
           activeBusiness: "false",
           business_admin: 1,
-          approval: true
         }
       ]);
     });
