@@ -1,13 +1,20 @@
 const db = require('../dbConfig');
 
 module.exports = {
+    find,
     getUserBusinessRoles,
     getBusinessAdminBusinessIds,
     getRequestBusinessIds,
     findByUser,
     getPendingRequest,
-    updateRolesByBusinessAdmin,
+    approveRequest,
+    rejectRequest,
     createRequest,
+}
+
+// for postman to check db
+function find() {
+    return db('roles')
 }
 
 // returns an array of business_id(s) for given user id
@@ -80,48 +87,16 @@ async function getPendingRequest(admin_id) {
     }
 }
 
-// roles/update-request
-async function updateRolesByBusinessAdmin(approved, rejected, admin_id) {
-    const { business_ids } = await getBusinessAdminBusinessIds(admin_id)
-    try {
-        await db.transaction(async trx => {
-            if (approved.length > 0) {
-                await db('roles')
-                    .transacting(trx)
-                    .whereIn('id', approved)
-                    .update({ active_role: true, approved_by: parseInt(admin_id) })
-            }
+function approveRequest(user_id, req_id) {
+    return db('roles')
+        .where({ id: req_id })
+        .update({ active_role: true, approved_by: parseInt(user_id) })
+}
 
-            if (rejected.length > 0) {
-                await db('roles')
-                    .transacting(trx)
-                    .whereIn('id', rejected)
-                    .delete()
-            }
-        })
-
-        return await db('roles')
-            .whereIn('business_id', business_ids)
-            .where({ active_role: false })
-            .whereNot({ user_id: admin_id })
-            .leftJoin('users', 'roles.user_id', '=', 'users.id')
-            .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
-            .select(
-                [
-                    'roles.id',
-                    'roles.user_id',
-                    'users.username',
-                    'roles.business_id',
-                    'businesses.name',
-                    'roles.role_type',
-                    'roles.active_role'
-                ]
-            )
-    } catch (error) {
-        console.log('error in catch')
-        console.log(error)
-        throw error
-    }
+async function rejectRequest(req_id) {
+    return await db('roles')
+        .where({ id: req_id })
+        .del()
 }
 
 // roles/create-request

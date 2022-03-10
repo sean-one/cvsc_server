@@ -54,6 +54,17 @@ router.get('/pending-request', [ validateToken ], (req, res) => {
         .catch(err => console.log(err))
 })
 
+// from pendingRequest inside business admin options approval
+router.post('/approve-request', [ validateToken ], (req, res) => {
+    const admin_id = req.decodedToken.subject
+    const { request_id } = req.body
+    db.approveRequest(admin_id, request_id)
+        .then(response => {
+            res.status(200).json(response)
+        })
+        .catch(err => console.log(err))
+})
+
 // inside PendingRequest sendRequestStatus function to confirm or delete role request
 router.post('/update-request', [ validateToken, validateBusinessAdminRights ], (req, res) => {
     const admin_id = req.decodedToken.subject
@@ -65,4 +76,13 @@ router.post('/update-request', [ validateToken, validateBusinessAdminRights ], (
         .catch(err => console.log(err))
 })
 
+// from pendingRequest inside business admin options reject
+router.delete('/reject-request/:id', [ validateToken ], (req, res) => {
+    const request_id = req.params.id
+    db.rejectRequest(request_id)
+        .then(response => {
+            res.status(200).json(response)
+        })
+        .catch(err => console.log(err))
+})
 module.exports = router;
