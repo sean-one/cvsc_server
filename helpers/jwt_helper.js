@@ -90,7 +90,7 @@ const validateUserRole = async (req, res, next) => {
         next()
     } else {
         console.log('invalid admin roles')
-        res.status(403).json({ message: 'invalid admin role' });
+        res.status(403).json({ type: 'role_rights', message: 'invalid role rights' });
     }
 }
 

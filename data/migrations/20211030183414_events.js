@@ -1,11 +1,12 @@
 
-exports.up = function (knex) {
+exports.up = async function (knex) {
     return knex.schema.createTable('events', events => {
         events.increments('id')
 
         events
             .string('eventname')
             .notNullable()
+            .unique()
 
         events
             .date('eventdate')
@@ -45,6 +46,9 @@ exports.up = function (knex) {
 
         events.timestamps(true, true)
     })
+
+    // add constraint to keep unique eventname per date
+    await knex.schema.raw(`ALTER TABLE events ADD CONSTRAINT on_per_day UNIQUE (eventname, eventdate);`)
 };
 
 exports.down = function (knex) {
