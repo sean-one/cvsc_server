@@ -46,11 +46,6 @@ router.post('/create', [ validateToken ], async (req, res) => {
     }
 })
 
-router.post('/new-business', [ validateToken ], async (req, res) => {
-    
-
-})
-
 // used in postman to get pending request
 router.get('/pending/business-request', (req, res) => {
     db.findPending()

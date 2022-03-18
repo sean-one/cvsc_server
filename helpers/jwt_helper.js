@@ -26,12 +26,10 @@ const validateToken = (req, res, next) => {
     } catch (error) {
         // console.log(error.name, error.message, error.expiredAt)
         if(error.name === 'TypeError') {
-            res.status(401).json({ message: 'missing token' })
+            res.status(401).json({ message: 'missing token, please log in' })
         } else if(error.name === 'JsonWebTokenError') {
-            res.status(401).json({ message: 'invalid signature' })
+            res.status(401).json({ message: 'invalid token, please log in' })
         } else {
-            // console.log('error')
-            // console.log(error)
             res.status(500).json({ message: 'server error' })
         }
     }

@@ -196,7 +196,7 @@ async function createEvent(event) {
                 )
                 .first()
         })
-        .catch(err => console.log(err))
+        .catch(err => {throw err})
 }
 
 async function updateEvent(eventId, eventChanges) {

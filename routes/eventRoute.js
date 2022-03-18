@@ -44,10 +44,13 @@ router.post('/', [ validateToken, validateUserRole ], async (req, res, next) => 
         const event = await db.createEvent(newEvent)
         res.status(200).json(event);
     } catch (err) {
-        next(err)
-        // res.status(400).json({ message: 'there was an error'})
+        if (err.constraint === 'events_eventname_unique') {
+            res.status(400).json({ message: 'duplicate eventname', type: 'eventname' })
+        } else {
+            // console.log('inside the catch of the post')
+            res.status(500).json({ message: 'something went wrong' })
+        }
     }
-    //     .catch(err => res.status(500).json(err));
 });
 
 router.get('/business/:id', (req, res) => {
