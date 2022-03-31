@@ -7,7 +7,7 @@ exports.seed = function(knex) {
       return knex('events').insert([
         {
           eventname: 'great upcoming event',
-          eventdate: '03/23/22',
+          eventdate: '04/01/22',
           eventstart: 800,
           eventend: 1000,
           eventmedia: 'https://picsum.photos/300/300',
@@ -18,7 +18,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'something fun to do',
-          eventdate: '03/24/22',
+          eventdate: '04/02/22',
           eventstart: 1400,
           eventend: 1600,
           eventmedia: 'https://picsum.photos/300/300',
@@ -29,7 +29,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'smokers only party',
-          eventdate: '03/24/22',
+          eventdate: '04/02/22',
           eventstart: 1500,
           eventend: 1800,
           eventmedia: 'https://picsum.photos/300/300',
@@ -40,7 +40,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'new product samples',
-          eventdate: '03/25/22',
+          eventdate: '04/03/22',
           eventstart: 1800,
           eventend: 2000,
           eventmedia: 'https://picsum.photos/300/300',
@@ -51,7 +51,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'free dabs for everyone',
-          eventdate: '03/26/22',
+          eventdate: '04/04/22',
           eventstart: 1200,
           eventend: 1700,
           eventmedia: 'https://picsum.photos/300/300',
@@ -62,7 +62,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'double the fun',
-          eventdate: '03/26/22',
+          eventdate: '04/04/22',
           eventstart: 2100,
           eventend: 2300,
           eventmedia: 'https://picsum.photos/300/300',
@@ -73,7 +73,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'buy one get one free',
-          eventdate: '03/27/22',
+          eventdate: '04/05/22',
           eventstart: 800,
           eventend: 1700,
           eventmedia: 'https://picsum.photos/300/300',
@@ -84,7 +84,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'smokers blow out',
-          eventdate: '03/28/22',
+          eventdate: '04/06/22',
           eventstart: 1200,
           eventend: 1500,
           eventmedia: 'https://picsum.photos/300/300',
@@ -95,7 +95,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'pre rollers only',
-          eventdate: '03/29/22',
+          eventdate: '04/07/22',
           eventstart: 1400,
           eventend: 1600,
           eventmedia: 'https://picsum.photos/300/300',
@@ -106,7 +106,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'new strain release',
-          eventdate: '03/26/22',
+          eventdate: '04/04/22',
           eventstart: 1600,
           eventend: 2200,
           eventmedia: 'https://picsum.photos/300/300',
@@ -117,7 +117,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'big party day',
-          eventdate: '03/30/22',
+          eventdate: '04/08/22',
           eventstart: 800,
           eventend: 1000,
           eventmedia: 'https://picsum.photos/300/300',
@@ -128,7 +128,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'the meet and greet with a really really long name',
-          eventdate: '03/30/22',
+          eventdate: '04/08/22',
           eventstart: 1900,
           eventend: 2100,
           eventmedia: 'https://picsum.photos/300/300',
@@ -139,7 +139,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'mean green machine',
-          eventdate: '03/30/22',
+          eventdate: '04/08/22',
           eventstart: 1100,
           eventend: 1300,
           eventmedia: 'https://picsum.photos/300/300',
@@ -150,7 +150,7 @@ exports.seed = function(knex) {
         },
         {
           eventname: 'big day finale',
-          eventdate: '03/30/22',
+          eventdate: '04/08/22',
           eventstart: 2100,
           eventend: 2300,
           eventmedia: 'https://picsum.photos/300/300',
