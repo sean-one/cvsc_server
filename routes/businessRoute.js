@@ -54,7 +54,12 @@ router.put('/:id', (req, res) => {
             res.status(201).json(business)
         })
         .catch(err => {
-            res.status(500).json({ message: "server not connected", err });
+            console.log(err.constraint)
+            if (err.constraint === 'contacts_email_unique') {
+                res.status(400).json({ message: 'duplicate email', type: 'email'})
+            } else {
+                res.status(500).json({ message: "server not connected", err });
+            }
         })
 })
 

@@ -202,7 +202,7 @@ async function updateBusiness(business_id, business_updates) {
                 'locations.formatted'
             ])
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         throw error
     }
 }
