@@ -168,14 +168,10 @@ async function addBusiness(business) {
 
 async function updateBusiness(business_id, business_updates) {
     try {
-        const { id, contact_id } = await db('businesses').where({ 'id': business_id }).select(['id', 'contact_id']).first()
+        const { contact_id } = await db('businesses').where({ 'id': business_id }).select(['contact_id']).first()
         
         if (Object.keys(business_updates.contact).length !== 0) {
             await db('contacts').where({ 'id': contact_id }).update(business_updates.contact)
-        }
-
-        if(Object.keys(business_updates.location).length !== 0) {
-            await db('locations').where({ 'venue_id': business_id}).update(business_updates.location)
         }
 
         if (Object.keys(business_updates.business).length !== 0) {
