@@ -46,6 +46,18 @@ router.post('/create', [ validateToken ], async (req, res) => {
     }
 })
 
+router.put('/:id', (req, res) => {
+    const { id } = req.params;
+    const business_update = req.body;
+    db.updateBusiness(id, business_update)
+        .then(business => {
+            res.status(201).json(business)
+        })
+        .catch(err => {
+            res.status(500).json({ message: "server not connected", err });
+        })
+})
+
 // used in postman to get pending request
 router.get('/pending/business-request', (req, res) => {
     db.findPending()

@@ -5,6 +5,7 @@ module.exports = {
     find,
     findById,
     addBusiness,
+    updateBusiness,
     findPending,
     remove
 };
@@ -95,12 +96,12 @@ async function addBusiness(business) {
         
             // add contact ID to business object
             business.business['contact_id'] = newContact[0].id
-        
+            
             // create new business
             const newBusiness = await db('businesses')
-                .transacting(trx)
-                .insert(business.business, ['id', 'name', 'business_admin'])
-        
+            .transacting(trx)
+            .insert(business.business, ['id', 'name', 'business_admin'])
+            
             // check for location
             if (business.location) {
                 const geoCode = await googleMapsClient.geocode({ address: `${business.location.street}, ${business.location.city}, ${business.location.state} ${business.location.zip}` }).asPromise();
@@ -118,9 +119,10 @@ async function addBusiness(business) {
                 await db('locations')
                     .transacting(trx)
                     .insert(location)
+
                 // console.log(geoCode.json.results[0])
             }
-
+            
             // create an business admin role for the user requesting the new business
             await db('roles')
                 .transacting(trx)
@@ -162,6 +164,47 @@ async function addBusiness(business) {
         throw error
     }
 
+}
+
+async function updateBusiness(business_id, business_updates) {
+    try {
+        const { id, contact_id } = await db('businesses').where({ 'id': business_id }).select(['id', 'contact_id']).first()
+        
+        if (Object.keys(business_updates.contact).length !== 0) {
+            await db('contacts').where({ 'id': contact_id }).update(business_updates.contact)
+        }
+
+        if(Object.keys(business_updates.location).length !== 0) {
+            await db('locations').where({ 'venue_id': business_id}).update(business_updates.location)
+        }
+
+        if (Object.keys(business_updates.business).length !== 0) {
+            await db('businesses').where({ 'id': business_id}).update(business_updates.business)
+        }
+
+        return db('businesses')
+            .where({ 'businesses.id': business_id})
+            .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
+            .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+            .select([
+                'businesses.id',
+                'businesses.name',
+                'businesses.avatar',
+                'businesses.description',
+                'businesses.businesstype',
+                'businesses.requestOpen',
+                'businesses.activeBusiness',
+                'businesses.business_admin',
+                'contacts.email',
+                'contacts.instagram',
+                'contacts.facebook',
+                'contacts.website',
+                'locations.formatted'
+            ])
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
 }
 
 async function remove(id) {
