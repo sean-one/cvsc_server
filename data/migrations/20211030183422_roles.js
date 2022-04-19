@@ -21,7 +21,7 @@ exports.up = function (knex) {
             .unique(['user_id', 'business_id'])
         
         roles
-            .enu('role_type', ['admin', 'creator'])
+            .enu('role_type', ['admin', 'creator', 'manager'])
             .notNullable()
             .defaultTo('creator')
         
