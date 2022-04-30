@@ -55,10 +55,10 @@ router.get('/pending-request', [ validateToken ], (req, res) => {
 })
 
 // from pendingRequest inside business admin options approval
-router.post('/approve-request', [ validateToken ], (req, res) => {
+router.post('/approve/:id', [ validateToken ], (req, res) => {
     const admin_id = req.decodedToken.subject
-    const { request_id } = req.body
-    db.approveRequest(admin_id, request_id)
+    const requestId = req.params.id
+    db.approveRoleRequest(requestId, admin_id)
         .then(response => {
             res.status(200).json(response)
         })

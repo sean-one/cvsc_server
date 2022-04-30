@@ -7,7 +7,7 @@ module.exports = {
     getRequestBusinessIds,
     findByUser,
     getPendingRequest,
-    approveRequest,
+    approveRoleRequest,
     rejectRequest,
     createRequest,
 }
@@ -87,10 +87,10 @@ async function getPendingRequest(admin_id) {
     }
 }
 
-function approveRequest(user_id, req_id) {
+function approveRoleRequest(request_id, admin_id) {
     return db('roles')
-        .where({ id: req_id })
-        .update({ active_role: true, approved_by: parseInt(user_id) })
+        .where({ id: request_id })
+        .update({ active_role: true, approved_by: parseInt(admin_id) })
 }
 
 async function rejectRequest(req_id) {
