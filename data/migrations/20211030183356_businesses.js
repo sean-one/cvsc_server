@@ -1,7 +1,10 @@
 
 exports.up = function (knex) {
     return knex.schema.createTable('businesses', businesses => {
-        businesses.increments('id')
+        businesses
+            .uuid('id')
+            .primary()
+            .defaultTo(knex.raw('gen_random_uuid()'))
 
         businesses
             .string('name')
@@ -17,7 +20,7 @@ exports.up = function (knex) {
             .notNullable()
 
         businesses
-            .integer('contact_id')
+            .uuid('contact_id')
             .unsigned()
             .references('id')
             .inTable('contacts')
@@ -35,7 +38,7 @@ exports.up = function (knex) {
             .defaultTo(false)
         
         businesses
-            .integer('business_admin')
+            .uuid('business_admin')
             .unsigned()
             .references('id')
             .inTable('users')

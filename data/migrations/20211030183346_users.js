@@ -1,7 +1,10 @@
 
 exports.up = function (knex) {
     return knex.schema.createTable('users', users => {
-        users.increments('id')
+        users
+            .uuid('id')
+            .primary()
+            .defaultTo(knex.raw('gen_random_uuid()'))
 
         users
             .string('username')
@@ -9,10 +12,14 @@ exports.up = function (knex) {
             .unique()
 
         users
-            .integer('contact_id')
-            .unsigned()
+            .uuid('contact_id')
             .references('id')
             .inTable('contacts')
+        
+        users
+            .enu('account_type', ['admin', 'creator', 'manager', 'basic'])
+            .notNullable()
+            .defaultTo('basic')
 
         users
             .string('password')

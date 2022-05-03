@@ -1,14 +1,17 @@
 
 exports.up = function (knex) {
     return knex.schema.createTable('locations', locations => {
-        locations.increments('id')
+        locations
+            .uuid('id')
+            .primary()
+            .defaultTo(knex.raw('gen_random_uuid()'))
 
         locations
             .string('venue_name')
             .notNullable()
 
         locations
-            .integer('venue_id')
+            .uuid('venue_id')
             .unsigned()
             .references('id')
             .inTable('businesses')

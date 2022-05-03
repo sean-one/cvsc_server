@@ -1,7 +1,10 @@
 
 exports.up = function(knex) {
   return knex.schema.createTable('contacts', contacts => {
-        contacts.increments('id')
+        contacts
+            .uuid('id')
+            .primary()
+            .defaultTo(knex.raw('gen_random_uuid()'))
 
         contacts
             .string('email')

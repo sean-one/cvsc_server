@@ -1,7 +1,10 @@
 
 exports.up = async function (knex) {
     return knex.schema.createTable('events', events => {
-        events.increments('id')
+        events
+            .uuid('id')
+            .primary()
+            .defaultTo(knex.raw('gen_random_uuid()'))
 
         events
             .string('eventname')
@@ -23,7 +26,7 @@ exports.up = async function (knex) {
         events.string('eventmedia')
 
         events
-            .integer('venue_id')
+            .uuid('venue_id')
             .unsigned()
             .references('id')
             .inTable('businesses')
@@ -32,13 +35,13 @@ exports.up = async function (knex) {
         events.text('details', 'longtext')
 
         events
-            .integer('brand_id')
+            .uuid('brand_id')
             .unsigned()
             .references('id')
             .inTable('businesses')
 
         events
-            .integer('created_by')
+            .uuid('created_by')
             .unsigned()
             .notNullable()
             .references('id')

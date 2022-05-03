@@ -6,8 +6,9 @@ exports.seed = function(knex) {
       // Inserts seed entries
       return knex('locations').insert([
         {
+          id: '22587096-0135-48ad-9ee0-812c44c56871',
           venue_name: "Green Dragon",
-          venue_id: 5,
+          venue_id: 'cd3b6f71-127c-4f08-bfa9-2478f09a4ff1',
           street: "353 South Palm Canyon Drive",
           city: "Palm Springs",
           state: "CA",
@@ -16,8 +17,9 @@ exports.seed = function(knex) {
           place_id: "EjEzNTMgUyBQYWxtIENhbnlvbiBEciwgUGFsbSBTcHJpbmdzLCBDQSA5MjI2MiwgVVNBIhsSGQoUChIJH2RTUqYb24ARJ6fbb5cp5jgQ4QI"
         },
         {
+          id: 'c431f06f-2c22-4bf6-83f3-708194043fae',
           venue_name: "BARE Dispensary",
-          venue_id: 6,
+          venue_id: '37de2ceb-0b11-47a3-bb43-9e0a6dadc789',
           street: "690 Garnet Avenue",
           city: "Palm Springs",
           state: "CA",
@@ -26,8 +28,9 @@ exports.seed = function(knex) {
           place_id: "ChIJdWLItvsY24ARW4eKd066M2A"
         },
         {
+          id: '14a78ff8-f55e-4bd5-8fca-cbb4f24ced6b',
           venue_name: "Desert's Finest",
-          venue_id: 7,
+          venue_id: '7d416c48-e007-4eb1-9641-8b5ac54de5ff',
           street: "12106 Palm Drive",
           city: "Desert Hot Springs",
           state: "CA",
@@ -36,8 +39,9 @@ exports.seed = function(knex) {
           place_id: "ChIJdWEAWeUh24ARxjQrMNew_A0"
         },
         {
+          id: '49cca14e-d8a8-4bf3-94c4-f1e130337f0d',
           venue_name: "No Wait Meds",
-          venue_id: 8,
+          venue_id: 'eac5ff8f-a9f9-430a-ab35-537686a5b0aa',
           street: "68860 Ramon Road #2",
           city: "Cathedral City",
           state: "CA",
@@ -46,8 +50,9 @@ exports.seed = function(knex) {
           place_id: "EjA2ODg2MCBSYW1vbiBSZCAjMiwgQ2F0aGVkcmFsIENpdHksIENBIDkyMjM0LCBVU0EiHRobChYKFAoSCc_S_8gYHduAET0OmgvPYae9EgEy"
         },
         {
+          id: '66331d04-ea4e-4874-bf48-f959cd3e5d84',
           venue_name: "Palm Royal Cannabis",
-          venue_id: 9,
+          venue_id: 'cf5bb409-85c9-43dc-acac-4d6444b1658f',
           street: "75048 Gerald Ford Drive #101",
           city: "Palm Desert",
           state: "CA",
