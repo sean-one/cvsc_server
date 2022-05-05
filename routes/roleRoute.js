@@ -5,6 +5,21 @@ const { validateUser, validateToken, validateBusinessAdminRights } = require('..
 
 const router = express.Router();
 
+// used on /profile page inside getroles
+router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
+    const { user_id } = req.decodedToken
+    db.findByUser(user_id)
+        .then(userevents => {
+            // [ { business_id: uuid, role_type: 'admin' }, { business_id: uuid, role_type: 'creator' } ]
+            res.status(200).json(userevents);
+        })
+        .catch(err => res.status(500).json(err));
+})
+
+
+
+
+
 router.get('/', (req, res) => {
     db.find()
         .then(roles => {
@@ -13,24 +28,14 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
-// returns an array of business_id(s) for given user id
-router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
-    const userId = req.decodedToken.subject
-    db.findByUser(userId)
-        .then(userevents => {
-            res.status(200).json(userevents);
-        })
-        .catch(err => res.status(500).json(err));
-})
-
 // add role request via the creatorRequestForm
 router.post('/create-request', [ validateToken ], (req, res) => {
-    const user_id = req.decodedToken.subject
-    const new_request = req.body
-    if (!new_request.business_id || !new_request.request_for) {
+    const { user_id } = req.decodedToken
+    const { business_id } = req.body
+    if (!business_id) {
         res.status(400).json({ message: 'missing input', type: 'missing input' })
     } else {
-        db.createRequest(new_request, user_id)
+        db.createRequest(business_id, user_id)
             .then(response => {
                 res.status(200).json(response)
             })
@@ -46,7 +51,7 @@ router.post('/create-request', [ validateToken ], (req, res) => {
 
 // get an array of pending request based on business admin rights
 router.get('/pending-request', [ validateToken ], (req, res) => {
-    const user_id = req.decodedToken.subject
+    const { user_id } = req.decodedToken
     db.getPendingRequest(user_id)
         .then(response => {
             res.status(200).json(response)
@@ -56,9 +61,9 @@ router.get('/pending-request', [ validateToken ], (req, res) => {
 
 // from pendingRequest inside business admin options approval
 router.post('/approve/:id', [ validateToken ], (req, res) => {
-    const admin_id = req.decodedToken.subject
+    const { user_id } = req.decodedToken
     const requestId = req.params.id
-    db.approveRoleRequest(requestId, admin_id)
+    db.approveRoleRequest(requestId, user_id)
         .then(response => {
             res.status(200).json(response)
         })
@@ -67,9 +72,9 @@ router.post('/approve/:id', [ validateToken ], (req, res) => {
 
 // inside PendingRequest sendRequestStatus function to confirm or delete role request
 router.post('/update-request', [ validateToken, validateBusinessAdminRights ], (req, res) => {
-    const admin_id = req.decodedToken.subject
+    const { user_id } = req.decodedToken
     const { approved_ids, rejected_ids } = req.validatedRoles
-    db.updateRolesByBusinessAdmin(approved_ids, rejected_ids, admin_id)
+    db.updateRolesByBusinessAdmin(approved_ids, rejected_ids, user_id)
         .then(response => {
             res.status(200).json(response)
         })

@@ -40,7 +40,7 @@ router.put('/:id', [ validateToken, validateUserRole ], (req, res) => {
 router.post('/', [ validateToken, validateUserRole ], async (req, res, next) => {
     try {
         const newEvent = req.body
-        newEvent.created_by = req.decodedToken.subject
+        newEvent.created_by = req.decodedToken.user_id
         const event = await db.createEvent(newEvent)
         res.status(200).json(event);
     } catch (err) {
@@ -65,7 +65,7 @@ router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
 router.delete('/remove/:eventid', validateToken, async (req, res) => {
     try {
         const deleteDetails = {
-            user: req.decodedToken.subject,
+            user: req.decodedToken.user_id,
             event: parseInt(req.params.eventid)
         }
         // console.log(deleteDetails)

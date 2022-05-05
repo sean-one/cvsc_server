@@ -6,43 +6,48 @@ const { createToken, validateToken } = require('../helpers/jwt_helper');
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    db.find()
-        .then(users => {
-            res.status(200).json(users);
-        })
-        .catch(err => res.status(500).json(err));
-});
-
+// at registration page
 router.post('/register', async (req, res) => {
-    const newUser = req.body.user
-    const userContact = req.body.contact
+
+    // format and clean up the data, grab only what is needed
+    const new_user = { username: req.body.username, password: req.body.password }
+    const new_user_contact = {
+        ...(req.body.email && { email: req.body.email }),
+        ...(req.body.instagram && { instagram: req.body.instagram })
+    }
     
     try {
+        
         // hash password, save hashed password to new_user
-        const hash = await hashPassword(newUser.password);
-        newUser.password = hash;
+        const hash = await hashPassword(new_user.password);
+        new_user.password = hash;
+        
         // insert the new_user into the users table
-        const user = await db.registerNewUser(newUser, userContact);
-        // add roles if any
-        user.business_roles = [];
+        const user = await db.register_user(new_user, new_user_contact);
+        
         // create token then save to user
         const token = createToken(user);
         user.token = token;
+        
         // create contact object and remove from user
-        user.contact = { email: user['email'], instagram: user['instagram'] }
+        user.contact = {
+            ...(user['email'] && { email: user['email'] }),
+            ...(user['instagram'] && { instagram: user['instagram'] }),
+            // ...(user['facebook'] && { facebook: user['facebook'] }),
+            // ...(user['website'] && { website: user['website'] }),
+        }
         delete user['email']
         delete user['instagram']
+        // delete user['facebook']
+        // delete user['website']
 
-        res.status(200).json(user);    
+        res.status(200).json(user);
+
     } catch (error) {
+        
         if(error.constraint === 'users_username_unique') {
             res.status(400).json({ message: 'username is not available', type: 'username' })
         }
-
-        // else if(error.constraint === 'users_email_unique') {
-        //     res.status(400).json({ message: 'email duplicate', type: 'email' })
-        // }
         
         else if(error.constraint === 'contacts_email_unique') {
             res.status(400).json({ message: 'email duplicate', type: 'email' })
@@ -55,42 +60,73 @@ router.post('/register', async (req, res) => {
     }
 })
 
+// at login page
 router.post('/login', async (req, res) => {
-    const userInfo = req.body
-    if(!userInfo.username || !userInfo.password) {
+
+    // get what is needed from the request body
+    const { username, password } = req.body
+
+    // check for required inputs
+    if(!username || !password) {
         res.status(400).json({ message: 'please fill all required inputs' });
+
     } else {
-        const user = await db.userSignIn(userInfo)
+        const user = await db.user_login(username);
+        
         if (!user) {
-            res.status(404).send({ message: 'user not found' })
+            res.status(404).send({ message: 'user not found' });
+
         } else {
-            const passwordVerify = await comparePassword(userInfo.password, user.password)
+            // verify password
+            const passwordVerify = await comparePassword(password, user.password);
+            
             if (!passwordVerify) {
-                res.status(401).send({ message: 'invalid credentials'})
+                res.status(401).send({ message: 'invalid credentials'});
+
             } else {
+                // create token then save to user
                 const token = createToken(user);
                 user.token = token;
-                user.contact = { email: user['email'], instagram: user['instagram'] }
-                // add facebook example
-                // user.contact = { email: user['email'], instagram: user['instagram'], facebook: user['facebook] }
-                delete user['password']
+
+                // create contact object and remove from user
+                user.contact = {
+                    ...(user['email'] && { email: user['email'] }),
+                    ...(user['instagram'] && { instagram: user['instagram'] }),
+                    // ...(user['facebook'] && { facebook: user['facebook'] }),
+                    // ...(user['website'] && { website: user['website'] }),
+                }
                 delete user['email']
                 delete user['instagram']
-                // add facebook example
                 // delete user['facebook']
+                // delete user['website']
+                
+                // remove password from return
+                delete user['password']
+
                 res.status(200).json(user);
             }
         }
     }
 })
 
+
+
+// not use in the app yet
+router.get('/', (req, res) => {
+    db.find()
+        .then(users => {
+            res.status(200).json(users);
+        })
+        .catch(err => res.status(500).json(err));
+});
+
 router.post('/updateAvatar', [ validateToken ], async (req, res) => {
     try {
         const avatarLink = req.body
-        const userId = req.decodedToken.subject
-        console.log(avatarLink)
-        console.log(userId)
-        await db.updateAvatar(userId, avatarLink)
+        const { user_id } = req.decodedToken
+        // console.log(avatarLink)
+        // console.log(user_id)
+        await db.updateAvatar(user_id, avatarLink)
             .then(response => {
                 res.status(200).json(response)
             })

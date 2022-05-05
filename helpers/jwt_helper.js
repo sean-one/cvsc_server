@@ -2,11 +2,12 @@ const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/roles');
 
+// used at users/register, users/login
 const createToken = (user) => {
     const payload = {
-        subject: user.id,
-        name: user.username,
-        roles: user.business_roles
+        user_id: user.id,
+        username: user.username,
+        account_type: user.account_type
     }
 
     const secret = process.env.JWT_SECRET;
@@ -16,6 +17,18 @@ const createToken = (user) => {
 
     return jwt.sign(payload, secret, options);
 }
+
+// used - /roles/user/:id
+const validateUser = (req, res, next) => {
+    if (req.params.id.toString() === req.decodedToken.user_id.toString()) {
+        next()
+    } else {
+        res.status(404).json({ message: 'wrong user' })
+    }
+}
+
+
+
 
 const validateToken = (req, res, next) => {
     try {
@@ -35,18 +48,9 @@ const validateToken = (req, res, next) => {
     }
 }
 
-const validateUser = (req, res, next) => {
-    if (req.params.id.toString() === req.decodedToken.subject.toString()) {
-        // console.log(`${req.params.id.toString()}, ${req.decodedToken.subject.toString()}`)
-        next()
-    } else {
-        res.status(404).json({ message: 'wrong user' })
-    }
-}
-
 const validateBusinessAdminRights = async (req, res, next) => {
     const data = req.body
-    const { business_ids } = await db.getBusinessAdminBusinessIds(req.decodedToken.subject)
+    const { business_ids } = await db.getBusinessAdminBusinessIds(req.decodedToken.user_id)
     const validatedRoles = {
         approved_ids: [],
         rejected_ids: [],
@@ -82,7 +86,7 @@ const validateBusinessAdminRights = async (req, res, next) => {
 
 // validates a user when creating or making changes to an event
 const validateUserRole = async (req, res, next) => {
-    const { business_ids } = await db.getUserBusinessRoles(req.decodedToken.subject)
+    const { business_ids } = await db.getUserBusinessRoles(req.decodedToken.user_id)
     if (business_ids.includes(req.body.venue_id) || business_ids.includes(req.body.brand_id)) {
         // validated user roles
         next()
@@ -97,7 +101,7 @@ const validateUserAdmin = async (req, res, next) => {
         const token = req.headers.authorization.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         console.log(decoded)
-        if (decoded.subject === Number(process.env.ADMIN_ID) && decoded.name === process.env.ADMIN_NAME) {
+        if (decoded.user_id === Number(process.env.ADMIN_ID) && decoded.username === process.env.ADMIN_NAME) {
             next()
         } else {
             //! need to add some sort of alarm if this is hit

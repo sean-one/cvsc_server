@@ -2,8 +2,8 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
-    userSignIn,
-    registerNewUser,
+    user_login,
+    register_user,
     updateAvatar,
     remove
 };
@@ -12,12 +12,11 @@ function find() {
     return db('users')
 }
 
-// userroute login
-async function userSignIn(user) {
+// login page
+async function user_login(username) {
     return await db('users')
-        .where({ username: user.username })
+        .where({ username: username })
         .leftJoin('contacts', 'users.contact_id', '=', 'contacts.id')
-        .leftJoin('roles', 'users.id', '=', 'roles.user_id')
         .select(
             [
                 'users.id',
@@ -25,33 +24,32 @@ async function userSignIn(user) {
                 'users.avatar',
                 'users.password',
                 'users.contact_id',
+                'users.account_type',
                 'contacts.email',
                 'contacts.instagram',
-                // add facebook for example
-                // 'contacts.facebook'
             ]
         )
         .first()
 }
 
-async function registerNewUser(user, contact) {
-    const newContact = await db('contacts').insert(contact, [ 'id' ])
+async function register_user(user, contact) {
+    const user_contact = await db('contacts').insert(contact, [ 'id' ])
     
-    user['contact_id'] = newContact[0].id
+    user['contact_id'] = user_contact[0].id
 
-    const newUser = await db('users').insert(user, [ 'id' ])
+    const new_user = await db('users').insert(user, [ 'id' ])
     
     return db('users')
         // need to put in to a trx so that all or nothing is saved
-        .where({ 'users.id': newUser[0].id })
+        .where({ 'users.id': new_user[0].id })
         .join('contacts', 'users.contact_id', '=', 'contacts.id')
         .select(
             [
                 'users.id',
                 'users.username',
                 'users.avatar',
-                // 'users.password',
                 'users.contact_id',
+                'users.account_type',
                 'contacts.email',
                 'contacts.instagram'
             ]

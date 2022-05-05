@@ -31,8 +31,8 @@ router.get('/:id', (req, res) => {
 
 router.post('/update', [ validateToken ], (req, res) => {
     const contactUpdate = req.body;
-    const userId = req.decodedToken.subject;
-    db.updateContact(contactUpdate, userId)
+    const { user_id } = req.decodedToken;
+    db.updateContact(contactUpdate, user_id)
         .then(newContact => {
             res.status(200).json(newContact)
         })
@@ -44,8 +44,8 @@ router.post('/update', [ validateToken ], (req, res) => {
 
 // router.post('/addUserContact', [ validateToken ], (req, res) => {
 //     const contact = req.body;
-//     const userId = req.decodedToken.subject
-//     db.addContact(contact, userId)
+//     const { user_id } = req.decodedToken
+//     db.addContact(contact, user_id)
 //         .then(response => {
 //             console.log(response)
 //             res.status(200).json(response)

@@ -18,7 +18,7 @@ router.get('/', (req, res) => {
 router.post('/create', [ validateToken ], async (req, res) => {
     
     const businessDetails = req.body
-    businessDetails.business['business_admin'] = req.decodedToken.subject
+    businessDetails.business['business_admin'] = req.decodedToken.user_id
     
     try {
         

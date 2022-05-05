@@ -48,9 +48,9 @@ async function getRequestBusinessIds(request_ids) {
 }
 
 // used at profile
-function findByUser(userId) {
+function findByUser(user_id) {
     return db('roles')
-        .where({ user_id: userId, active_role: true })
+        .where({ user_id: user_id, active_role: true })
         .select(
             [
                 'business_id',
@@ -100,12 +100,11 @@ async function rejectRequest(req_id) {
 }
 
 // roles/create-request
-function createRequest(request_data, user_id) {
+function createRequest(business_id, user_id) {
     return db('roles')
         .insert({ 
             user_id: user_id,
-            business_id: request_data.business_id,
-            role_type: request_data.request_for
+            business_id: business_id,
         }, [ 'id' ])
 
 }
