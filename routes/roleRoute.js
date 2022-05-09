@@ -1,7 +1,7 @@
 const express = require('express');
 
 const db = require('../data/models/roles');
-const { validateUser, validateToken, validateBusinessAdminRights } = require('../helpers/jwt_helper')
+const { validateUser, validateToken, validateRequestRights } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
@@ -59,19 +59,45 @@ router.get('/pending-request', [ validateToken ], (req, res) => {
         .catch(err => console.log(err))
 })
 
-// from pendingRequest inside business admin options approval
-router.post('/approve/:id', [ validateToken ], (req, res) => {
-    const { user_id } = req.decodedToken
-    const requestId = req.params.id
-    db.approveRoleRequest(requestId, user_id)
-        .then(response => {
-            res.status(200).json(response)
-        })
-        .catch(err => console.log(err))
+// pendingRequest approval button
+router.post('/approve/:id', [ validateToken, validateRequestRights ], (req, res, next) => {
+    try {
+        const { user_id } = req.decodedToken
+        if(req.validated === true) {
+            db.approveRoleRequest(req.request_id, user_id)
+                .then(response => {
+                    res.status(200).json(response)
+                })
+                .catch(err => console.log(err))
+        } else {
+            throw new Error('not_validated')
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
+// pendingRequest reject button
+router.delete('/reject/:id', [ validateToken, validateRequestRights ], (req, res, next) => {
+    try {
+        if(req.validated === true) {
+            db.rejectRequest(req.request_id)
+                .then(response => {
+                    res.status(204).json(response)
+                })
+                .catch(err => console.log(err))
+        } else {
+            
+            throw new Error('not_validated')
+        }
+    } catch (error) {
+        
+        next(error)
+    }
 })
 
 // inside PendingRequest sendRequestStatus function to confirm or delete role request
-router.post('/update-request', [ validateToken, validateBusinessAdminRights ], (req, res) => {
+router.post('/update-request', [ validateToken ], (req, res) => {
     const { user_id } = req.decodedToken
     const { approved_ids, rejected_ids } = req.validatedRoles
     db.updateRolesByBusinessAdmin(approved_ids, rejected_ids, user_id)

@@ -104,7 +104,7 @@ exports.seed = function(knex) {
           id: 'cdf39a48-6475-4db3-add6-063ddb6ed14a',
           user_id: '218e312c-e67c-497e-9c3a-f69abf28f2bc',
           business_id: '8faeb07f-7d0d-43fe-bc9f-64e55e4c91ac',
-          role_type: 'manager',
+          role_type: 'creator',
           active_role: false
         },
         { 

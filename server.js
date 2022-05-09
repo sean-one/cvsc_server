@@ -14,6 +14,7 @@ const businessRouter = require('./routes/businessRoute');
 const locationRouter = require('./routes/locationRoute');
 const roleRouter = require('./routes/roleRoute');
 const s3Router = require('./routes/s3Route');
+const errorHandler = require('./helpers/errorHandler')
 
 app.use(fileUpload({
     createParentPath: true
@@ -36,6 +37,8 @@ app.use('/business', businessRouter);
 app.use('/locations', locationRouter);
 app.use('/roles', roleRouter);
 app.use('/s3', s3Router);
+
+app.use(errorHandler)
 
 app.get('/', (req, res) => {
     res.send('WELCOME TO THE ROOT OF IT ALL')

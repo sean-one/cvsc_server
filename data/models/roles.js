@@ -2,9 +2,9 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
+    findById,
+    userValidation,
     getUserBusinessRoles,
-    getBusinessAdminBusinessIds,
-    getRequestBusinessIds,
     findByUser,
     getPendingRequest,
     approveRoleRequest,
@@ -15,6 +15,44 @@ module.exports = {
 // for postman to check db
 function find() {
     return db('roles')
+}
+
+// find role request by request_id
+async function findById(request_id) {
+    const role_request = await db('roles')
+        .where({ id: request_id })
+        .select(
+            [
+                'business_id'
+            ]
+        )
+        .first()
+    if (role_request == null) {
+        throw new Error('request_not_found')
+    } else {
+        return role_request;
+    }
+}
+
+// USED - inside jwt_helper validateRequestRights
+async function userValidation(user_id, business_id) {
+    const role_request = await db('roles')
+        .where({ user_id: user_id, business_id: business_id, active_role: true })
+        .whereNot({ role_type: 'creator' })
+        .select(
+            [
+                'roles.id',
+                'roles.user_id',
+                'roles.business_id',
+                'roles.role_type'
+            ]
+        )
+        .first()
+    if (role_request == null) {
+        throw new Error('invalid_role_rights')
+    } else {
+        return role_request;
+    }
 }
 
 // returns an array of business_id(s) for given user id
@@ -31,6 +69,7 @@ function getUserBusinessRoles(user_id) {
         .first()
 }
 
+// NOT USED
 async function getBusinessAdminBusinessIds(user_admin) {
     // creates an array of business ids of businesses with user id listed as admin (business creators)
     return await db('businesses')
@@ -39,6 +78,7 @@ async function getBusinessAdminBusinessIds(user_admin) {
         .first()
 }
 
+// NOT USED
 async function getRequestBusinessIds(request_ids) {
     // creates an array of business ids from an array of request ids
     return await db('roles')
@@ -87,16 +127,39 @@ async function getPendingRequest(admin_id) {
     }
 }
 
-function approveRoleRequest(request_id, admin_id) {
-    return db('roles')
+// pendingRequest /roles/approve/:id
+async function approveRoleRequest(request_id, admin_id) {
+    
+    const updated_role = await db('roles')
         .where({ id: request_id })
-        .update({ active_role: true, approved_by: parseInt(admin_id) })
+        .update({ active_role: true, approved_by: admin_id })
+    
+    if(updated_role >  0) {
+        
+        return db('roles')
+            .where({ id: request_id })
+            .select(
+                [
+                    'roles.id',
+                ]
+            )
+            .first()
+    } else {
+        
+        throw new Error('update_failed')
+    }
 }
 
+// pendingRequest /roles/reject/:id
 async function rejectRequest(req_id) {
-    return await db('roles')
+    const deleted_count = await db('roles')
         .where({ id: req_id })
         .del()
+    if(deleted_count > 0) {
+        return req_id
+    } else {
+        throw new Error('delete_failed')
+    }
 }
 
 // roles/create-request

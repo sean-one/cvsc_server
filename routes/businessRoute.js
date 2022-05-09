@@ -1,7 +1,7 @@
 const express = require('express');
 
 const db = require('../data/models/business');
-const { validateToken, validateUserAdmin } = require('../helpers/jwt_helper');
+const { validateToken } = require('../helpers/jwt_helper');
 
 const router = express.Router()
 
@@ -88,7 +88,7 @@ router.get('/:id', (req, res) => {
     });
 });
 
-router.delete('/remove/:id', [ validateUserAdmin ], async (req, res, next) => {
+router.delete('/remove/:id', async (req, res, next) => {
     try {
         const { id } = req.params
         const deletedUser = await db.remove(id)
