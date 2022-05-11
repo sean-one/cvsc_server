@@ -55,33 +55,40 @@ const validateRequestRights = async (req, res, next) => {
 
 const validateToken = (req, res, next) => {
     try {
+
         const token = req.headers.authorization.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        
         req.decodedToken = decoded;
+        
         next()
     } catch (error) {
-        console.log(error.name, error.message, error.expiredAt)
-        if(error.name === 'TypeError') {
-            res.status(401).json({ message: 'missing token, please log in' })
-        } else if(error.name === 'JsonWebTokenError') {
-            res.status(401).json({ message: 'invalid token, please log in' })
+        
+        if(error.name === 'TypeError' || error.name === 'JsonWebTokenError') {
+            next({ status: tokenErrors['invalid_token']?.status, message: tokenErrors['invalid_token']?.message })
+
         } else if(error.name === 'TokenExpiredError') {
-            res.status(401).json({ message: error.message })  
+            next({ status: tokenErrors['expired_token']?.status, message: tokenErrors['expired_token']?.message })
+
         } else {
-            res.status(500).json({ message: 'server error' })
+            next(error)
+
         }
     }
 }
 
 // validates a user when creating or making changes to an event
 const validateUserRole = async (req, res, next) => {
-    const { business_ids } = await db.getUserBusinessRoles(req.decodedToken.user_id)
-    if (business_ids.includes(req.body.venue_id) || business_ids.includes(req.body.brand_id)) {
-        // validated user roles
-        next()
-    } else {
-        console.log('invalid admin roles')
-        res.status(403).json({ type: 'role_rights', message: 'invalid role rights' });
+    try {
+        const { business_ids } = await db.getUserBusinessRoles(req.decodedToken.user_id)
+        if (business_ids.includes(req.body.venue_id) || business_ids.includes(req.body.brand_id)) {
+            // validated user roles
+            next()
+        } else {
+            throw new Error('invalid_role_rights')
+        }
+    } catch (error) {
+        next({ status: tokenErrors[error.message]?.status, message: tokenErrors[error.message]?.message })
     }
 }
 

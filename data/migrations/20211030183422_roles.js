@@ -12,6 +12,7 @@ exports.up = function (knex) {
             .references('id')
             .inTable('users')
             .notNullable()
+            .onDelete('cascade')
 
         roles
             .uuid('business_id')
@@ -19,6 +20,7 @@ exports.up = function (knex) {
             .references('id')
             .inTable('businesses')
             .notNullable()
+            .onDelete('cascade')
 
         roles
             .unique(['user_id', 'business_id'])
@@ -37,6 +39,7 @@ exports.up = function (knex) {
             .unsigned()
             .references('id')
             .inTable('users')
+            .onDelete('cascade')
     })
 };
 

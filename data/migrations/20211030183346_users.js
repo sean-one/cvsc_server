@@ -15,6 +15,7 @@ exports.up = function (knex) {
             .uuid('contact_id')
             .references('id')
             .inTable('contacts')
+            .onDelete('cascade')
         
         users
             .enu('account_type', ['admin', 'creator', 'manager', 'basic'])

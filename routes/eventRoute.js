@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/event');
+const eventErrors = require('../error_messages/eventErrors');
 const { validateToken, validateUser, validateUserRole } = require('../helpers/jwt_helper');
 
 const router = express.Router();
@@ -39,16 +40,33 @@ router.put('/:id', [ validateToken, validateUserRole ], (req, res) => {
 
 router.post('/', [ validateToken, validateUserRole ], async (req, res, next) => {
     try {
-        const newEvent = req.body
-        newEvent.created_by = req.decodedToken.user_id
-        const event = await db.createEvent(newEvent)
+        const new_event = {
+            eventname: req.body.eventname,
+            eventdate: req.body.eventdate,
+            eventstart: req.body.eventstart,
+            eventend: req.body.eventend,
+            venue_id: req.body.venue_id,
+            brand_id: req.body.brand_id,
+            details: req.body.details,
+            eventmedia: req.body.eventmedia,
+            created_by: req.decodedToken.user_id
+
+        }
+        // const newEvent = req.body
+        // newEvent.created_by = req.decodedToken.user_id
+        
+        const event = await db.createEvent(new_event)
+        
         res.status(200).json(event);
-    } catch (err) {
-        if (err.constraint === 'events_eventname_unique') {
-            res.status(400).json({ message: 'duplicate eventname', type: 'eventname' })
+
+    } catch (error) {
+        console.log(error)
+        if (error.constraint === 'events_eventname_unique') {
+            next({ status: eventErrors[error.constraint]?.status, message: eventErrors[error.constraint]?.message })
+
         } else {
-            // console.log('inside the catch of the post')
-            res.status(500).json({ message: 'something went wrong' })
+            next({ status: eventErrors[error.message]?.status, message: eventErrors[error.message]?.message })
+
         }
     }
 });

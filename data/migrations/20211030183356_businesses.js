@@ -43,6 +43,7 @@ exports.up = function (knex) {
             .references('id')
             .inTable('users')
             .notNullable()
+            .onDelete('cascade')
 
         businesses.timestamps(true, true)
     })

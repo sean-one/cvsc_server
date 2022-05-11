@@ -17,6 +17,7 @@ exports.up = function (knex) {
             .inTable('businesses')
             .notNullable()
             .unique()
+            .onDelete('cascade')
 
         locations
             .string('street')

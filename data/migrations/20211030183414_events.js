@@ -31,6 +31,7 @@ exports.up = async function (knex) {
             .references('id')
             .inTable('businesses')
             .notNullable()
+            .onDelete('cascade')
 
         events.text('details', 'longtext')
 
@@ -46,6 +47,7 @@ exports.up = async function (knex) {
             .notNullable()
             .references('id')
             .inTable('users')
+            .onDelete('cascade')
 
         events.timestamps(true, true)
     })

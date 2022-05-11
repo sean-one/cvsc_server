@@ -35,6 +35,7 @@ async function findById(request_id) {
 }
 
 // USED - inside jwt_helper validateRequestRights
+// validates users account_type is above 'creator' - returns only 'manager' & 'admin'
 async function userValidation(user_id, business_id) {
     const role_request = await db('roles')
         .where({ user_id: user_id, business_id: business_id, active_role: true })
@@ -57,9 +58,9 @@ async function userValidation(user_id, business_id) {
 
 // returns an array of business_id(s) for given user id
 // used validateUserRole for create and update events
-function getUserBusinessRoles(user_id) {
-    return db('roles')
-        .where({ user_id: user_id })
+async function getUserBusinessRoles(user_id) {
+    const user_roles = await db('roles')
+        .where({ user_id: user_id, active_role: true })
         .select(
             [
                 db.raw('ARRAY_AGG(roles.business_id) as business_ids')
@@ -67,24 +68,11 @@ function getUserBusinessRoles(user_id) {
         )
         .groupBy('roles.user_id')
         .first()
-}
-
-// NOT USED
-async function getBusinessAdminBusinessIds(user_admin) {
-    // creates an array of business ids of businesses with user id listed as admin (business creators)
-    return await db('businesses')
-        .where({ business_admin: user_admin })
-        .select([db.raw('JSON_AGG(businesses.id) as business_ids')])
-        .first()
-}
-
-// NOT USED
-async function getRequestBusinessIds(request_ids) {
-    // creates an array of business ids from an array of request ids
-    return await db('roles')
-        .whereIn('id', request_ids)
-        .select([db.raw('JSON_AGG(roles.business_id) as business_id_request')])
-        .first()
+    if (user_roles == null) {
+        throw new Error('roles_not_found')
+    } else {
+        return user_roles
+    }
 }
 
 // used at profile
@@ -100,15 +88,20 @@ function findByUser(user_id) {
 }
     
 // roles/pending-request
-async function getPendingRequest(admin_id) {    
+async function getPendingRequest(user_id) {    
     // get business ids that user has business admin rights to
-    const { business_ids } = await getBusinessAdminBusinessIds(admin_id)
+    const { business_ids } = await db('roles')
+        .where({ user_id: user_id })
+        .andWhere({ role_type: 'admin' })
+        .orWhere({ role_type: 'manager'})
+        .select([ db.raw('JSON_AGG(roles.business_id) as business_ids') ])
+        .first()
     
     if (!!business_ids) {
         return await db('roles')
             .whereIn('business_id', business_ids)
             .where({ active_role: false })
-            .whereNot({ user_id: admin_id })
+            .whereNot({ user_id: user_id })
             .join('users', 'roles.user_id', '=', 'users.id')
             .join('businesses', 'roles.business_id', '=', 'businesses.id')
             .select(
@@ -130,20 +123,27 @@ async function getPendingRequest(admin_id) {
 // pendingRequest /roles/approve/:id
 async function approveRoleRequest(request_id, admin_id) {
     
-    const updated_role = await db('roles')
+    const updated_count = await db('roles')
         .where({ id: request_id })
         .update({ active_role: true, approved_by: admin_id })
     
-    if(updated_role >  0) {
-        
-        return db('roles')
+    if(updated_count >  0) {
+        const updated_role = await db('roles')
             .where({ id: request_id })
             .select(
                 [
                     'roles.id',
+                    'roles.user_id'
                 ]
             )
             .first()
+
+        // update account_type from 'basic' to 'creator' ignore if not 'basic'
+        await db('users')
+                .where({ id: updated_role.user_id, account_type: 'basic' })
+                .update({ account_type: 'creator' })
+        
+        return updated_role
     } else {
         
         throw new Error('update_failed')
@@ -165,9 +165,6 @@ async function rejectRequest(req_id) {
 // roles/create-request
 function createRequest(business_id, user_id) {
     return db('roles')
-        .insert({ 
-            user_id: user_id,
-            business_id: business_id,
-        }, [ 'id' ])
-
+        .insert({ user_id: user_id, business_id: business_id }, ['id'])
+    
 }

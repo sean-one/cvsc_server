@@ -1,6 +1,7 @@
 const express = require('express');
 
 const db = require('../data/models/business');
+const businessErrors = require('../error_messages/businessErrors');
 const { validateToken } = require('../helpers/jwt_helper');
 
 const router = express.Router()
@@ -15,34 +16,29 @@ router.get('/', (req, res) => {
 
 // inside the createBusiness on submit
 // creates a new business with activeBusiness & arppoval set to false also creates a top user admin role
-router.post('/create', [ validateToken ], async (req, res) => {
-    
-    const businessDetails = req.body
-    businessDetails.business['business_admin'] = req.decodedToken.user_id
-    
+router.post('/create', [ validateToken ], async (req, res, next) => {
     try {
-        
-        const newBusiness = await db.addBusiness(businessDetails)
+        const new_business = req.body
+        new_business.business['business_admin'] = req.decodedToken.user_id
+        console.log(new_business.location)
+
+        if(new_business.business.businesstype === 'brand' && typeof new_business.location === 'object') throw new Error('brand_address_not_valid')
+        if(new_business.business.businesstype !== 'brand' && new_business.location === null) throw new Error('business_address_required')
+
+        const newBusiness = await db.addBusiness(new_business)
         
         res.status(201).json(newBusiness);
 
     } catch (err) {
-        console.log(err)
-        if (err.constraint === 'contacts_email_unique') {
-            res.status(400).json({ message: 'duplicate email', type: 'email' })
-
-        } else if (err.constraint === 'locations_place_id_unique') {
-            res.status(400).json({ message: 'duplicate address', type: 'street_address' })
-
-        } else if (err.constraint === 'businesses_name_unique') {
-            res.status(400).json({ message: 'duplicate business name', type: 'business_name' })
-
-        } else if (err instanceof TypeError) {
-            res.status(400).json({ message: 'invalid address', type: 'street_address' })
-            
+        if (err.constraint) {
+            next({ status: businessErrors[err.constraint]?.status, message: businessErrors[err.constraint]?.message })
         } else {
-            res.status(500).json({ message: 'something went wrong', err })
+            next({ status: businessErrors[err.message]?.status, message: businessErrors[err.message]?.message })
         }
+        // else if (err instanceof TypeError) {
+        //     res.status(400).json({ message: 'invalid address', type: 'street_address' })
+
+        // } 
     }
 })
 
