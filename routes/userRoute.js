@@ -1,6 +1,7 @@
 const express = require('express');
 
 const db = require('../data/models/user')
+const userErrors = require('../error_messages/userErrors');
 const { hashPassword, comparePassword } = require('../helpers/bcrypt_helper');
 const { createToken, validateToken } = require('../helpers/jwt_helper');
 
@@ -61,52 +62,32 @@ router.post('/register', async (req, res) => {
 })
 
 // at login page
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
+    try {
+        // get what is needed from the request body
+        const { username, password } = req.body
+        if (!username || !password) throw new Error('incomplete_input')
 
-    // get what is needed from the request body
-    const { username, password } = req.body
-
-    // check for required inputs
-    if(!username || !password) {
-        res.status(400).json({ message: 'please fill all required inputs' });
-
-    } else {
+        // get the user to compare password
         const user = await db.user_login(username);
+        if (!user) throw new Error('user_not_found')
+
+        // verify password
+        const passwordVerify = await comparePassword(password, user.password);
+        if (!passwordVerify) throw new Error('invalid_credentials')
         
-        if (!user) {
-            res.status(404).send({ message: 'user not found' });
+        // create token then save to user
+        const token = createToken(user);
+        user.token = token;
 
-        } else {
-            // verify password
-            const passwordVerify = await comparePassword(password, user.password);
-            
-            if (!passwordVerify) {
-                res.status(401).send({ message: 'invalid credentials'});
+        delete user['password']
 
-            } else {
-                // create token then save to user
-                const token = createToken(user);
-                user.token = token;
-
-                // create contact object and remove from user
-                user.contact = {
-                    ...(user['email'] && { email: user['email'] }),
-                    ...(user['instagram'] && { instagram: user['instagram'] }),
-                    // ...(user['facebook'] && { facebook: user['facebook'] }),
-                    // ...(user['website'] && { website: user['website'] }),
-                }
-                delete user['email']
-                delete user['instagram']
-                // delete user['facebook']
-                // delete user['website']
-                
-                // remove password from return
-                delete user['password']
-
-                res.status(200).json(user);
-            }
-        }
+        res.status(200).json(user);
+    } catch (error) {
+        console.log(error)
+        next({ status: userErrors[error.message]?.status, message: userErrors[error.message]?.message })
     }
+
 })
 
 

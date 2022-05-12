@@ -10,12 +10,6 @@ exports.up = function (knex) {
             .string('username')
             .notNullable()
             .unique()
-
-        users
-            .uuid('contact_id')
-            .references('id')
-            .inTable('contacts')
-            .onDelete('cascade')
         
         users
             .enu('account_type', ['admin', 'creator', 'manager', 'basic'])
@@ -30,6 +24,20 @@ exports.up = function (knex) {
             .string('avatar')
             .defaultTo("https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png")
 
+        users
+            .string('email')
+            .unique()
+            .notNullable()
+        
+        users
+            .string('instagram')
+        
+        users
+            .string('facebook')
+        
+        users
+            .string('twitter')
+        
         users.timestamps(true, true)
     })
 };

@@ -20,11 +20,19 @@ exports.up = function (knex) {
             .notNullable()
 
         businesses
-            .uuid('contact_id')
-            .unsigned()
-            .references('id')
-            .inTable('contacts')
-            .onDelete('cascade')
+            .string('email')
+        
+        businesses
+            .string('instagram')
+        
+        businesses
+            .string('twitter')
+        
+        businesses
+            .string('facebook')
+        
+        businesses
+            .string('website')
 
         // business open to user creator request, defaults to true
         businesses

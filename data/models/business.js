@@ -13,7 +13,7 @@ module.exports = {
 function find() {
     return db('businesses')
         .where({ activeBusiness: true })
-        .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
+        // .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
@@ -25,10 +25,10 @@ function find() {
                 'businesses.requestOpen',
                 'businesses.activeBusiness',
                 'businesses.business_admin',
-                'contacts.email',
-                'contacts.instagram',
-                'contacts.facebook',
-                'contacts.website',
+                'businesses.email',
+                'businesses.instagram',
+                'businesses.facebook',
+                'businesses.website',
                 'locations.formatted'
             ]
         )
@@ -37,7 +37,7 @@ function find() {
 function findById(id) {
     return db('businesses')
         .where({ 'businesses.id': id })
-        .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
+        // .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
@@ -49,10 +49,10 @@ function findById(id) {
                 'businesses.requestOpen',
                 'businesses.activeBusiness',
                 'businesses.business_admin',
-                'contacts.email',
-                'contacts.instagram',
-                'contacts.facebook',
-                'contacts.website',
+                'businesses.email',
+                'businesses.instagram',
+                'businesses.facebook',
+                'businesses.website',
                 'locations.formatted'
             ]
         )
@@ -63,7 +63,7 @@ function findById(id) {
 function findPending() {
     return db('businesses')
         .where({ activeBusiness: false })
-        .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
+        // .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
@@ -75,10 +75,10 @@ function findPending() {
                 'businesses.requestOpen',
                 'businesses.activeBusiness',
                 'businesses.business_admin',
-                'contacts.email',
-                'contacts.instagram',
-                'contacts.facebook',
-                'contacts.website',
+                'businesses.email',
+                'businesses.instagram',
+                'businesses.facebook',
+                'businesses.website',
                 'locations.formatted'
             ]
         )
@@ -180,7 +180,7 @@ async function updateBusiness(business_id, business_updates) {
 
         return db('businesses')
             .where({ 'businesses.id': business_id})
-            .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
+            // .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
             .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
             .select([
                 'businesses.id',
@@ -191,10 +191,10 @@ async function updateBusiness(business_id, business_updates) {
                 'businesses.requestOpen',
                 'businesses.activeBusiness',
                 'businesses.business_admin',
-                'contacts.email',
-                'contacts.instagram',
-                'contacts.facebook',
-                'contacts.website',
+                'businesses.email',
+                'businesses.instagram',
+                'businesses.facebook',
+                'businesses.website',
                 'locations.formatted'
             ])
     } catch (error) {
