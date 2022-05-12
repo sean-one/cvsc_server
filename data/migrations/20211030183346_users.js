@@ -29,15 +29,6 @@ exports.up = function (knex) {
             .unique()
             .notNullable()
         
-        users
-            .string('instagram')
-        
-        users
-            .string('facebook')
-        
-        users
-            .string('twitter')
-        
         users.timestamps(true, true)
     })
 };

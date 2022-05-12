@@ -12,7 +12,6 @@ exports.seed = function(knex) {
           password: '$2a$14$tswDPo02q2gg/DcwH11e3.C2sziAWdSjnBeL35bQ9L36qdWeadM9e',
           account_type: 'admin',
           email: 'basement365@gmail.com',
-          facebook: 'seanckerman-facebook'
         },
         { 
           id: '218e312c-e67c-497e-9c3a-f69abf28f2bc',
@@ -21,7 +20,6 @@ exports.seed = function(knex) {
           password: '$2a$14$3HABR4cxzl.uP/.QosYes.Kkjnj72g9eR1Z7wkQ2413rQ8btNaZjC',
           account_type: 'manager',
           email: 'jlopez760@gmail.com',
-          instagram: 'janetInsta'
         }
       ]);
     });

@@ -24,21 +24,15 @@ async function user_login(username) {
                 'users.password',
                 'users.account_type',
                 'users.email',
-                'users.instagram',
             ]
         )
         .first()
 }
 
 async function register_user(user, contact) {
-    // const user_contact = await db('contacts').insert(contact, [ 'id' ])
-    
-    // user['contact_id'] = user_contact[0].id
-
     const new_user = await db('users').insert(user, [ 'id' ])
     
     return db('users')
-        // need to put in to a trx so that all or nothing is saved
         .where({ 'users.id': new_user[0].id })
         .select(
             [
@@ -47,7 +41,6 @@ async function register_user(user, contact) {
                 'users.avatar',
                 'users.account_type',
                 'users.email',
-                'users.instagram'
             ]
         )
         .first()
@@ -56,7 +49,7 @@ async function register_user(user, contact) {
 async function updateAvatar(userId, avatar) {
     return db('users')
         .where({ 'users.id': userId })
-        .update(avatar, [ 'id', 'username', 'avatar', 'contact_id' ])
+        .update(avatar, [ 'id', 'username', 'avatar' ])
 }
 
 function remove(id) {

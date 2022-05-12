@@ -105,8 +105,6 @@ router.post('/updateAvatar', [ validateToken ], async (req, res) => {
     try {
         const avatarLink = req.body
         const { user_id } = req.decodedToken
-        // console.log(avatarLink)
-        // console.log(user_id)
         await db.updateAvatar(user_id, avatarLink)
             .then(response => {
                 res.status(200).json(response)
