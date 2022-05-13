@@ -1,11 +1,13 @@
 const roleErrors = {
     roles_user_id_business_id_unique: {
         status: 400,
-        message: 'request already pending'
+        message: 'request already pending',
+        type: 'duplicate'
     },
     missing_input: {
         status: 400,
-        message: 'missing business id'
+        message: 'missing business id',
+        type: 'missing_input'
     },
     roles_business_id_foreign: {
         status: 404,

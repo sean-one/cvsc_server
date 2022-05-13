@@ -14,7 +14,7 @@ function find() {
 
 // login page
 async function user_login(username) {
-    return await db('users')
+    const found_user = await db('users')
         .where({ username: username })
         .select(
             [
@@ -27,23 +27,33 @@ async function user_login(username) {
             ]
         )
         .first()
+    
+    if (found_user == null) {
+        throw new Error('user_not_found')
+    } else {
+        return found_user
+    }
 }
 
-async function register_user(user, contact) {
+async function register_user(user) {
     const new_user = await db('users').insert(user, [ 'id' ])
     
-    return db('users')
-        .where({ 'users.id': new_user[0].id })
-        .select(
-            [
-                'users.id',
-                'users.username',
-                'users.avatar',
-                'users.account_type',
-                'users.email',
-            ]
-        )
-        .first()
+    if(new_user == null) {
+        throw new Error('insert_error')
+    } else {
+        return db('users')
+            .where({ 'users.id': new_user[0].id })
+            .select(
+                [
+                    'users.id',
+                    'users.username',
+                    'users.avatar',
+                    'users.account_type',
+                    'users.email',
+                ]
+            )
+            .first()
+    }
 }
 
 async function updateAvatar(userId, avatar) {

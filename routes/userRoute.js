@@ -8,55 +8,32 @@ const { createToken, validateToken } = require('../helpers/jwt_helper');
 const router = express.Router();
 
 // at registration page
-router.post('/register', async (req, res) => {
-
-    // format and clean up the data, grab only what is needed
-    const new_user = { username: req.body.username, password: req.body.password }
-    const new_user_contact = {
-        ...(req.body.email && { email: req.body.email }),
-        ...(req.body.instagram && { instagram: req.body.instagram })
-    }
-    
+router.post('/register', async (req, res, next) => {
     try {
+        const new_user = { username: req.body.username, password: req.body.password, email: req.body.email }    
+        if (!new_user.username || !new_user.password || !new_user.email) throw new Error('incomplete_input')
         
         // hash password, save hashed password to new_user
         const hash = await hashPassword(new_user.password);
         new_user.password = hash;
         
         // insert the new_user into the users table
-        const user = await db.register_user(new_user, new_user_contact);
+        const user = await db.register_user(new_user);
         
         // create token then save to user
         const token = createToken(user);
         user.token = token;
         
-        // create contact object and remove from user
-        user.contact = {
-            ...(user['email'] && { email: user['email'] }),
-            ...(user['instagram'] && { instagram: user['instagram'] }),
-            // ...(user['facebook'] && { facebook: user['facebook'] }),
-            // ...(user['website'] && { website: user['website'] }),
-        }
-        delete user['email']
-        delete user['instagram']
-        // delete user['facebook']
-        // delete user['website']
-
         res.status(200).json(user);
 
     } catch (error) {
-        
-        if(error.constraint === 'users_username_unique') {
-            res.status(400).json({ message: 'username is not available', type: 'username' })
-        }
-        
-        else if(error.constraint === 'contacts_email_unique') {
-            res.status(400).json({ message: 'email duplicate', type: 'email' })
-        }
+        // console.log(error)
+        if (error.constraint) {
+            next({ status: userErrors[error.constraint]?.status, message: userErrors[error.constraint]?.message, type: userErrors[error.constraint]?.type })
 
-        else {
-            console.log(error)
-            res.status(500).json({ message: 'something went wrong', error })
+        } else {
+            next({ status: userErrors[error.message]?.status, message: userErrors[error.message]?.message })
+
         }
     }
 })

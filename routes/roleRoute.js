@@ -33,10 +33,18 @@ router.post('/create-request', [ validateToken ], async (req, res, next) => {
     } catch (error) {
         
         if (error.constraint) {
-            next({ status: roleErrors[error.constraint]?.status, message: roleErrors[error.constraint]?.message })
+            next({
+                status: roleErrors[error.constraint]?.status,
+                message: roleErrors[error.constraint]?.message,
+                type: roleErrors[error.constraint]?.type
+            })
 
         } else {
-            next({ status: roleErrors[error.message]?.status, message: roleErrors[error.message]?.message })
+            next({ 
+                status: roleErrors[error.message]?.status,
+                message: roleErrors[error.message]?.message,
+                type: roleErrors[error.message]?.type
+            })
 
         }
     }

@@ -13,7 +13,6 @@ module.exports = {
 function find() {
     return db('businesses')
         .where({ activeBusiness: true })
-        // .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
@@ -37,7 +36,6 @@ function find() {
 function findById(id) {
     return db('businesses')
         .where({ 'businesses.id': id })
-        // .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
@@ -63,7 +61,6 @@ function findById(id) {
 function findPending() {
     return db('businesses')
         .where({ activeBusiness: false })
-        // .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
