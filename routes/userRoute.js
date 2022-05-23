@@ -29,10 +29,18 @@ router.post('/register', async (req, res, next) => {
     } catch (error) {
         // console.log(error)
         if (error.constraint) {
-            next({ status: userErrors[error.constraint]?.status, message: userErrors[error.constraint]?.message, type: userErrors[error.constraint]?.type })
+            next({
+                status: userErrors[error.constraint]?.status,
+                message: userErrors[error.constraint]?.message,
+                type: userErrors[error.constraint]?.type
+            })
 
         } else {
-            next({ status: userErrors[error.message]?.status, message: userErrors[error.message]?.message })
+            next({
+                status: userErrors[error.message]?.status,
+                message: userErrors[error.message]?.message,
+                type: userErrors[error.message]?.type
+            })
 
         }
     }
@@ -61,8 +69,12 @@ router.post('/login', async (req, res, next) => {
 
         res.status(200).json(user);
     } catch (error) {
-        console.log(error)
-        next({ status: userErrors[error.message]?.status, message: userErrors[error.message]?.message })
+        // console.log(error)
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type
+        })
     }
 
 })

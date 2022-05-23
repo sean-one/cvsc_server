@@ -26,7 +26,8 @@ const businessErrors = {
     business_address_required: {
         status: 400,
         message: 'business must have a valid address'
-    }
+    },
+    
 }
 
 module.exports = businessErrors;
