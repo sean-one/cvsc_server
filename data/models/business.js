@@ -91,7 +91,8 @@ async function addBusiness(business) {
             businesstype: business.business_type,
             email: business.email,
             instagram: business.instagram,
-            // phone: business.phone,
+            phone: business.phone,
+            twitter: business.twitter,
             website: business.website
         }
 
@@ -103,28 +104,23 @@ async function addBusiness(business) {
                 zipcode: business.zip,
             }
         }
-        return await db.transaction(async trx => {
-
-            // create a new contact and get ID
-            // const newContact = await db('contacts')
-            //     .transacting(trx)
-            //     .insert(business.contact, ['id'])
         
-            // add contact ID to business object
-            // business.business['contact_id'] = newContact[0].id
+        return await db.transaction(async trx => {
             
             // create new business
-            const newBusiness = await db('businesses')
+            const added_business = await db('businesses')
             .transacting(trx)
             .insert(new_business, ['id', 'name', 'business_admin', 'businesstype'])
             
             // check for location
-            if (newBusiness[0].businesstype !== 'brand') {
+            if (added_business[0].businesstype !== 'brand') {
+                // google api with address returning geocode information
                 const geoCode = await googleMapsClient.geocode({ address: `${business_location.street}, ${business_location.city}, ${business_location.state} ${business_location.zip}` }).asPromise();
-                // console.log(geoCode)
+                
+                // save return from geocode and newly added business information
                 location = {
-                    venue_name: newBusiness[0].name,
-                    venue_id: newBusiness[0].id,
+                    venue_name: added_business[0].name,
+                    venue_id: added_business[0].id,
                     street: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
                     city: geoCode.json.results[0].address_components[2].long_name,
                     state: geoCode.json.results[0].address_components[4].short_name,
@@ -132,28 +128,28 @@ async function addBusiness(business) {
                     formatted: geoCode.json.results[0].formatted_address,
                     place_id: geoCode.json.results[0].place_id
                 }
+
+                // insert location information
                 await db('locations')
                     .transacting(trx)
                     .insert(location)
-
-                // console.log(geoCode.json.results[0])
             }
             
             // create an business admin role for the user requesting the new business
             await db('roles')
                 .transacting(trx)
                 .insert({
-                    user_id: newBusiness[0].business_admin,
-                    business_id: newBusiness[0].id,
+                    user_id: added_business[0].business_admin,
+                    business_id: added_business[0].id,
                     role_type: "admin",
                     active_role: false,
-                    approved_by: newBusiness[0].business_admin
+                    approved_by: added_business[0].business_admin
                 })
 
             // return the newly created business with contact and location if created
             return db('businesses')
                 .transacting(trx)
-                .where({ 'businesses.id': newBusiness[0].id})
+                .where({ 'businesses.id': added_business[0].id})
                 .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
                 .select(
                     [
