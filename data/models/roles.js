@@ -122,32 +122,15 @@ async function getPendingRequest(user_id) {
 
 // pendingRequest /roles/approve/:id
 async function approveRoleRequest(request_id, admin_id) {
-    
-    const updated_count = await db('roles')
-        .where({ id: request_id })
-        .update({ active_role: true, approved_by: admin_id })
-    
-    if(updated_count >  0) {
-        const updated_role = await db('roles')
-            .where({ id: request_id })
-            .select(
-                [
-                    'roles.id',
-                    'roles.user_id'
-                ]
-            )
-            .first()
 
-        // update account_type from 'basic' to 'creator' ignore if not 'basic'
-        await db('users')
-                .where({ id: updated_role.user_id, account_type: 'basic' })
-                .update({ account_type: 'creator' })
-        
-        return updated_role
-    } else {
-        
-        throw new Error('update_failed')
-    }
+    const updated_role = await db('roles')
+        .where({ id: request_id })
+        .update({ active_role: true, approved_by: admin_id}, [ 'id', 'user_id' ])
+
+    // update account_type from 'basic' to 'creator' ignore if not 'basic'
+    await db('users').where({ id: updated_role[0].user_id, account_type: 'basic' }).update({ account_type: 'creator' })
+    
+    return updated_role
 }
 
 // pendingRequest /roles/reject/:id
