@@ -87,6 +87,16 @@ function findPending() {
 // creates new business & new admin role for the user requesting the new business
 async function addBusiness(business) {
     try {
+        const user_admin = await db('users')
+            .where({ id: business.business_admin})
+            .select(
+                [
+                    'users.id',
+                    'users.account_type'
+                ]
+            )
+            .first()
+
         const new_business = {
             avatar: business.business_avatar,
             description: business.business_description,
@@ -152,6 +162,12 @@ async function addBusiness(business) {
                     active_role: true,
                     approved_by: added_business[0].business_admin
                 })
+
+            if (user_admin.account_type !== 'admin') {
+                await db('users')
+                    .transacting(trx)
+                    .update({ account_type: 'admin'})
+            }
 
             // return the newly created business with contact and location if created
             return db('businesses')
