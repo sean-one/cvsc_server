@@ -87,15 +87,7 @@ function findPending() {
 // creates new business & new admin role for the user requesting the new business
 async function addBusiness(business) {
     try {
-        const user_admin = await db('users')
-            .where({ id: business.business_admin})
-            .select(
-                [
-                    'users.id',
-                    'users.account_type'
-                ]
-            )
-            .first()
+        const user_admin = await db('users').where({ id: business.business_admin}).select([ 'users.id', 'users.account_type']).first()
 
         const new_business = {
             avatar: business.business_avatar,
@@ -103,22 +95,21 @@ async function addBusiness(business) {
             name: business.business_name,
             businesstype: business.business_type,
             email: business.email,
-            instagram: business.instagram,
-            phone: Number(business.phone),
-            twitter: business.twitter,
-            website: business.website,
             business_admin: business.business_admin,
+            // condidtionally add optional contact information
+            ...(business.instagram && { instagram: business.instagram }),
+            ...(business.phone && { phone: Number(business.phone) }),
+            ...(business.twitter && { twitter: business.twitter }),
+            ...(business.website && { website: business.website }),
             // REMOVE LATER
             activeBusiness: true,
         }
 
-        if (new_business.businesstype !== 'brand') {
-            const business_location = {
-                street: business.street,
-                city: business.city,
-                state: business.state,
-                zipcode: business.zip,
-            }
+        const business_location = {
+            ...(business.street_address && { street: business.street_address }),
+            ...(business.city && { city: business.city }),
+            ...(business.state && { state: business.state }),
+            ...(business.zip && { zipcode: business.zip }),
         }
         
         return await db.transaction(async trx => {
@@ -131,7 +122,11 @@ async function addBusiness(business) {
             // check for location
             if (added_business[0].businesstype !== 'brand') {
                 // google api with address returning geocode information
-                const geoCode = await googleMapsClient.geocode({ address: `${business_location.street}, ${business_location.city}, ${business_location.state} ${business_location.zip}` }).asPromise();
+                const geoCode = await googleMapsClient.geocode(
+                    {
+                        address: `${business_location.street}, ${business_location.city}, ${business_location.state} ${business_location.zip}`
+                    }
+                ).asPromise();
                 
                 // save return from geocode and newly added business information
                 location = {
