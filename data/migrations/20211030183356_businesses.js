@@ -21,6 +21,10 @@ exports.up = function (knex) {
 
         businesses
             .string('email')
+            .notNullable()
+
+        businesses
+            .bigInteger('phone')
         
         businesses
             .string('instagram')

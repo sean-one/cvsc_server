@@ -19,17 +19,19 @@ router.get('/', (req, res) => {
 router.post('/create', [ validateToken ], async (req, res, next) => {
     try {
         const new_business = req.body
-        new_business.business['business_admin'] = req.decodedToken.user_id
-        console.log(new_business.location)
 
-        if(new_business.business.businesstype === 'brand' && typeof new_business.location === 'object') throw new Error('brand_address_not_valid')
-        if(new_business.business.businesstype !== 'brand' && new_business.location === null) throw new Error('business_address_required')
+        new_business['business_admin'] = req.decodedToken.user_id
 
-        const newBusiness = await db.addBusiness(new_business)
+        // check to be sure if not brand must include address fields
+        if(new_business.business_type === 'brand' && typeof new_business.location === 'object') throw new Error('brand_address_not_valid')
+        if(new_business.business_type !== 'brand' && new_business.location === null) throw new Error('business_address_required')
+
+        const created_business = await db.addBusiness(new_business)
         
-        res.status(201).json(newBusiness);
+        res.status(201).json(created_business);
 
     } catch (err) {
+        console.log(err)
         if (err.constraint) {
             next({ status: businessErrors[err.constraint]?.status, message: businessErrors[err.constraint]?.message })
         } else {

@@ -13,6 +13,7 @@ exports.seed = function(knex) {
           email: 'stiiizy@gmail.com',
           instagram: 'stiiizy',
           facebook: 'stiiizy-facebook',
+          phone: 7608675309,
           businesstype: "brand",
           activeBusiness: "true",
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',

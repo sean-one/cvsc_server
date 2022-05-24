@@ -25,6 +25,7 @@ function find() {
                 'businesses.activeBusiness',
                 'businesses.business_admin',
                 'businesses.email',
+                'businesses.phone',
                 'businesses.instagram',
                 'businesses.facebook',
                 'businesses.website',
@@ -48,6 +49,7 @@ function findById(id) {
                 'businesses.activeBusiness',
                 'businesses.business_admin',
                 'businesses.email',
+                'businesses.phone',
                 'businesses.instagram',
                 'businesses.facebook',
                 'businesses.website',
@@ -73,6 +75,7 @@ function findPending() {
                 'businesses.activeBusiness',
                 'businesses.business_admin',
                 'businesses.email',
+                'businesses.phone',
                 'businesses.instagram',
                 'businesses.facebook',
                 'businesses.website',
@@ -91,12 +94,15 @@ async function addBusiness(business) {
             businesstype: business.business_type,
             email: business.email,
             instagram: business.instagram,
-            phone: business.phone,
+            phone: Number(business.phone),
             twitter: business.twitter,
-            website: business.website
+            website: business.website,
+            business_admin: business.business_admin,
+            // REMOVE LATER
+            activeBusiness: true,
         }
 
-        if (business.business_type !== 'brand') {
+        if (new_business.businesstype !== 'brand') {
             const business_location = {
                 street: business.street,
                 city: business.city,
@@ -142,7 +148,8 @@ async function addBusiness(business) {
                     user_id: added_business[0].business_admin,
                     business_id: added_business[0].id,
                     role_type: "admin",
-                    active_role: false,
+                    // REMOVE AND UPDATE TO FALSE TO START
+                    active_role: true,
                     approved_by: added_business[0].business_admin
                 })
 
@@ -162,6 +169,7 @@ async function addBusiness(business) {
                         'businesses.activeBusiness',
                         'businesses.business_admin',
                         'businesses.email',
+                        'businesses.phone',
                         'businesses.instagram',
                         'businesses.facebook',
                         'businesses.website',
