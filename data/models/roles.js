@@ -110,7 +110,7 @@ async function getPendingRequest(user_id) {
                     'roles.user_id',
                     'users.username',
                     'roles.business_id',
-                    'businesses.name',
+                    'businesses.business_name',
                     'roles.role_type',
                     'roles.active_role'
                 ]

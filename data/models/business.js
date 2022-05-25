@@ -12,23 +12,24 @@ module.exports = {
 
 function find() {
     return db('businesses')
-        .where({ activeBusiness: true })
+        .where({ active_business: true })
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
                 'businesses.id',
-                'businesses.name',
-                'businesses.avatar',
-                'businesses.description',
-                'businesses.businesstype',
-                'businesses.requestOpen',
-                'businesses.activeBusiness',
+                'businesses.business_name',
+                'businesses.business_avatar',
+                'businesses.business_description',
+                'businesses.business_type',
+                'businesses.business_request_open',
+                'businesses.active_business',
                 'businesses.business_admin',
-                'businesses.email',
-                'businesses.phone',
-                'businesses.instagram',
-                'businesses.facebook',
-                'businesses.website',
+                'businesses.business_email',
+                'businesses.business_phone',
+                'businesses.business_instagram',
+                'businesses.business_facebook',
+                'businesses.business_website',
+                'businesses.business_twitter',
                 'locations.formatted'
             ]
         )
@@ -41,18 +42,19 @@ function findById(id) {
         .select(
             [
                 'businesses.id',
-                'businesses.name',
-                'businesses.avatar',
-                'businesses.description',
-                'businesses.businesstype',
-                'businesses.requestOpen',
-                'businesses.activeBusiness',
+                'businesses.business_name',
+                'businesses.business_avatar',
+                'businesses.business_description',
+                'businesses.business_type',
+                'businesses.business_request_open',
+                'businesses.active_business',
                 'businesses.business_admin',
-                'businesses.email',
-                'businesses.phone',
-                'businesses.instagram',
-                'businesses.facebook',
-                'businesses.website',
+                'businesses.business_email',
+                'businesses.business_phone',
+                'businesses.business_instagram',
+                'businesses.business_facebook',
+                'businesses.business_website',
+                'businesses.business_twitter',
                 'locations.formatted'
             ]
         )
@@ -67,18 +69,19 @@ function findPending() {
         .select(
             [
                 'businesses.id',
-                'businesses.name',
-                'businesses.avatar',
-                'businesses.description',
-                'businesses.businesstype',
-                'businesses.requestOpen',
-                'businesses.activeBusiness',
+                'businesses.business_name',
+                'businesses.business_avatar',
+                'businesses.business_description',
+                'businesses.business_type',
+                'businesses.business_request_open',
+                'businesses.active_business',
                 'businesses.business_admin',
-                'businesses.email',
-                'businesses.phone',
-                'businesses.instagram',
-                'businesses.facebook',
-                'businesses.website',
+                'businesses.business_email',
+                'businesses.business_phone',
+                'businesses.business_instagram',
+                'businesses.business_facebook',
+                'businesses.business_website',
+                'businesses.business_twitter',
                 'locations.formatted'
             ]
         )
@@ -90,19 +93,19 @@ async function addBusiness(business) {
         const user_admin = await db('users').where({ id: business.business_admin}).select([ 'users.id', 'users.account_type']).first()
 
         const new_business = {
-            avatar: business.business_avatar,
-            description: business.business_description,
-            name: business.business_name,
-            businesstype: business.business_type,
-            email: business.email,
+            business_avatar: business.business_avatar,
+            business_description: business.business_description,
+            business_name: business.business_name,
+            business_type: business.business_type,
+            business_email: business.business_email,
             business_admin: business.business_admin,
             // condidtionally add optional contact information
-            ...(business.instagram && { instagram: business.instagram }),
-            ...(business.phone && { phone: Number(business.phone) }),
-            ...(business.twitter && { twitter: business.twitter }),
-            ...(business.website && { website: business.website }),
+            ...(business.business_instagram && { business_instagram: business.business_instagram }),
+            ...(business.business_phone && { business_phone: Number(business.business_phone) }),
+            ...(business.business_twitter && { business_twitter: business.business_twitter }),
+            ...(business.business_website && { business_website: business.business_website }),
             // REMOVE LATER
-            activeBusiness: true,
+            active_business: true,
         }
 
         const business_location = {
@@ -116,11 +119,11 @@ async function addBusiness(business) {
             
             // create new business
             const added_business = await db('businesses')
-            .transacting(trx)
-            .insert(new_business, ['id', 'name', 'business_admin', 'businesstype'])
+                .transacting(trx)
+                .insert(new_business, ['id', 'business_name', 'business_admin', 'business_type'])
             
             // check for location
-            if (added_business[0].businesstype !== 'brand') {
+            if (added_business[0].business_type !== 'brand') {
                 // google api with address returning geocode information
                 const geoCode = await googleMapsClient.geocode(
                     {
@@ -130,7 +133,7 @@ async function addBusiness(business) {
                 
                 // save return from geocode and newly added business information
                 location = {
-                    venue_name: added_business[0].name,
+                    venue_name: added_business[0].business_name,
                     venue_id: added_business[0].id,
                     street: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
                     city: geoCode.json.results[0].address_components[2].long_name,
@@ -172,18 +175,19 @@ async function addBusiness(business) {
                 .select(
                     [
                         'businesses.id',
-                        'businesses.name',
-                        'businesses.avatar',
-                        'businesses.description',
-                        'businesses.businesstype',
-                        'businesses.requestOpen',
-                        'businesses.activeBusiness',
+                        'businesses.business_name',
+                        'businesses.business_avatar',
+                        'businesses.business_description',
+                        'businesses.business_type',
+                        'businesses.business_request_open',
+                        'businesses.active_business',
                         'businesses.business_admin',
-                        'businesses.email',
-                        'businesses.phone',
-                        'businesses.instagram',
-                        'businesses.facebook',
-                        'businesses.website',
+                        'businesses.business_email',
+                        'businesses.business_phone',
+                        'businesses.business_instagram',
+                        'businesses.business_facebook',
+                        'businesses.business_website',
+                        'businesses.business_twitter',
                         'locations.formatted'
                     ]
                 )
@@ -196,28 +200,41 @@ async function addBusiness(business) {
 
 }
 
-async function updateBusiness(business_id, business_updates) {
+async function updateBusiness(business_id, business) {
     try {
+        // const updated_business = {
+        //     ...(business.business_avatar && { avatar: business.business_avatar }),
+        //     ...(business.business_description && { description: business.business_description }),
+        //     ...(business.business_name && { name: business.business_name }),
+        //     ...(business.email && { email: business.email }),
+        //     ...(business.instagram && { instagram: business.instagram }),
+        //     ...(business.phone && { phone: Number(business.phone) }),
+        //     ...(business.twitter && { twitter: business.twitter }),
+        //     ...(business.website && { website: business.website }),
+        // }
+
         await db('businesses')
             .where({ 'businesses.id': business_id})
-            .update(business_updates)
+            .update(business)
         
         return db('businesses')
             .where({ 'businesses.id': business_id})
             .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
             .select([
                 'businesses.id',
-                'businesses.name',
-                'businesses.avatar',
-                'businesses.description',
-                'businesses.businesstype',
-                'businesses.requestOpen',
-                'businesses.activeBusiness',
+                'businesses.business_name',
+                'businesses.business_avatar',
+                'businesses.business_description',
+                'businesses.business_type',
+                'businesses.business_request_open',
+                'businesses.active_business',
                 'businesses.business_admin',
-                'businesses.email',
-                'businesses.instagram',
-                'businesses.facebook',
-                'businesses.website',
+                'businesses.business_email',
+                'businesses.business_phone',
+                'businesses.business_instagram',
+                'businesses.business_facebook',
+                'businesses.business_website',
+                'businesses.business_twitter',
                 'locations.formatted'
             ])
     } catch (error) {

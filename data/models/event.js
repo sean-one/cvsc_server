@@ -31,7 +31,7 @@ function find() {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name as brand_name',
+                'businesses.business_name as brand_name',
                 'events.created_by'
             ]
         )
@@ -57,7 +57,7 @@ function findById(eventId) {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name as brand_name',
+                'businesses.business_name as brand_name',
                 'events.created_by'
             ]
         )
@@ -84,7 +84,7 @@ function findByBusiness(id) {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name as brand_name',
+                'businesses.business_name as brand_name',
                 'events.created_by'
             ]
         )
@@ -110,7 +110,7 @@ function findByLocation(venue) {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name as brand_name',
+                'businesses.business_name as brand_name',
                 'events.created_by'
             ]
         )
@@ -135,7 +135,7 @@ function findByBrand(brand) {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name as brand_name',
+                'businesses.business_name as brand_name',
                 'events.created_by'
             ]
         )
@@ -161,7 +161,7 @@ function findByCreator(user) {
                 'locations.city',
                 'locations.formatted',
                 'events.brand_id',
-                'businesses.name as brand_name',
+                'businesses.business_name as brand_name',
                 'events.created_by'
             ]
         )
@@ -190,7 +190,7 @@ async function createEvent(event) {
                         'locations.city',
                         'locations.formatted',
                         'events.brand_id',
-                        'businesses.name as brand_name',
+                        'businesses.business_name as brand_name',
                         'events.created_by'
                     ]
                 )
@@ -221,7 +221,7 @@ async function updateEvent(eventId, eventChanges) {
                         'locations.city',
                         'locations.formatted',
                         'events.brand_id',
-                        'businesses.name as brand_name',
+                        'businesses.business_name as brand_name',
                         'events.created_by'
                     ]
                 )

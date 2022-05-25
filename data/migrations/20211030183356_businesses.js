@@ -7,45 +7,45 @@ exports.up = function (knex) {
             .defaultTo(knex.raw('gen_random_uuid()'))
 
         businesses
-            .string('name')
+            .string('business_name')
             .notNullable()
             .unique()
 
-        businesses.string('avatar')
+        businesses.string('business_avatar')
 
-        businesses.text('description', 'longtext')
+        businesses.text('business_description', 'longtext')
 
         businesses
-            .enu('businesstype', ['brand', 'venue', 'both'])
+            .enu('business_type', ['brand', 'venue', 'both'])
             .notNullable()
 
         businesses
-            .string('email')
+            .string('business_email')
             .notNullable()
 
         businesses
-            .bigInteger('phone')
+            .bigInteger('business_phone')
         
         businesses
-            .string('instagram')
+            .string('business_instagram')
         
         businesses
-            .string('twitter')
+            .string('business_twitter')
         
         businesses
-            .string('facebook')
+            .string('business_facebook')
         
         businesses
-            .string('website')
+            .string('business_website')
 
         // business open to user creator request, defaults to true
         businesses
-            .boolean('requestOpen')
+            .boolean('business_request_open')
             .nullable()
             .defaultTo(true)
         
         businesses
-            .boolean('activeBusiness')
+            .boolean('active_business')
             .nullable()
             .defaultTo(false)
         
