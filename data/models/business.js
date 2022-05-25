@@ -198,19 +198,12 @@ async function addBusiness(business) {
 
 async function updateBusiness(business_id, business_updates) {
     try {
-        const { contact_id } = await db('businesses').where({ 'id': business_id }).select(['contact_id']).first()
+        await db('businesses')
+            .where({ 'businesses.id': business_id})
+            .update(business_updates)
         
-        if (Object.keys(business_updates.contact).length !== 0) {
-            await db('contacts').where({ 'id': contact_id }).update(business_updates.contact)
-        }
-
-        if (Object.keys(business_updates.business).length !== 0) {
-            await db('businesses').where({ 'id': business_id}).update(business_updates.business)
-        }
-
         return db('businesses')
             .where({ 'businesses.id': business_id})
-            // .leftJoin('contacts', 'businesses.contact_id', '=', 'contacts.id')
             .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
             .select([
                 'businesses.id',
