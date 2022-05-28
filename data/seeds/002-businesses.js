@@ -121,7 +121,7 @@ exports.seed = function(knex) {
           business_description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum gravida malesuada eros, luctus iaculis purus tincidunt consequat. Morbi ac diam nec quam fermentum cursus eget facilisis ex. Integer fringilla diam nec sagittis convallis. Nulla facilisi",
           business_email: 'somethingnew@gmail.com',
           business_instagram: 'something_new',
-          business_type: "both",
+          business_type: "brand",
           active_business: "false",
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         }

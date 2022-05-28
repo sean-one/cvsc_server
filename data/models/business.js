@@ -12,7 +12,7 @@ module.exports = {
 
 function find() {
     return db('businesses')
-        .where({ active_business: true })
+        // .where({ active_bus  iness: true })
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
@@ -30,6 +30,7 @@ function find() {
                 'businesses.business_facebook',
                 'businesses.business_website',
                 'businesses.business_twitter',
+                'locations.id as location_id',
                 'locations.formatted'
             ]
         )
@@ -55,6 +56,7 @@ function findById(id) {
                 'businesses.business_facebook',
                 'businesses.business_website',
                 'businesses.business_twitter',
+                'locations.id as location_id',
                 'locations.formatted'
             ]
         )
@@ -82,6 +84,7 @@ function findPending() {
                 'businesses.business_facebook',
                 'businesses.business_website',
                 'businesses.business_twitter',
+                'locations.id as location_id',
                 'locations.formatted'
             ]
         )
@@ -188,6 +191,7 @@ async function addBusiness(business) {
                         'businesses.business_facebook',
                         'businesses.business_website',
                         'businesses.business_twitter',
+                        'locations.id as location_id',
                         'locations.formatted'
                     ]
                 )
@@ -235,6 +239,7 @@ async function updateBusiness(business_id, business) {
                 'businesses.business_facebook',
                 'businesses.business_website',
                 'businesses.business_twitter',
+                'locations.id as location_id',
                 'locations.formatted'
             ])
     } catch (error) {
