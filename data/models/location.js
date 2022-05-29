@@ -12,6 +12,6 @@ function find() {
 function findById(id) {
     return db('locations')
         .where({ id })
+        .select([ 'id', 'street_address', 'location_city', 'location_state', 'zip_code' ])
         .first()
-        // .select([ 'id', 'city' ])
 }

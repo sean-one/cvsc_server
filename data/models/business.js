@@ -31,6 +31,10 @@ function find() {
                 'businesses.business_website',
                 'businesses.business_twitter',
                 'locations.id as location_id',
+                'locations.street_address',
+                'locations.location_city',
+                'locations.location_state',
+                'locations.zip_code',
                 'locations.formatted'
             ]
         )
@@ -112,10 +116,10 @@ async function addBusiness(business) {
         }
 
         const business_location = {
-            ...(business.street_address && { street: business.street_address }),
-            ...(business.city && { city: business.city }),
-            ...(business.state && { state: business.state }),
-            ...(business.zip && { zipcode: business.zip }),
+            ...(business.street_address && { street_address: business.street_address }),
+            ...(business.city && { location_city: business.city }),
+            ...(business.state && { location_state: business.state }),
+            ...(business.zip && { zip_code: business.zip }),
         }
         
         return await db.transaction(async trx => {
@@ -130,7 +134,7 @@ async function addBusiness(business) {
                 // google api with address returning geocode information
                 const geoCode = await googleMapsClient.geocode(
                     {
-                        address: `${business_location.street}, ${business_location.city}, ${business_location.state} ${business_location.zip}`
+                        address: `${business_location.street_address}, ${business_location.location_city}, ${business_location.location_state} ${business_location.zip_code}`
                     }
                 ).asPromise();
                 
@@ -138,10 +142,10 @@ async function addBusiness(business) {
                 location = {
                     venue_name: added_business[0].business_name,
                     venue_id: added_business[0].id,
-                    street: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
-                    city: geoCode.json.results[0].address_components[2].long_name,
-                    state: geoCode.json.results[0].address_components[4].short_name,
-                    zipcode: geoCode.json.results[0].address_components[6].short_name,
+                    street_address: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
+                    location_city: geoCode.json.results[0].address_components[2].long_name,
+                    location_state: geoCode.json.results[0].address_components[4].short_name,
+                    zip_code: geoCode.json.results[0].address_components[6].short_name,
                     formatted: geoCode.json.results[0].formatted_address,
                     place_id: geoCode.json.results[0].place_id
                 }

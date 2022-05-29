@@ -20,19 +20,19 @@ exports.up = function (knex) {
             .onDelete('cascade')
 
         locations
-            .string('street')
+            .string('street_address')
             .notNullable()
 
         locations
-            .string('city')
+            .string('location_city')
             .notNullable()
 
         locations
-            .string('state')
+            .string('location_state')
             .notNullable()
 
         locations
-            .string('zipcode')
+            .string('zip_code')
             .notNullable()
 
         locations
