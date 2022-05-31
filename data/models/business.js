@@ -61,6 +61,10 @@ function findById(id) {
                 'businesses.business_website',
                 'businesses.business_twitter',
                 'locations.id as location_id',
+                'locations.street_address',
+                'locations.location_city',
+                'locations.location_state',
+                'locations.zip_code',
                 'locations.formatted'
             ]
         )
@@ -89,6 +93,10 @@ function findPending() {
                 'businesses.business_website',
                 'businesses.business_twitter',
                 'locations.id as location_id',
+                'locations.street_address',
+                'locations.location_city',
+                'locations.location_state',
+                'locations.zip_code',
                 'locations.formatted'
             ]
         )
@@ -196,6 +204,10 @@ async function addBusiness(business) {
                         'businesses.business_website',
                         'businesses.business_twitter',
                         'locations.id as location_id',
+                        'locations.street_address',
+                        'locations.location_city',
+                        'locations.location_state',
+                        'locations.zip_code',
                         'locations.formatted'
                     ]
                 )
@@ -210,17 +222,6 @@ async function addBusiness(business) {
 
 async function updateBusiness(business_id, business) {
     try {
-        // const updated_business = {
-        //     ...(business.business_avatar && { avatar: business.business_avatar }),
-        //     ...(business.business_description && { description: business.business_description }),
-        //     ...(business.business_name && { name: business.business_name }),
-        //     ...(business.email && { email: business.email }),
-        //     ...(business.instagram && { instagram: business.instagram }),
-        //     ...(business.phone && { phone: Number(business.phone) }),
-        //     ...(business.twitter && { twitter: business.twitter }),
-        //     ...(business.website && { website: business.website }),
-        // }
-
         await db('businesses')
             .where({ 'businesses.id': business_id})
             .update(business)
@@ -244,6 +245,10 @@ async function updateBusiness(business_id, business) {
                 'businesses.business_website',
                 'businesses.business_twitter',
                 'locations.id as location_id',
+                'locations.street_address',
+                'locations.location_city',
+                'locations.location_state',
+                'locations.zip_code',
                 'locations.formatted'
             ])
     } catch (error) {
