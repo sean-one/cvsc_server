@@ -110,12 +110,11 @@ function findByUser(user_id) {
 async function getPendingRequest(user_id) {    
     // get business ids that user has business admin rights to
     const { business_ids } = await db('roles')
-        .where({ user_id: user_id })
-        .andWhere({ role_type: 'admin' })
-        .orWhere({ role_type: 'manager'})
+        .whereIn('role_type', ['admin', 'manager'])
+        .andWhere({ user_id: user_id })
         .select([ db.raw('JSON_AGG(roles.business_id) as business_ids') ])
         .first()
-    
+        
     if (!!business_ids) {
         return await db('roles')
             .whereIn('business_id', business_ids)
