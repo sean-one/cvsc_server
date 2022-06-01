@@ -17,6 +17,15 @@ router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
+router.get('/business/:business_id', (req, res) => {
+    const { business_id } = req.params
+    db.findByBusiness(business_id)
+        .then(roles => {
+            res.status(200).json(roles);
+        })
+        .catch(err => res.status(500).json(err));
+})
+
 // add role request via the creatorRequestForm
 router.post('/create-request', [ validateToken ], async (req, res, next) => {
     try {

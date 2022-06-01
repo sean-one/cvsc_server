@@ -3,6 +3,7 @@ const db = require('../dbConfig');
 module.exports = {
     find,
     findById,
+    findByBusiness,
     userValidation,
     getUserBusinessRoles,
     findByUser,
@@ -32,6 +33,24 @@ async function findById(request_id) {
     } else {
         return role_request;
     }
+}
+
+// find all role entries by business id
+async function findByBusiness(business_id) {
+    return db('roles')
+        .where({ 'roles.business_id': business_id })
+        .leftJoin('users', 'roles.user_id', '=', 'users.id')
+        .select(
+            [
+                'roles.id',
+                'roles.user_id',
+                'users.username',
+                'roles.business_id',
+                'roles.role_type',
+                'roles.active_role',
+                'roles.approved_by',
+            ]
+        )
 }
 
 // USED - inside jwt_helper validateRequestRights
