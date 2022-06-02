@@ -32,13 +32,9 @@ const validateUser = (req, res, next) => {
 const validateRequestRights = async (req, res, next) => {
     try {
         const { user_id } = req.decodedToken
-        const { request_id } = req.body
+        const request_id = req.params.id
         const { business_id } = await db.findById(request_id)
 
-        if (request_id !== req.params.id) {
-            throw new Error('non_matching_request')
-        }
-        
         // validate that user has role of admin or manager for the selected business
         await db.userValidation(user_id, business_id)        
 
@@ -48,7 +44,6 @@ const validateRequestRights = async (req, res, next) => {
         next()
 
     } catch (error) {
-
         next({
             status: tokenErrors[error.message]?.status,
             message: tokenErrors[error.message]?.message,
@@ -67,7 +62,6 @@ const validateToken = (req, res, next) => {
         
         next()
     } catch (error) {
-        
         if(error.name === 'TypeError' || error.name === 'JsonWebTokenError') {
             next({ 
                 status: tokenErrors['invalid_token']?.status,

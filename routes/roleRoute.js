@@ -97,20 +97,18 @@ router.post('/approve/:id', [ validateToken, validateRequestRights ], (req, res,
 })
 
 // pendingRequest reject button
-router.delete('/reject/:id', [ validateToken, validateRequestRights ], (req, res, next) => {
+router.delete('/reject-request/:id', [ validateToken, validateRequestRights ], (req, res, next) => {
     try {
         if(req.validated) {
             db.rejectRequest(req.request_id)
                 .then(response => {
-                    res.status(204).json(response)
+                    res.status(204)
                 })
                 .catch(err => console.log(err))
         } else {
-            
             throw new Error('not_validated')
         }
     } catch (error) {
-        
         next(error)
     }
 })
