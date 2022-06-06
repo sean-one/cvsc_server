@@ -117,15 +117,15 @@ async function getPendingRequest(user_id) {
     // get business ids that user has business admin rights to
     const { business_ids } = await db('roles')
         .whereIn('role_type', ['admin', 'manager'])
-        .andWhere({ user_id: user_id })
+        .andWhere({ 'roles.user_id': user_id })
         .select([ db.raw('JSON_AGG(roles.business_id) as business_ids') ])
         .first()
 
     if (!!business_ids) {
         return await db('roles')
-            .whereIn('business_id', business_ids)
-            .where({ active_role: false })
-            .whereNot({ user_id: user_id })
+            .whereIn('roles.business_id', business_ids)
+            .where({ 'roles.active_role': false })
+            .whereNot({ 'roles.user_id': user_id })
             .join('users', 'roles.user_id', '=', 'users.id')
             .join('businesses', 'roles.business_id', '=', 'businesses.id')
             .select(
