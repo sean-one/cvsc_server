@@ -96,13 +96,32 @@ router.post('/approve/:id', [ validateToken, validateRequestRights ], (req, res,
     }
 })
 
+router.post('/upgrade/creator/:id', [ validateToken, validateRequestRights], (req, res, next) => {
+    try {
+        const { user_id } = req.decodedToken
+        if(req.validated === true) {
+            db.upgradeCreatorRole(req.request_id, user_id)
+                .then(response => {
+                    res.status(200).json(response)
+                })
+                .catch(err => console.log(err))
+        } else {
+            throw new Error('not_validated')
+        }
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+
+})
+
 // pendingRequest reject button
 router.delete('/reject-request/:id', [ validateToken, validateRequestRights ], (req, res, next) => {
     try {
         if(req.validated) {
             db.rejectRequest(req.request_id)
                 .then(response => {
-                    res.status(204)
+                    res.status(204).json(response)
                 })
                 .catch(err => console.log(err))
         } else {

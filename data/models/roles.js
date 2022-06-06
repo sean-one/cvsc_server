@@ -9,6 +9,7 @@ module.exports = {
     findByUser,
     getPendingRequest,
     approveRoleRequest,
+    upgradeCreatorRole,
     rejectRequest,
     createRequest,
 }
@@ -153,6 +154,30 @@ async function approveRoleRequest(request_id, admin_id) {
     // update account_type from 'basic' to 'creator' ignore if not 'basic'
     await db('users').where({ id: updated_role[0].user_id, account_type: 'basic' }).update({ account_type: 'creator' })
     
+    return await db('roles')
+        .where({ 'roles.id': request_id })
+        .leftJoin('users', 'roles.user_id', '=', 'users.id')
+        .select(
+            [
+                'roles.id',
+                'roles.user_id',
+                'users.username',
+                'roles.business_id',
+                'roles.role_type',
+                'roles.active_role',
+                'roles.approved_by',
+            ]
+        )
+        .first()
+}
+
+async function upgradeCreatorRole(request_id, admin_id) {
+    const updated_role = await db('roles')
+        .where({ id: request_id })
+        .update({ role_type: 'manager', approved_by: admin_id}, ['user_id'])
+    
+    await db('users').where({ id: updated_role[0].user_id, account_type: 'creator' }).update({ account_type: 'manager' })
+
     return await db('roles')
         .where({ 'roles.id': request_id })
         .leftJoin('users', 'roles.user_id', '=', 'users.id')
