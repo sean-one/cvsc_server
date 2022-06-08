@@ -108,6 +108,7 @@ function findByUser_All(user_id) {
             [
                 'business_id',
                 'role_type',
+                'active_role'
             ]
         )
 }
@@ -210,6 +211,6 @@ async function rejectRequest(req_id) {
 // roles/create-request
 function createRequest(business_id, user_id) {
     return db('roles')
-        .insert({ user_id: user_id, business_id: business_id }, ['business_id', 'role_type'])
+        .insert({ user_id: user_id, business_id: business_id }, ['business_id', 'role_type', 'active_role'])
     
 }
