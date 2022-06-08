@@ -6,7 +6,7 @@ module.exports = {
     findByBusiness,
     userValidation,
     getUserBusinessRoles,
-    findByUser,
+    findByUser_All,
     getPendingRequest,
     approveRoleRequest,
     upgradeCreatorRole,
@@ -101,9 +101,9 @@ async function getUserBusinessRoles(user_id) {
 }
 
 // used at profile
-function findByUser(user_id) {
+function findByUser_All(user_id) {
     return db('roles')
-        .where({ user_id: user_id, active_role: true })
+        .where({ user_id: user_id })
         .select(
             [
                 'business_id',
@@ -113,7 +113,7 @@ function findByUser(user_id) {
 }
     
 // roles/pending-request
-async function getPendingRequest(user_id) {    
+async function getPendingRequest(user_id) {
     // get business ids that user has business admin rights to
     const { business_ids } = await db('roles')
         .whereIn('role_type', ['admin', 'manager'])
@@ -210,6 +210,6 @@ async function rejectRequest(req_id) {
 // roles/create-request
 function createRequest(business_id, user_id) {
     return db('roles')
-        .insert({ user_id: user_id, business_id: business_id }, ['id'])
+        .insert({ user_id: user_id, business_id: business_id }, ['business_id', 'role_type'])
     
 }

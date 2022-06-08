@@ -17,6 +17,7 @@ function find() {
         .where('events.eventdate', '>=', new Date())
         .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
+        .join('users', 'events.created_by', '=', 'users.id')
         .select(
             [
                 'events.id as event_id',
@@ -32,7 +33,8 @@ function find() {
                 'locations.formatted',
                 'events.brand_id',
                 'businesses.business_name as brand_name',
-                'events.created_by'
+                'events.created_by',
+                'users.username as event_creator'
             ]
         )
 

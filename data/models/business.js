@@ -14,6 +14,7 @@ function find() {
     return db('businesses')
         // .where({ active_bus  iness: true })
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+        .leftJoin('users', 'businesses.business_admin', '=', 'users.id')
         .select(
             [
                 'businesses.id',
@@ -24,6 +25,7 @@ function find() {
                 'businesses.business_request_open',
                 'businesses.active_business',
                 'businesses.business_admin',
+                'users.username as admin_user',
                 'businesses.business_email',
                 'businesses.business_phone',
                 'businesses.business_instagram',

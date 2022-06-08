@@ -9,7 +9,7 @@ const router = express.Router();
 // used on /profile page inside getroles
 router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
     const { user_id } = req.decodedToken
-    db.findByUser(user_id)
+    db.findByUser_All(user_id)
         .then(userevents => {
             // [ { business_id: uuid, role_type: 'admin' }, { business_id: uuid, role_type: 'creator' } ]
             res.status(200).json(userevents);
