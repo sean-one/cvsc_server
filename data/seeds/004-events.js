@@ -147,7 +147,7 @@ exports.seed = function(knex) {
           venue_id: 'eac5ff8f-a9f9-430a-ab35-537686a5b0aa',
           details: 'Pariatur non consequat ut enim nisi ad incididunt proident occaecat velit sit. Exercitation ea aliqua deserunt incididunt mollit reprehenderit sint reprehenderit est ad culpa deserunt culpa ut. Aliquip nisi dolor aliqua ipsum. Laboris tempor duis non minim enim enim magna do fugiat sint ut. Ullamco enim id est aliqua cillum consequat dolor veniam ut aliqua ipsum cillum incididunt dolor. Minim sunt esse occaecat minim. Eu reprehenderit excepteur ex velit dolore minim voluptate esse eiusmod magna.',
           brand_id: 'e8728dd1-5ed5-4d6b-bc07-810aa79c8a5f',
-          created_by: '218e312c-e67c-497e-9c3a-f69abf28f2bc'
+          created_by: '2c906eeb-c7f7-4534-ae06-20f601b42224'
         },
         {
           id: '6e2849ac-d814-4ca4-973b-280b877b16e6',
