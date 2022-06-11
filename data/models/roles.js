@@ -103,12 +103,14 @@ async function getUserBusinessRoles(user_id) {
 // used at profile
 function findByUser_All(user_id) {
     return db('roles')
-        .where({ user_id: user_id })
+        .where({ 'roles.user_id': user_id })
+        .join('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [
-                'business_id',
-                'role_type',
-                'active_role'
+                'roles.business_id',
+                'businesses.business_name',
+                'roles.role_type',
+                'roles.active_role'
             ]
         )
 }
@@ -209,8 +211,23 @@ async function rejectRequest(req_id) {
 }
 
 // roles/create-request
-function createRequest(business_id, user_id) {
-    return db('roles')
-        .insert({ user_id: user_id, business_id: business_id }, ['business_id', 'role_type', 'active_role'])
+async function createRequest(business_id, user_id) {
+    const created_role = await db('roles')
+        .insert({
+            user_id: user_id,
+            business_id: business_id
+        }, ['id'])
+        
+    return await db('roles')
+        .where({ 'roles.id': created_role[0].id })
+        .join('businesses', 'roles.business_id', '=', 'businesses.id')
+        .select(
+            [
+                'roles.business_id',
+                'businesses.business_name',
+                'roles.role_type',
+                'roles.active_role'
+            ]
+        )
     
 }
