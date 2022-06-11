@@ -107,8 +107,6 @@ function findPending() {
 // creates new business & new admin role for the user requesting the new business
 async function addBusiness(business) {
     try {
-        const user_admin = await db('users').where({ id: business.business_admin}).select([ 'users.id', 'users.account_type']).first()
-
         const new_business = {
             business_avatar: business.business_avatar,
             business_description: business.business_description,
@@ -176,19 +174,14 @@ async function addBusiness(business) {
                     // REMOVE AND UPDATE TO FALSE TO START
                     active_role: true,
                     approved_by: added_business[0].business_admin
-                })
-
-            if (user_admin.account_type !== 'admin') {
-                await db('users')
-                    .transacting(trx)
-                    .update({ account_type: 'admin'})
-            }
+                }, [ 'id' ])
 
             // return the newly created business with contact and location if created
             return db('businesses')
                 .transacting(trx)
                 .where({ 'businesses.id': added_business[0].id})
                 .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+                .join('roles', 'businesses.id', '=', 'roles.business_id')
                 .select(
                     [
                         'businesses.id',
@@ -210,7 +203,9 @@ async function addBusiness(business) {
                         'locations.location_city',
                         'locations.location_state',
                         'locations.zip_code',
-                        'locations.formatted'
+                        'locations.formatted',
+                        'roles.active_role',
+                        'roles.role_type',
                     ]
                 )
                 .first()
@@ -259,41 +254,36 @@ async function updateBusiness(business_id, business) {
     }
 }
 
-async function remove(id) {
+async function remove(business_id) {
     try {
         return await db.transaction(async trx => {
-            // get business info
-            const business = await db('businesses')
-                .transacting(trx)    
-                .where({ id: id })
-                .select(
-                    [
-                        'contact_id'
-                    ]
-                )
-                .first()
-            console.log(business.contact_id)
             
             // delete location for business to be deleted
             await db('locations')
-            .transacting(trx)
-            .where({ venue_id: id })
-            .del()
+                .transacting(trx)
+                .where({ venue_id: business_id })
+                .del()
+
+            // delete all from roles
+            await db('roles')
+                .transacting(trx)
+                .where({ business_id: business_id})
+                .del()
             
-            //! need to delete from admin roles
+            // delete all upcoming events with business
+            await db('events')
+                .transacting(trx)
+                .where({ brand_id: business_id })
+                .orWhere({ venue_id: business_id })
+                .del()
+            
+            // delete from the businesses table
+            return await db('businesses')
+                .transacting(trx)
+                .where({ id: business_id })
+                .del()
+
             //! need to delete business avatar from s3 bucket
-            
-            // delete business account
-            await db('businesses')
-            .transacting(trx)
-            .where({ id: id })
-            .del()
-            
-            // delete contact for business to be deleted
-            return db('contacts')
-                    .transacting(trx)
-                    .where({ id: business.contact_id })
-                    .del()
         })
     } catch (error) {
         throw error

@@ -12,11 +12,6 @@ exports.up = function (knex) {
             .unique()
         
         users
-            .enu('account_type', ['admin', 'creator', 'manager', 'basic'])
-            .notNullable()
-            .defaultTo('basic')
-
-        users
             .string('password')
             .notNullable()
 

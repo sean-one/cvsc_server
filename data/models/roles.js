@@ -148,12 +148,12 @@ async function getPendingRequest(user_id) {
 // pendingRequest /roles/approve/:id
 async function approveRoleRequest(request_id, admin_id) {
 
-    const updated_role = await db('roles')
+    await db('roles')
         .where({ id: request_id })
-        .update({ active_role: true, approved_by: admin_id}, ['user_id'])
+        .update({ active_role: true, approved_by: admin_id})
 
     // update account_type from 'basic' to 'creator' ignore if not 'basic'
-    await db('users').where({ id: updated_role[0].user_id, account_type: 'basic' }).update({ account_type: 'creator' })
+    // await db('users').where({ id: updated_role[0].user_id, account_type: 'basic' }).update({ account_type: 'creator' })
     
     return await db('roles')
         .where({ 'roles.id': request_id })
@@ -173,11 +173,11 @@ async function approveRoleRequest(request_id, admin_id) {
 }
 
 async function upgradeCreatorRole(request_id, admin_id) {
-    const updated_role = await db('roles')
+    await db('roles')
         .where({ id: request_id })
-        .update({ role_type: 'manager', approved_by: admin_id}, ['user_id'])
+        .update({ role_type: 'manager', approved_by: admin_id})
     
-    await db('users').where({ id: updated_role[0].user_id, account_type: 'creator' }).update({ account_type: 'manager' })
+    // await db('users').where({ id: updated_role[0].user_id, account_type: 'creator' }).update({ account_type: 'manager' })
 
     return await db('roles')
         .where({ 'roles.id': request_id })

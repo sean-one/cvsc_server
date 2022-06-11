@@ -22,7 +22,6 @@ async function user_login(username) {
                 'users.username',
                 'users.avatar',
                 'users.password',
-                'users.account_type',
                 'users.email',
             ]
         )
@@ -48,7 +47,6 @@ async function register_user(user) {
                     'users.id',
                     'users.username',
                     'users.avatar',
-                    'users.account_type',
                     'users.email',
                 ]
             )

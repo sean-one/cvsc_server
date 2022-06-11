@@ -86,13 +86,13 @@ router.get('/:id', (req, res) => {
     });
 });
 
-router.delete('/remove/:id', async (req, res, next) => {
+router.delete('/remove/:business_id', async (req, res, next) => {
     try {
-        const { id } = req.params
-        const deletedUser = await db.remove(id)
+        const { business_id } = req.params
+        const deleted_business = await db.remove(business_id)
         
-        if (deletedUser >= 1) {
-            res.status(204).json();
+        if (deleted_business >= 1) {
+            res.status(204).json(deleted_business);
         } else {
             const error = new Error('invalid id')
             error.message = 'not found';

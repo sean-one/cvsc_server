@@ -8,7 +8,6 @@ const createToken = (user) => {
     const payload = {
         user_id: user.id,
         username: user.username,
-        account_type: user.account_type
     }
 
     const secret = process.env.JWT_SECRET;
