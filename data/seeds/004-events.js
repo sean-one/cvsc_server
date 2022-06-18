@@ -8,7 +8,7 @@ exports.seed = function(knex) {
         {
           id: '65e4db99-8109-4bad-9378-6f1d39d6edab',
           eventname: 'great upcoming event',
-          eventdate: '06/10/22',
+          eventdate: '06/18/22',
           eventstart: 800,
           eventend: 1000,
           eventmedia: 'https://picsum.photos/300/300',
@@ -20,7 +20,7 @@ exports.seed = function(knex) {
         {
           id: 'a6b198d5-f18c-402c-a3e7-f739b9491a65',
           eventname: 'something fun to do',
-          eventdate: '06/11/22',
+          eventdate: '06/19/22',
           eventstart: 1400,
           eventend: 1600,
           eventmedia: 'https://picsum.photos/300/300',
@@ -32,7 +32,7 @@ exports.seed = function(knex) {
         {
           id: 'ca83791a-b70b-4771-9d61-158a1aca2f52',
           eventname: 'smokers only party',
-          eventdate: '06/11/22',
+          eventdate: '06/19/22',
           eventstart: 1500,
           eventend: 1800,
           eventmedia: 'https://picsum.photos/300/300',
@@ -44,7 +44,7 @@ exports.seed = function(knex) {
         {
           id: 'c10f4ccb-7a9f-45db-8015-31a9f2cdc23d',
           eventname: 'new product samples',
-          eventdate: '06/12/22',
+          eventdate: '06/20/22',
           eventstart: 1800,
           eventend: 2000,
           eventmedia: 'https://picsum.photos/300/300',
@@ -56,7 +56,7 @@ exports.seed = function(knex) {
         {
           id: '7dba2df9-b6a9-4a2c-9a11-46d85ffcb7c7',
           eventname: 'free dabs for everyone',
-          eventdate: '06/13/22',
+          eventdate: '06/21/22',
           eventstart: 1200,
           eventend: 1700,
           eventmedia: 'https://picsum.photos/300/300',
@@ -68,7 +68,7 @@ exports.seed = function(knex) {
         {
           id: 'fa918cb4-1914-4352-b1cd-42fd31bfdb50',
           eventname: 'double the fun',
-          eventdate: '06/13/22',
+          eventdate: '06/21/22',
           eventstart: 2100,
           eventend: 2300,
           eventmedia: 'https://picsum.photos/300/300',
@@ -80,7 +80,7 @@ exports.seed = function(knex) {
         {
           id: '9ab39eaa-22cf-468e-aeb9-5a1484af4fc4',
           eventname: 'buy one get one free',
-          eventdate: '06/14/22',
+          eventdate: '06/22/22',
           eventstart: 800,
           eventend: 1700,
           eventmedia: 'https://picsum.photos/300/300',
@@ -92,7 +92,7 @@ exports.seed = function(knex) {
         {
           id: 'b90e1553-6c47-4cee-a179-750bcf637581',
           eventname: 'smokers blow out',
-          eventdate: '06/15/22',
+          eventdate: '06/23/22',
           eventstart: 1200,
           eventend: 1500,
           eventmedia: 'https://picsum.photos/300/300',
@@ -104,7 +104,7 @@ exports.seed = function(knex) {
         {
           id: '064b844d-511d-4ded-9831-f299066d799a',
           eventname: 'pre rollers only',
-          eventdate: '06/16/22',
+          eventdate: '06/24/22',
           eventstart: 1400,
           eventend: 1600,
           eventmedia: 'https://picsum.photos/300/300',
@@ -116,7 +116,7 @@ exports.seed = function(knex) {
         {
           id: 'c66ff4d7-b219-4da7-9b70-56aceb55d5e4',
           eventname: 'new strain release',
-          eventdate: '06/13/22',
+          eventdate: '06/21/22',
           eventstart: 1600,
           eventend: 2200,
           eventmedia: 'https://picsum.photos/300/300',
@@ -128,7 +128,7 @@ exports.seed = function(knex) {
         {
           id: '200418ab-432a-4094-b698-be5cfe0e789a',
           eventname: 'big party day',
-          eventdate: '06/17/22',
+          eventdate: '06/25/22',
           eventstart: 800,
           eventend: 1000,
           eventmedia: 'https://picsum.photos/300/300',
@@ -140,7 +140,7 @@ exports.seed = function(knex) {
         {
           id: 'ab674d3a-f464-4468-8d56-aced79dbd54c',
           eventname: 'the meet and greet with a really really long name',
-          eventdate: '06/17/22',
+          eventdate: '06/25/22',
           eventstart: 1900,
           eventend: 2100,
           eventmedia: 'https://picsum.photos/300/300',
@@ -152,7 +152,7 @@ exports.seed = function(knex) {
         {
           id: '6e2849ac-d814-4ca4-973b-280b877b16e6',
           eventname: 'mean green machine',
-          eventdate: '06/17/22',
+          eventdate: '06/25/22',
           eventstart: 1100,
           eventend: 1300,
           eventmedia: 'https://picsum.photos/300/300',
@@ -164,7 +164,7 @@ exports.seed = function(knex) {
         {
           id: '4a686c54-a020-4c1f-8ed8-11308dc703e5',
           eventname: 'big day finale',
-          eventdate: '06/17/22',
+          eventdate: '06/25/22',
           eventstart: 2100,
           eventend: 2300,
           eventmedia: 'https://picsum.photos/300/300',
