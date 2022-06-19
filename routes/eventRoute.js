@@ -5,6 +5,7 @@ const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
 const { validateToken, validateUser, validateUserRole } = require('../helpers/jwt_helper');
 
+// '/events'
 const router = express.Router();
 
 router.get('/', (req, res) => {
