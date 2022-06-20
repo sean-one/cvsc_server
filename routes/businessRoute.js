@@ -6,6 +6,7 @@ const { validateToken } = require('../helpers/jwt_helper');
 
 const router = express.Router()
 
+// '/business'
 router.get('/', (req, res) => {
     db.find()
         .then(businesses => {
