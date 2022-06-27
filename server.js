@@ -4,17 +4,20 @@ const express = require('express');
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors');
+const session = require('express-session');
+const passport = require('passport')
 const fileUpload = require('express-fileupload');
 
 // routes
-const contactRouter = require('./routes/contactRoute')
+const contactRouter = require('./routes/contactRoute');
+const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoute');
 const eventRouter = require('./routes/eventRoute');
 const businessRouter = require('./routes/businessRoute');
 const locationRouter = require('./routes/locationRoute');
 const roleRouter = require('./routes/roleRoute');
 const s3Router = require('./routes/s3Route');
-const errorHandler = require('./helpers/errorHandler')
+const errorHandler = require('./helpers/errorHandler');
 
 app.use(fileUpload({
     createParentPath: true
@@ -30,7 +33,23 @@ app.use(cors({
     credentials: true
 }));
 
+app.use(
+    session({
+        secret: process.env.COOKIE_SECRET,
+        cookie: {
+            secure: process.env.NODE_ENV === "production" ? "true" : "auto",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        },
+        resave: false,
+        saveUninitialized: false,
+    })
+);
+
+app.use(passport.initialize());
+app.use(passport.session())
+
 app.use('/contacts', contactRouter);
+app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
 app.use('/business', businessRouter);

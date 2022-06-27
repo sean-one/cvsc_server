@@ -16,9 +16,12 @@
     "dotenv": "^9.0.2",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
+    "express-session": "^1.17.3",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.95.6",
     "morgan": "^1.10.0",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
     "pg": "^8.6.0",
     "sqlite3": "^5.0.2"
   },
