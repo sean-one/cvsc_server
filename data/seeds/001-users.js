@@ -10,7 +10,7 @@ exports.seed = function(knex) {
           username: 'seanone',
           avatar: 'https://coachellavalleysmokers-images.s3.amazonaws.com/23988.jpeg',
           password: '$2a$14$tswDPo02q2gg/DcwH11e3.C2sziAWdSjnBeL35bQ9L36qdWeadM9e',
-          email: 'basement365@gmail.com',
+          email: 'ackerman.sean.w@gmail.com',
         },
         { 
           id: '218e312c-e67c-497e-9c3a-f69abf28f2bc',

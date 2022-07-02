@@ -13,7 +13,6 @@ exports.up = function (knex) {
         
         users
             .string('password')
-            .notNullable()
 
         users
             .string('avatar')
@@ -23,6 +22,10 @@ exports.up = function (knex) {
             .string('email')
             .unique()
             .notNullable()
+        
+        users
+            .string('google_id')
+            .defaultTo(null)
         
         users.timestamps(true, true)
     })

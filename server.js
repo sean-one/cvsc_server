@@ -19,6 +19,8 @@ const roleRouter = require('./routes/roleRoute');
 const s3Router = require('./routes/s3Route');
 const errorHandler = require('./helpers/errorHandler');
 
+const passportSetup = require('./passport-config');
+
 app.use(fileUpload({
     createParentPath: true
 }))
@@ -35,8 +37,10 @@ app.use(cors({
 
 app.use(
     session({
+        name: 'cv_smoker',
         secret: process.env.COOKIE_SECRET,
         cookie: {
+            maxAge: 60 * 60 * 24 * 1000,
             secure: process.env.NODE_ENV === "production" ? "true" : "auto",
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         },

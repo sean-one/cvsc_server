@@ -2,6 +2,9 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
+    findById,
+    add_google_user,
+    search_google_user,
     user_login,
     register_user,
     updateAvatar,
@@ -10,6 +13,54 @@ module.exports = {
 
 function find() {
     return db('users')
+}
+
+function findById(id) {
+    return db('users')
+        .where({ id: id })
+        .select(
+            [
+                'users.id',
+                'users.username',
+                'users.avatar',
+                'users.email'
+            ]
+        )
+        .first()
+}
+
+async function add_google_user(user) {
+    const google_register = await db('users').insert(user, ['id'])
+
+    console.log(google_register)
+    if (google_register == null) {
+        throw new Error('insert_error')
+    } else {
+        return db('users')
+            .where({ 'users.id': google_register[0].id })
+            .select(
+                [
+                    'users.id',
+                    'users.username',
+                    'users.avatar',
+                    'users.email',
+                ]
+            )
+            .first()
+    }
+}
+
+async function search_google_user(google_id) {
+    return await db('users')
+        .where({ google_id: google_id })
+        .select(
+            [
+                'users.id',
+                'users.username',
+                'users.avatar',
+                'users.email'
+            ]
+        )
 }
 
 // login page
