@@ -11,9 +11,9 @@ const router = express.Router();
 router.get('/user/:id', (req, res) => {
     // const { user_id } = req.decodedToken
     db.findByUser_All(req.user.id)
-        .then(userevents => {
+        .then(user_roles => {
             // [ { business_id: uuid, role_type: 'admin' }, { business_id: uuid, role_type: 'creator' } ]
-            res.status(200).json(userevents);
+            res.status(200).json(user_roles);
         })
         .catch(err => res.status(500).json(err));
 })

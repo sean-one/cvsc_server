@@ -3,6 +3,7 @@ const db = require('../dbConfig');
 module.exports = {
     find,
     findById,
+    findByUsername,
     add_google_user,
     search_google_user,
     user_login,
@@ -27,6 +28,20 @@ function findById(id) {
             ]
         )
         .first()
+}
+
+function findByUsername(username) {
+    return db('users')
+        .where({ username: username })
+        .select(
+            [
+                'users.id',
+                'users.username',
+                'users.avatar',
+                'users.email',
+                'users.password'
+            ]
+        )
 }
 
 async function add_google_user(user) {

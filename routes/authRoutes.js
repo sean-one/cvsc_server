@@ -6,13 +6,20 @@ const passport = require('passport');
 
 const router = express.Router();
 
-router.get('/google', passport.authenticate("google", { scope: ["profile", "email"] }));
-
-router.get('/google/failed', (req, res) => {
-    res.status(401).json({ message: 'failure'}).redirect('http://localhost:3000/login')
+router.post('/local', passport.authenticate('local', { failureRedirect: '/auth/login/failed' }), (req, res) => {
+    res.status(200).json({ success: true, message: 'successful', user: req.user })
 })
 
-router.get('/google/success', (req, res) => {
+// call google api for profile, email & google_id
+router.get('/google', passport.authenticate("google", { scope: ["profile", "email"] }));
+
+router.get('/google/redirect', passport.authenticate("google", {
+    successRedirect: 'http://localhost:3000/profile',
+    failureRedirect: '/auth/login/failed',
+    session: true
+}))
+
+router.get('/login/success', (req, res) => {
     if(req.user) {
         res.status(200).json({ success: true, message: 'successful', user: req.user })
     } else {
@@ -20,11 +27,9 @@ router.get('/google/success', (req, res) => {
     }
 })
 
-router.get('/google/redirect', passport.authenticate("google", {
-    successRedirect: 'http://localhost:3000/profile',
-    failureRedirect: '/google/failed',
-    session: true
-}))
+router.get('/login/failed', (req, res) => {
+    res.status(401).json({ message: 'failure'}).redirect('http://localhost:3000/login')
+})
 
 router.get('/logout', (req, res, next) => {
     req.logout((err) => {

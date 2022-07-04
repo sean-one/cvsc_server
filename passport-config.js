@@ -1,7 +1,9 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy
+const LocalStrategy = require('passport-local').Strategy
 
-const db = require('./data/models/user')
+const db = require('./data/models/user');
+const { comparePassword } = require('./helpers/bcrypt_helper');
 
 passport.serializeUser((user, done) => {
     done(null, user.id)
@@ -36,6 +38,29 @@ passport.use(
                 done(null, added_google_register[0])
             } else {
                 done(null, google_user[0])
+            }
+        }
+    )
+)
+
+passport.use(
+    new LocalStrategy(
+        async (username, password, done) => {
+            try {
+                if(!username || !password) throw new Error('incomplete_input')
+                
+                const [ user ] = await db.findByUsername(username)
+                if(!user) throw new Error('user_not_found')
+                
+                const password_verify = await comparePassword(password, user.password)
+                if(!password_verify) throw new Error('invalid_credentials')
+                
+                delete user['password']
+
+                done(null, user)
+            } catch (error) {
+                console.log(error)
+                return done(null, false)
             }
         }
     )
