@@ -28,15 +28,14 @@ router.get('/business/:business_id', (req, res) => {
 })
 
 // add role request via the creatorRequestForm
-router.post('/create-request', [ validateToken ], async (req, res, next) => {
+router.post('/create-request', async (req, res, next) => {
     try {
-        const { user_id } = req.decodedToken
         const { business_id } = req.body
         
         if (!business_id) {
             throw new Error('missing_input')
         }
-        const result = await db.createRequest(business_id, user_id)
+        const result = await db.createRequest(business_id, req.user.id)
 
         res.status(200).json(result)
 
