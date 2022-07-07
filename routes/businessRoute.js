@@ -18,10 +18,11 @@ router.get('/', (req, res) => {
 // inside the createBusiness on submit
 // creates a new business with activeBusiness & arppoval set to false also creates a top user admin role
 router.post('/create', [ validateToken ], async (req, res, next) => {
+    // console.log(req.user)
     try {
         const new_business = req.body
 
-        new_business['business_admin'] = req.decodedToken.user_id
+        new_business['business_admin'] = req.user.id
 
         // check to be sure if not brand must include address fields
         if(new_business.business_type === 'brand' && typeof new_business.location === 'object') throw new Error('brand_address_not_valid')

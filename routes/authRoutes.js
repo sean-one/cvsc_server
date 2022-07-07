@@ -1,6 +1,8 @@
 const express = require('express');
 const passport = require('passport');
 
+const rolesDB = require('../data/models/roles')
+
 // const db = require('../data/models/user')
 // const { hashPassword, comparePassword } = require('../helpers/bcrypt_helper');
 
@@ -19,16 +21,19 @@ router.get('/google/redirect', passport.authenticate("google", {
     session: true
 }))
 
-router.get('/login/success', (req, res) => {
+router.get('/login/success', async (req, res) => {
     if(req.user) {
-        res.status(200).json({ success: true, message: 'successful', user: req.user })
+        // grab all active and inactive roles for user
+        const user_roles = await rolesDB.findByUser_All(req.user.id)
+        // add user and roles to return
+        res.status(200).json({ success: true, message: 'successful', user: req.user, roles: user_roles || [] })
     } else {
         res.status(401).json({ success: false, message: 'user not found' })
     }
 })
 
 router.get('/login/failed', (req, res) => {
-    res.status(401).json({ message: 'failure'}).redirect('http://localhost:3000/login')
+    res.status(401).redirect('http://localhost:3000/login')
 })
 
 router.get('/logout', (req, res, next) => {

@@ -4,6 +4,7 @@ const LocalStrategy = require('passport-local').Strategy
 
 const db = require('./data/models/user');
 const { comparePassword } = require('./helpers/bcrypt_helper');
+const { createToken } = require('./helpers/jwt_helper');
 
 passport.serializeUser((user, done) => {
     done(null, user.id)
@@ -11,6 +12,11 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     const user = await db.findById(id)
+
+    // create token then save to user
+    const token = createToken(user)
+    user.token = token
+
     done(null, user)
 })
 
@@ -54,7 +60,7 @@ passport.use(
                 
                 const password_verify = await comparePassword(password, user.password)
                 if(!password_verify) throw new Error('invalid_credentials')
-                
+
                 delete user['password']
 
                 done(null, user)
