@@ -98,7 +98,7 @@ router.post('/approve/:id', [ validateToken, validateRequestRights ], (req, res,
 
 router.post('/upgrade/creator/:id', [ validateToken, validateRequestRights], (req, res, next) => {
     try {
-        const { user_id } = req.decodedToken
+        const user_id = req.user.id
         if(req.validated === true) {
             db.upgradeCreatorRole(req.request_id, user_id)
                 .then(response => {
