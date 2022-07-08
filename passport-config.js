@@ -71,3 +71,16 @@ passport.use(
         }
     )
 )
+
+// passport.use('local-signup', new LocalStrategy({
+//     usernameField: 'username',
+//     passwordField: 'password',
+//     //are there other options?
+//     //emailField did not seem to do anything
+//     passReqToCallback: true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
+// },
+// function(req, email, password, done) {
+//     //check if email not already in database
+//         //create new user using "email" and "password"
+//         //I want an additional parameter here "name"
+// }));
