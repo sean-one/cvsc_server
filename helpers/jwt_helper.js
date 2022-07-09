@@ -31,9 +31,9 @@ const validateUser = (req, res, next) => {
 const validateManagmentRole = async (req, res, next) => {
     try {
         const user_id = req.user.id
-        const request_id = req.params.request_id
+        const role_id = req.params.role_id
 
-        const user_role_request = await db.findById(request_id)
+        const user_role_request = await db.findById(role_id)
         const admin_role = await db.findRole(user_id, user_role_request.business_id)
 
         if(admin_role.role_type === 'admin' || admin_role.role_type === 'manager'){

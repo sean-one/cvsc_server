@@ -78,30 +78,25 @@ router.get('/pending-request', [ validateToken ], async (req, res) => {
 })
 
 // pendingRequest approval button
-router.post('/approve/:request_id', [ validateManagmentRole ], async (req, res, next) => {
+router.post('/approve_pending/:role_id', [ validateManagmentRole ], async (req, res, next) => {
     const management_id = await req.user.id
-    const new_creator = await db.approveRoleRequest(req.params.request_id, management_id)
+    const new_creator = await db.approveRoleRequest(req.params.role_id, management_id)
     
     res.status(200).json(new_creator)
 })
 
-router.post('/upgrade/creator/:id', [ validateToken, validateManagmentRole], (req, res, next) => {
-    try {
-        const user_id = req.user.id
-        if(req.validated === true) {
-            db.upgradeCreatorRole(req.request_id, user_id)
-                .then(response => {
-                    res.status(200).json(response)
-                })
-                .catch(err => console.log(err))
-        } else {
-            throw new Error('not_validated')
-        }
-    } catch (error) {
-        console.log(error)
-        next(error)
-    }
+router.post('/upgrade_creator/:role_id', [ validateManagmentRole], async (req, res, next) => {
+    const management_id = await req.user.id
+    const new_manager = await db.upgradeCreatorRole(req.params.role_id, management_id)
 
+    res.status(200).json(new_manager)
+})
+
+router.post('/downgrade_manager/:role_id', [], async (req, res, next) => {
+    const admin_id = await req.user.id
+    const creator_role = await db.downgradeManagerRole(req.params.role_id, admin_id)
+
+    res.status(200).json(creator_role)
 })
 
 // pendingRequest reject button
