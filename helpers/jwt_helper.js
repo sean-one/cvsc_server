@@ -20,27 +20,27 @@ const createToken = (user) => {
 
 // used - /roles/user/:id
 const validateUser = (req, res, next) => {
-    if (req.params.id.toString() === req.decodedToken.user_id.toString()) {
+    if (req.user.id.toString() === req.decodedToken.user_id.toString()) {
         next()
     } else {
         res.status(404).json({ message: 'wrong user' })
     }
 }
 
-// USED - /roles/approve/:id, /roles/reject/:id
-const validateRequestRights = async (req, res, next) => {
+// USED - /roles/approve/:request_id, /roles/reject/:id
+const validateManagmentRole = async (req, res, next) => {
     try {
-        const { user_id } = req.decodedToken
-        const request_id = req.params.id
-        const { business_id } = await db.findById(request_id)
+        const user_id = req.user.id
+        const request_id = req.params.request_id
 
-        // validate that user has role of admin or manager for the selected business
-        await db.userValidation(user_id, business_id)        
+        const user_role_request = await db.findById(request_id)
+        const admin_role = await db.findRole(user_id, user_role_request.business_id)
 
-        req.validated = true;
-        req.request_id = request_id;
-
-        next()
+        if(admin_role.role_type === 'admin' || admin_role.role_type === 'manager'){
+            next()
+        } else {
+            throw new Error('invalid_role_rights')
+        }
 
     } catch (error) {
         next({
@@ -52,9 +52,11 @@ const validateRequestRights = async (req, res, next) => {
 }
 
 const validateToken = (req, res, next) => {
+    // console.log(req.headers)
     try {
-
+        console.log('inside validateToken')
         const token = req.headers.authorization.split(' ')[1];
+        console.log(`token: ${token}`)
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         
         req.decodedToken = decoded;
@@ -101,6 +103,6 @@ module.exports = {
     createToken,
     validateToken,
     validateUser,
-    validateRequestRights,
+    validateManagmentRole,
     validateUserRole,
 }

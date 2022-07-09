@@ -16,6 +16,10 @@ const roleErrors = {
     roles_user_id_foreign: {
         status: 404,
         message: 'user not found'
+    },
+    delete_error: {
+        status: 400,
+        message: 'bad request error'
     }
 }
 

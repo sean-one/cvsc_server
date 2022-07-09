@@ -3,6 +3,7 @@ const db = require('../dbConfig');
 module.exports = {
     find,
     findById,
+    findRole,
     findByBusiness,
     userValidation,
     getUserBusinessRoles,
@@ -10,6 +11,7 @@ module.exports = {
     getPendingRequest,
     approveRoleRequest,
     upgradeCreatorRole,
+    removeUserRole,
     rejectRequest,
     createRequest,
 }
@@ -25,7 +27,9 @@ async function findById(request_id) {
         .where({ 'roles.id': request_id })
         .select(
             [
-                'business_id'
+                'roles.business_id',
+                'roles.user_id',
+                'roles.role_type'
             ]
         )
         .first()
@@ -34,6 +38,22 @@ async function findById(request_id) {
         throw new Error('request_not_found')
     } else {
         return role_request;
+    }
+}
+
+async function findRole(user_id, business_id) {
+    const role = await db('roles')
+        .where({ user_id: user_id, business_id: business_id })
+        .select(
+            [
+                'roles.role_type'
+            ]
+        )
+        .first()
+    if(role === null) {
+        throw new Error('manage_role_not_found')
+    } else {
+        return role;
     }
 }
 
@@ -147,16 +167,13 @@ async function getPendingRequest(user_id) {
     }
 }
 
-// pendingRequest /roles/approve/:id
+// pendingRequest /roles/approve/:request_id
 async function approveRoleRequest(request_id, admin_id) {
 
     await db('roles')
         .where({ id: request_id })
         .update({ active_role: true, approved_by: admin_id})
 
-    // update account_type from 'basic' to 'creator' ignore if not 'basic'
-    // await db('users').where({ id: updated_role[0].user_id, account_type: 'basic' }).update({ account_type: 'creator' })
-    
     return await db('roles')
         .where({ 'roles.id': request_id })
         .leftJoin('users', 'roles.user_id', '=', 'users.id')
@@ -196,6 +213,18 @@ async function upgradeCreatorRole(request_id, admin_id) {
             ]
         )
         .first()
+}
+
+async function removeUserRole(request_id) {
+    const deleted_count = await db('roles')
+        .where({ id: request_id})
+        .del()
+
+    if(deleted_count >= 1) {
+        return deleted_count;
+    } else {
+        throw new Error('delete_error')
+    }
 }
 
 // pendingRequest /roles/reject/:id

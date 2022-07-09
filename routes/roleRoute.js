@@ -2,7 +2,7 @@ const express = require('express');
 
 const db = require('../data/models/roles');
 const roleErrors = require('../error_messages/roleErrors');
-const { validateUser, validateToken, validateRequestRights } = require('../helpers/jwt_helper')
+const { validateUser, validateToken, validateManagmentRole } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
@@ -78,25 +78,14 @@ router.get('/pending-request', [ validateToken ], async (req, res) => {
 })
 
 // pendingRequest approval button
-router.post('/approve/:id', [ validateToken, validateRequestRights ], (req, res, next) => {
-    try {
-        const { user_id } = req.decodedToken
-        if(req.validated === true) {
-            db.approveRoleRequest(req.request_id, user_id)
-                .then(response => {
-                    res.status(200).json(response)
-                })
-                .catch(err => console.log(err))
-        } else {
-            throw new Error('not_validated')
-        }
-    } catch (error) {
-        console.log(error)
-        next(error)
-    }
+router.post('/approve/:request_id', [ validateManagmentRole ], async (req, res, next) => {
+    const management_id = await req.user.id
+    const new_creator = await db.approveRoleRequest(req.params.request_id, management_id)
+    
+    res.status(200).json(new_creator)
 })
 
-router.post('/upgrade/creator/:id', [ validateToken, validateRequestRights], (req, res, next) => {
+router.post('/upgrade/creator/:id', [ validateToken, validateManagmentRole], (req, res, next) => {
     try {
         const user_id = req.user.id
         if(req.validated === true) {
@@ -116,7 +105,18 @@ router.post('/upgrade/creator/:id', [ validateToken, validateRequestRights], (re
 })
 
 // pendingRequest reject button
-router.delete('/reject-request/:id', [ validateToken, validateRequestRights ], (req, res, next) => {
+router.delete('/user_remove/:request_id', [ validateManagmentRole ], async (req, res, next) => {
+    try {
+        const deleted_count = await db.removeUserRole(req.params.request_id)
+        
+        res.status(200).json(deleted_count)
+    } catch (error) {
+        next(error)
+    }
+})
+
+
+router.delete('/reject-request/:id', [ validateToken, validateManagmentRole ], (req, res, next) => {
     try {
         if(req.validated) {
             db.rejectRequest(req.request_id)
