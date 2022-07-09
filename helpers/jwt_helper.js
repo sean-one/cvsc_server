@@ -51,6 +51,29 @@ const validateManagmentRole = async (req, res, next) => {
     }
 }
 
+const validateAdminRole = async (req, res, next) => {
+    try {
+        const admin_id = req.user.id
+        const role_id = req.params.role_id
+
+        const user_role_request = await db.findById(role_id)
+        const admin_role = await db.findRole(admin_id, user_role_request.business_id)
+
+        if(admin_role.role_type === 'admin'){
+            next()
+        } else {
+            throw new Error('invalid_role_rights')
+        }
+
+    } catch (error) {
+        next({
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type
+        })
+    }
+}
+
 const validateToken = (req, res, next) => {
     // console.log(req.headers)
     try {
@@ -104,5 +127,6 @@ module.exports = {
     validateToken,
     validateUser,
     validateManagmentRole,
+    validateAdminRole,
     validateUserRole,
 }

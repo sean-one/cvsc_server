@@ -2,7 +2,7 @@ const express = require('express');
 
 const db = require('../data/models/roles');
 const roleErrors = require('../error_messages/roleErrors');
-const { validateUser, validateToken, validateManagmentRole } = require('../helpers/jwt_helper')
+const { validateUser, validateToken, validateManagmentRole, validateAdminRole } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
@@ -92,7 +92,7 @@ router.post('/upgrade_creator/:role_id', [ validateManagmentRole], async (req, r
     res.status(200).json(new_manager)
 })
 
-router.post('/downgrade_manager/:role_id', [], async (req, res, next) => {
+router.post('/downgrade_manager/:role_id', [ validateAdminRole ], async (req, res, next) => {
     const admin_id = await req.user.id
     const creator_role = await db.downgradeManagerRole(req.params.role_id, admin_id)
 
@@ -100,9 +100,19 @@ router.post('/downgrade_manager/:role_id', [], async (req, res, next) => {
 })
 
 // pendingRequest reject button
-router.delete('/user_remove/:request_id', [ validateManagmentRole ], async (req, res, next) => {
+router.delete('/user_remove/:role_id', [ validateManagmentRole ], async (req, res, next) => {
     try {
-        const deleted_count = await db.removeUserRole(req.params.request_id)
+        const deleted_count = await db.removeUserRole(req.params.role_id)
+        
+        res.status(200).json(deleted_count)
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.delete('/manager_remove/:role_id', [ validateAdminRole ], async (req, res, next) => {
+    try {
+        const deleted_count = await db.removeUserRole(req.params.role_id)
         
         res.status(200).json(deleted_count)
     } catch (error) {
