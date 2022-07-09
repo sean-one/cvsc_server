@@ -13,7 +13,6 @@ module.exports = {
     upgradeCreatorRole,
     downgradeManagerRole,
     removeUserRole,
-    rejectRequest,
     createRequest,
 }
 
@@ -135,38 +134,6 @@ function findByUser_All(user_id) {
             ]
         )
 }
-    
-// roles/pending-request
-async function getPendingRequest(user_id) {
-    // get business ids that user has business admin rights to
-    const { business_ids } = await db('roles')
-        .whereIn('role_type', ['admin', 'manager'])
-        .andWhere({ 'roles.user_id': user_id })
-        .select([ db.raw('JSON_AGG(roles.business_id) as business_ids') ])
-        .first()
-
-    if (!!business_ids) {
-        return await db('roles')
-            .whereIn('roles.business_id', business_ids)
-            .where({ 'roles.active_role': false })
-            .whereNot({ 'roles.user_id': user_id })
-            .join('users', 'roles.user_id', '=', 'users.id')
-            .join('businesses', 'roles.business_id', '=', 'businesses.id')
-            .select(
-                [
-                    'roles.id',
-                    'roles.user_id',
-                    'users.username',
-                    'roles.business_id',
-                    'businesses.business_name',
-                    'roles.role_type',
-                    'roles.active_role'
-                ]
-            )
-    } else {
-        return []
-    }
-}
 
 // pendingRequest /roles/approve/:request_id
 async function approveRoleRequest(request_id, admin_id) {
@@ -245,18 +212,6 @@ async function removeUserRole(request_id) {
         return deleted_count;
     } else {
         throw new Error('delete_error')
-    }
-}
-
-// pendingRequest /roles/reject/:id
-async function rejectRequest(req_id) {
-    try {
-        return await db('roles')
-            .where({ 'roles.id': req_id })
-            .del()
-        
-    } catch (error) {
-        throw new Error('delete_failed')
     }
 }
 

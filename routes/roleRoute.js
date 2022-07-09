@@ -59,24 +59,6 @@ router.post('/create-request', async (req, res, next) => {
     }
 })
 
-// get an array of pending request based on business admin & manager rights
-router.get('/pending-request', [ validateToken ], async (req, res) => {
-    try {
-        const { user_id } = req.decodedToken
-        const results = await db.getPendingRequest(user_id)
-
-        if(results) {
-            res.status(200).json(results)
-        } else {
-            throw new Error('server_error')
-        }
-        
-    } catch (error) {
-        
-        next(error)
-    }
-})
-
 // pendingRequest approval button
 router.post('/approve_pending/:role_id', [ validateManagmentRole ], async (req, res, next) => {
     const management_id = await req.user.id
@@ -119,26 +101,6 @@ router.delete('/manager_remove/:role_id', [ validateAdminRole ], async (req, res
         next(error)
     }
 })
-
-
-router.delete('/reject-request/:id', [ validateToken, validateManagmentRole ], (req, res, next) => {
-    try {
-        if(req.validated) {
-            db.rejectRequest(req.request_id)
-                .then(response => {
-                    res.status(204).json(response)
-                })
-                .catch(err => console.log(err))
-        } else {
-            throw new Error('not_validated')
-        }
-    } catch (error) {
-        next(error)
-    }
-})
-
-
-
 
 router.get('/', (req, res) => {
     db.find()
