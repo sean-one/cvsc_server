@@ -8,7 +8,6 @@ module.exports = {
     userValidation,
     getUserBusinessRoles,
     findByUser_All,
-    getPendingRequest,
     approveRoleRequest,
     upgradeCreatorRole,
     downgradeManagerRole,

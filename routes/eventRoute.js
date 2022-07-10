@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
-const { validateToken, validateUser, validateUserRole } = require('../helpers/jwt_helper');
+const { validateToken, validateUser, validateUserRole, validateCreatorRights } = require('../helpers/jwt_helper');
 
 // '/events'
 const router = express.Router();
@@ -39,7 +39,7 @@ router.put('/:id', [ validateToken, validateUserRole ], (req, res) => {
         });
 })
 
-router.post('/', [ validateToken, validateUserRole ], async (req, res, next) => {
+router.post('/', [ validateCreatorRights ], async (req, res, next) => {
     try {
         const new_event = {
             eventname: req.body.eventname,
@@ -50,15 +50,13 @@ router.post('/', [ validateToken, validateUserRole ], async (req, res, next) => 
             brand_id: req.body.brand_id,
             details: req.body.details,
             eventmedia: req.body.eventmedia,
-            created_by: req.decodedToken.user_id
+            created_by: req.user.id
 
         }
-        // const newEvent = req.body
-        // newEvent.created_by = req.decodedToken.user_id
         
         const event = await db.createEvent(new_event)
         
-        res.status(200).json(event);
+        res.status(201).json(event);
 
     } catch (error) {
         console.log(error)

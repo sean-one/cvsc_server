@@ -27,6 +27,26 @@ const validateUser = (req, res, next) => {
     }
 }
 
+const validateCreatorRights = async (req, res, next) => {
+    try {
+        const user_id = req.user.id
+        const { business_ids } = await db.getUserBusinessRoles(user_id)
+
+        if(business_ids.includes(req.body.venue_id) || business_ids.includes(req.body.brand_id)) {
+            next()
+        } else {
+            throw new Error('invalid_role_rights')
+        }
+        
+    } catch (error) {
+        next({
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type,
+        })
+    }
+}
+
 // USED - /roles/approve/:request_id, /roles/reject/:id
 const validateManagmentRole = async (req, res, next) => {
     try {
@@ -126,6 +146,7 @@ module.exports = {
     createToken,
     validateToken,
     validateUser,
+    validateCreatorRights,
     validateManagmentRole,
     validateAdminRole,
     validateUserRole,
