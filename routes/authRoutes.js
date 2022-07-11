@@ -3,10 +3,8 @@ const passport = require('passport');
 
 const rolesDB = require('../data/models/roles')
 
-// const db = require('../data/models/user')
-// const { hashPassword, comparePassword } = require('../helpers/bcrypt_helper');
-
 const router = express.Router();
+
 
 router.post('/local', passport.authenticate('local', { failureRedirect: '/auth/login/failed' }), (req, res) => {
     res.status(200).json({ success: true, message: 'successful', user: req.user })
@@ -16,12 +14,13 @@ router.post('/local', passport.authenticate('local', { failureRedirect: '/auth/l
 router.get('/google', passport.authenticate("google", { scope: ["profile", "email"] }));
 
 router.get('/google/redirect', passport.authenticate("google", {
-    successRedirect: 'http://localhost:3000/profile',
+    successRedirect: `${process.env.FRONTEND_CLIENT}/profile`,
     failureRedirect: '/auth/login/failed',
     session: true
 }))
 
 router.get('/login/success', async (req, res) => {
+    console.log(`req.user: ${req.user}`)
     if(req.user) {
         // grab all active and inactive roles for user
         const user_roles = await rolesDB.findByUser_All(req.user.id)
@@ -33,7 +32,7 @@ router.get('/login/success', async (req, res) => {
 })
 
 router.get('/login/failed', (req, res) => {
-    res.status(401).redirect('http://localhost:3000/login')
+    res.status(401).redirect(`${process.env.FRONTEND_CLIENT}/login`)
 })
 
 router.get('/logout', (req, res, next) => {
@@ -41,7 +40,6 @@ router.get('/logout', (req, res, next) => {
         if (err) { return next(err); }
     })
     res.status(200).json({ success: true, message: 'successful logout' })
-    // res.redirect('http://localhost:3000')
 })
 
 module.exports = router;
