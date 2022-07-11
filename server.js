@@ -48,7 +48,7 @@ app.use(passport.initialize());
 app.use(passport.session())
 
 app.use(cors({
-    origin: [ "http://localhost:3000", process.env.FRONTEND_CLIENT, /\.localhost:3000/ ],
+    origin: [process.env.FRONTEND_CLIENT, "http://192.168.1.36:3000", /\.localhost:3000/ ],
     methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
     credentials: true
 }));
