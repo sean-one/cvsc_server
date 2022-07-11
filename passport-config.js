@@ -62,6 +62,7 @@ passport.use(
                 if(!user) {
                     const hash = await hashPassword(req.body.password);
 
+                    // if req.body.email is not there error bad username
                     const new_user = {
                         username: req.body.username,
                         password: hash,
