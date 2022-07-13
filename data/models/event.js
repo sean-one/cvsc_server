@@ -40,6 +40,7 @@ function find() {
 
 }
 
+// used inside validateEventEditRights
 function findById(eventId) {
     return db('events')
         .where({ 'events.id' : eventId })

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/roles');
+const eventDB = require('../data/models/event');
 const tokenErrors = require('../error_messages/tokenErrors');
 
 // used at users/register, users/login
@@ -124,6 +125,20 @@ const validateToken = (req, res, next) => {
         }
     }
 }
+
+// const validateEventEditRights = async (req, res, next) => {
+//     const event_id = req.params.id
+//     const { venue_id, brand_id, created_by } = await eventDB.findById(event_id)
+//     let request_user_role
+
+//     // if user is the user who created the event access granted
+//     if(created_by === req.user.id) { next() }
+
+//     if(venue_id === brand_id) {
+//         request_user_role = await db.findRole(req.user.id, venue_id)
+//     }
+
+// }
 
 // validates a user when creating or making changes to an event
 const validateUserRole = async (req, res, next) => {
