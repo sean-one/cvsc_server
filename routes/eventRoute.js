@@ -1,9 +1,9 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
-const { validateToken, validateUser, validateUserRole, validateCreatorRights } = require('../helpers/jwt_helper');
+const { validateToken, validateUser, validateUserRole, validateCreatorRights, validateEventEditRights } = require('../helpers/jwt_helper');
 
 // '/events'
 const router = express.Router();
@@ -27,16 +27,22 @@ router.get('/:id', (req, res) => {
         });
 })
 
-router.put('/:id', [ validateToken, validateUserRole ], (req, res) => {
-    const { id } = req.params
-    const changes = req.body;
-    db.updateEvent(id, changes)
-        .then(event => {
-            res.status(201).json(event)
-        })
-        .catch(err => {
-            res.status(500).json({ message: "server not connected", err });
-        });
+router.put('/:id', [ validateEventEditRights, validateToken, validateUserRole ], (req, res, next) => {
+    try {
+        const { id } = req.params
+        const changes = req.body;
+        db.updateEvent(id, changes)
+            .then(event => {
+                res.status(201).json(event)
+            })
+            .catch(err => {
+                console.log(err)
+                res.status(500).json({ message: "server not connected", err });
+            });
+    } catch (error) {
+        console.log(error.message)
+        next(error)
+    }
 })
 
 router.post('/', [ validateCreatorRights ], async (req, res, next) => {

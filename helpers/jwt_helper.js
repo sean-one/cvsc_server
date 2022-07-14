@@ -126,19 +126,40 @@ const validateToken = (req, res, next) => {
     }
 }
 
-// const validateEventEditRights = async (req, res, next) => {
-//     const event_id = req.params.id
-//     const { venue_id, brand_id, created_by } = await eventDB.findById(event_id)
-//     let request_user_role
+const validateEventEditRights = async (req, res, next) => {
+    try {
+        const event_update = req.body
+        const event_id = req.params.id
+        const { venue_id, brand_id, created_by } = await eventDB.findById(event_id)
+        let business_id_list = [ venue_id, brand_id ]
+        
+        // if user is the user who created the event access granted
+        if(created_by === req.user.id) { next() }
+    
+        // if updating venue update business_ids
+        if(event_update.venue_id !== venue_id) {
+            business_id_list[0] = event_update.venue_id
+        }
+    
+        // if updating brand update business_ids
+        if(event_update.brand_id !== brand_id) {
+            business_id_list[1] = event_update.brand_id
+        }
+    
+        const editor_roles = await db.checkUserRoles(req.user.id, business_id_list)
+        
+        console.log(`editor_roles:`)
+        console.log(editor_roles)
+    
+        next()
 
-//     // if user is the user who created the event access granted
-//     if(created_by === req.user.id) { next() }
-
-//     if(venue_id === brand_id) {
-//         request_user_role = await db.findRole(req.user.id, venue_id)
-//     }
-
-// }
+    } catch (error) {
+        next({ 
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message
+        })
+    }
+}
 
 // validates a user when creating or making changes to an event
 const validateUserRole = async (req, res, next) => {
@@ -162,5 +183,6 @@ module.exports = {
     validateCreatorRights,
     validateManagmentRole,
     validateAdminRole,
+    validateEventEditRights,
     validateUserRole,
 }

@@ -4,6 +4,7 @@ module.exports = {
     find,
     findById,
     findRole,
+    checkUserRoles,
     findByBusiness,
     userValidation,
     getUserBusinessRoles,
@@ -37,6 +38,23 @@ async function findById(request_id) {
         throw new Error('request_not_found')
     } else {
         return role_request;
+    }
+}
+
+async function checkUserRoles(user_id, business_ids) {
+    const roles = await db('roles')
+        .where({ user_id: user_id, active_role: true })
+        .whereIn('business_id', business_ids)
+        .select(
+            [
+                'roles.business_id',
+                'roles.role_type',
+            ]
+        )
+    if(roles.length <= 0) {
+        throw new Error('invalid_user_rights')
+    } else {
+        return roles;
     }
 }
 
