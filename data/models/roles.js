@@ -42,7 +42,7 @@ async function findById(request_id) {
 }
 
 async function checkUserRoles(user_id, business_ids) {
-    const roles = await db('roles')
+    return await db('roles')
         .where({ user_id: user_id, active_role: true })
         .whereIn('business_id', business_ids)
         .select(
@@ -51,11 +51,6 @@ async function checkUserRoles(user_id, business_ids) {
                 'roles.role_type',
             ]
         )
-    if(roles.length <= 0) {
-        throw new Error('invalid_user_rights')
-    } else {
-        return roles;
-    }
 }
 
 async function findRole(user_id, business_id) {

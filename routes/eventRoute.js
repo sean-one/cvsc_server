@@ -27,7 +27,7 @@ router.get('/:id', (req, res) => {
         });
 })
 
-router.put('/:id', [ validateEventEditRights, validateToken, validateUserRole ], (req, res, next) => {
+router.put('/:id', [ validateEventEditRights ], (req, res, next) => {
     try {
         const { id } = req.params
         const changes = req.body;

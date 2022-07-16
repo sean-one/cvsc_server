@@ -148,9 +148,14 @@ const validateEventEditRights = async (req, res, next) => {
     
         const editor_roles = await db.checkUserRoles(req.user.id, business_id_list)
         
-        console.log(`editor_roles:`)
-        console.log(editor_roles)
-    
+        if (editor_roles.length <= 0) {
+            throw new Error('roles_not_found')
+        }
+
+        const validated_index = editor_roles.findIndex(role => role.role_type === 'admin' || role.role_type === 'manager')
+
+        if (validated_index === -1) { throw new Error('update_failed') }
+        
         next()
 
     } catch (error) {
