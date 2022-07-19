@@ -19,7 +19,8 @@ const tokenErrors = {
     },
     invalid_role_rights : {
         status: 403,
-        message: 'user does not have correct role rights'
+        message: 'user does not have correct role rights',
+        type:'role_validation'
     },
     non_matching_request: {
         status: 400,
@@ -35,7 +36,8 @@ const tokenErrors = {
     },
     roles_not_found: {
         status: 404,
-        message: 'matching role rights not found'
+        message: 'matching role rights not found',
+        type: 'role_validation'
     }
 }
 

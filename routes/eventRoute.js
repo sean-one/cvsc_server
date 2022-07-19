@@ -29,6 +29,7 @@ router.get('/:id', (req, res) => {
 
 router.put('/:id', [ validateEventEditRights ], (req, res, next) => {
     try {
+        console.log('finished validation')
         const { id } = req.params
         const changes = req.body;
         db.updateEvent(id, changes)
@@ -40,6 +41,7 @@ router.put('/:id', [ validateEventEditRights ], (req, res, next) => {
                 res.status(500).json({ message: "server not connected", err });
             });
     } catch (error) {
+        console.log('this is the error in event route')
         console.log(error.message)
         next(error)
     }

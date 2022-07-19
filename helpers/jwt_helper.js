@@ -135,12 +135,12 @@ const validateEventEditRights = async (req, res, next) => {
         
         // if user is the user who created the event access granted
         if(created_by === req.user.id) { next() }
-    
+        
         // if updating venue update business_ids
         if(event_update.venue_id !== venue_id) {
             business_id_list[0] = event_update.venue_id
         }
-    
+        
         // if updating brand update business_ids
         if(event_update.brand_id !== brand_id) {
             business_id_list[1] = event_update.brand_id
@@ -153,15 +153,16 @@ const validateEventEditRights = async (req, res, next) => {
         }
 
         const validated_index = editor_roles.findIndex(role => role.role_type === 'admin' || role.role_type === 'manager')
-
-        if (validated_index === -1) { throw new Error('update_failed') }
+        
+        if (validated_index === -1) { throw new Error('invalid_role_rights') }
         
         next()
 
     } catch (error) {
         next({ 
             status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type
         })
     }
 }
