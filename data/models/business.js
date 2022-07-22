@@ -6,6 +6,7 @@ module.exports = {
     findById,
     addBusiness,
     updateBusiness,
+    toggleActiveBusiness,
     findPending,
     remove
 };
@@ -252,6 +253,50 @@ async function updateBusiness(business_id, business) {
         // console.log(error)
         throw error
     }
+}
+
+// toggle active business between true and false from business controls componenet
+async function toggleActiveBusiness(business_id, admin_id) {
+    const business = await db('businesses')
+        .where({ 'businesses.id': business_id, 'businesses.business_admin': admin_id })
+        .select(
+        [
+                'businesses.id',
+                'businesses.active_business',
+            ]
+        )
+        .first()
+
+    await db('businesses')
+            .where({ id: business.id })
+            .update({ active_business: !business.active_business })
+    
+    return await db('businesses')
+            .where({ 'businesses.id': business_id })
+            .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+            .select([
+                'businesses.id',
+                'businesses.business_name',
+                'businesses.business_avatar',
+                'businesses.business_description',
+                'businesses.business_type',
+                'businesses.business_request_open',
+                'businesses.active_business',
+                'businesses.business_admin',
+                'businesses.business_email',
+                'businesses.business_phone',
+                'businesses.business_instagram',
+                'businesses.business_facebook',
+                'businesses.business_website',
+                'businesses.business_twitter',
+                'locations.id as location_id',
+                'locations.street_address',
+                'locations.location_city',
+                'locations.location_state',
+                'locations.zip_code',
+                'locations.formatted'
+            ])
+            .first()
 }
 
 async function remove(business_id) {
