@@ -4,6 +4,7 @@ const googleMapsClient = require('../../helpers/geocoder');
 module.exports = {
     find,
     findById,
+    findByBusiness,
     updateLocation
 };
 
@@ -15,6 +16,22 @@ function findById(id) {
     return db('locations')
         .where({ id })
         .select([ 'id', 'street_address', 'location_city', 'location_state', 'zip_code' ])
+        .first()
+}
+
+function findByBusiness(business_id) {
+    return db('locations')
+        .where({ venue_id: business_id })
+        .select(
+            [
+                'id',
+                'street_address',
+                'location_city',
+                'location_state',
+                'zip_code',
+                'venue_name'
+            ]
+        )
         .first()
 }
 
@@ -37,36 +54,49 @@ async function updateLocation(location_id, location_update) {
 
         const updated_business_location = await db('locations')
             .where({ id: location_id})
-            .update(location, [ 'venue_id' ])
+            .update(location, [ 'id' ])
         
-        return await db('businesses')
-            .where({ 'businesses.id': updated_business_location[0].venue_id })
-            .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+        return await db('locations')
+            .where({ id: updated_business_location.id })
             .select(
                 [
-                    'businesses.id',
-                    'businesses.business_name',
-                    'businesses.business_avatar',
-                    'businesses.business_description',
-                    'businesses.business_type',
-                    'businesses.business_request_open',
-                    'businesses.active_business',
-                    'businesses.business_admin',
-                    'businesses.business_email',
-                    'businesses.business_phone',
-                    'businesses.business_instagram',
-                    'businesses.business_facebook',
-                    'businesses.business_website',
-                    'businesses.business_twitter',
-                    'locations.id as location_id',
-                    'locations.street_address',
-                    'locations.location_city',
-                    'locations.location_state',
-                    'locations.zip_code',
-                    'locations.formatted'
+                    'id',
+                    'street_address',
+                    'location_city',
+                    'location_state',
+                    'zip_code',
+                    'venue_name'
                 ]
             )
-            .first();
+            .first()
+        // return await db('businesses')
+        //     .where({ 'businesses.id': updated_business_location[0].venue_id })
+        //     .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+        //     .select(
+        //         [
+        //             'businesses.id',
+        //             'businesses.business_name',
+        //             'businesses.business_avatar',
+        //             'businesses.business_description',
+        //             'businesses.business_type',
+        //             'businesses.business_request_open',
+        //             'businesses.active_business',
+        //             'businesses.business_admin',
+        //             'businesses.business_email',
+        //             'businesses.business_phone',
+        //             'businesses.business_instagram',
+        //             'businesses.business_facebook',
+        //             'businesses.business_website',
+        //             'businesses.business_twitter',
+        //             'locations.id as location_id',
+        //             'locations.street_address',
+        //             'locations.location_city',
+        //             'locations.location_state',
+        //             'locations.zip_code',
+        //             'locations.formatted'
+        //         ]
+        //     )
+        //     .first();
         
     } catch (error) {
         throw error

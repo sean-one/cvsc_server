@@ -13,6 +13,17 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
+router.get('/business/:business_id', (req, res) => {
+    const { business_id } = req.params
+    db.findByBusiness(business_id)
+        .then(business_location => {
+            res.status(200).json(business_location)
+        })
+        .catch(err => {
+            console.log(err)
+        })
+})
+
 router.get('/:id', (req, res) => {
     const { id } = req.params;
 
