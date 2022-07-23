@@ -15,7 +15,7 @@ function find() {
 function findById(id) {
     return db('locations')
         .where({ id })
-        .select([ 'id', 'street_address', 'location_city', 'location_state', 'zip_code' ])
+        .select([ 'id', 'street_address', 'location_city', 'location_state', 'zip_code', 'formatted' ])
         .first()
 }
 
@@ -29,7 +29,8 @@ function findByBusiness(business_id) {
                 'location_city',
                 'location_state',
                 'zip_code',
-                'venue_name'
+                'venue_name',
+                'formatted'
             ]
         )
         .first()
@@ -65,7 +66,8 @@ async function updateLocation(location_id, location_update) {
                     'location_city',
                     'location_state',
                     'zip_code',
-                    'venue_name'
+                    'venue_name',
+                    'formatted'
                 ]
             )
             .first()
