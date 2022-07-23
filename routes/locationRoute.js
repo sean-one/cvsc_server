@@ -40,11 +40,11 @@ router.get('/:id', (req, res) => {
         });
 });
 
-router.put('/:id', (req, res, next) => {
-    const { id } = req.params;
+router.put('/:location_id', (req, res, next) => {
+    const { location_id } = req.params;
     const location_update = req.body;
 
-    db.updateLocation(id, location_update)
+    db.updateLocation(location_id, location_update)
         .then(location => {
             if(location) {
                 res.status(201).json(location);
