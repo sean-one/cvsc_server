@@ -46,10 +46,10 @@ router.post('/create', [ validateToken ], async (req, res, next) => {
     }
 })
 
-router.put('/:id', (req, res) => {
-    const { id } = req.params;
+router.put('/:business_id', (req, res) => {
+    const { business_id } = req.params;
     const business_update = req.body;
-    db.updateBusiness(id, business_update)
+    db.updateBusiness(business_id, business_update)
         .then(business => {
             res.status(201).json(business)
         })
