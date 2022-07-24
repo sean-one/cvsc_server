@@ -249,6 +249,8 @@ async function updateBusiness(business_id, business) {
                 'locations.zip_code',
                 'locations.formatted'
             ])
+            .first()
+            
     } catch (error) {
         // console.log(error)
         throw error

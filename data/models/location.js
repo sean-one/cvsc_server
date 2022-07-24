@@ -53,12 +53,12 @@ async function updateLocation(location_id, location_update) {
             place_id: geoCode.json.results[0].place_id
         }
 
-        const updated_business_location = await db('locations')
+        await db('locations')
             .where({ id: location_id})
             .update(location, [ 'id' ])
         
         return await db('locations')
-            .where({ id: updated_business_location.id })
+            .where({ id: location_id })
             .select(
                 [
                     'id',
