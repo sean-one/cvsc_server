@@ -1,13 +1,16 @@
 const db = require('../dbConfig');
 
 module.exports = {
+    emailDuplicate,
     find,
+    findByEmail,
     findById,
     findByUsername,
     add_google_user,
     search_google_user,
     user_login,
     register_user,
+    usernameDuplicate,
     updateAvatar,
     remove
 };
@@ -28,6 +31,36 @@ function findById(id) {
             ]
         )
         .first()
+}
+
+function findByEmail(email) {
+    return db('users')
+        .where({ email: email })
+        .select(
+            [
+                'users.id',
+                'users.email'
+            ]
+        )
+        .first()
+}
+
+async function usernameDuplicate(username) {
+    const user = await db('users').where({ username: username }).select([ 'users.id' ]).first()
+    if(user === undefined) {
+        return false
+    } else {
+        return true
+    } 
+}
+
+async function emailDuplicate(email) {
+    const user = await db('users').where({ email: email }).select([ 'users.id' ]).first()
+    if(user === undefined) {
+        return false
+    } else {
+        return true
+    }
 }
 
 function findByUsername(username) {

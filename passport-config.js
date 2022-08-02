@@ -5,6 +5,7 @@ const LocalStrategy = require('passport-local').Strategy
 const db = require('./data/models/user');
 const { hashPassword, comparePassword } = require('./helpers/bcrypt_helper');
 const { createToken } = require('./helpers/jwt_helper');
+const authErrors = require('./error_messages/authErrors');
 
 passport.serializeUser((user, done) => {
     done(null, user.id)
@@ -55,35 +56,48 @@ passport.use(
     },
         async (req, username, password, done) => {
             try {
-                if(!username || !password) throw new Error('incomplete_input')
-                
-                const [ user ] = await db.findByUsername(username)
-                // if(!user) throw new Error('user_not_found')
-                if(!user) {
-                    const hash = await hashPassword(req.body.password);
+                // check for new user
+                if(req.body.register) {
 
-                    // if req.body.email is not there error bad username
-                    const new_user = {
-                        username: req.body.username,
-                        password: hash,
-                        email: req.body.email
-                    }
+                    // check for complete registration
+                    const new_user = { username: req.body.username, password: req.body.password, email: req.body.email }
+                    if (!new_user.username || !new_user.password || !new_user.email) { throw new Error('incomplete_input') }
 
+                    // check for username duplicate
+                    const check_for_username = await db.usernameDuplicate(new_user.username)
+                    if(check_for_username) { throw new Error('duplicate_username') }
+
+                    // check for email duplicate
+                    const check_for_email = await db.emailDuplicate(new_user.email)
+                    if(check_for_email) { throw new Error('duplicate_email') }
+
+                    // hash the password and save to user
+                    const hash = await hashPassword(new_user.password)
+                    new_user.password = hash
+
+                    // create and register new user
                     const created_user = await db.register_user(new_user)
 
                     done(null, created_user)
-                } else {
+                }
+
+                if(!username || !password) { throw new Error('incomplete_input') }
+                
+                // check for username and validate password
+                const [ user ] = await db.findByUsername(username)
+                if(user) {
                     const password_verify = await comparePassword(password, user.password)
                     if(!password_verify) throw new Error('invalid_credentials')
     
                     delete user['password']
     
                     done(null, user)
+                } else {
+                    throw new Error('invalid_credentials')
                 }
                 
             } catch (error) {
-                console.log(error)
-                return done(null, false)
+                return done({ status: authErrors[error.message]?.status, message: authErrors[error.message]?.message, type: authErrors[error.message]?.type }, false)
             }
         }
     )

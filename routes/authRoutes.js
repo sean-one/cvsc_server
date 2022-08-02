@@ -6,7 +6,7 @@ const rolesDB = require('../data/models/roles')
 const router = express.Router();
 
 
-router.post('/local', passport.authenticate('local', { failureRedirect: '/auth/login/failed' }), (req, res) => {
+router.post('/local', passport.authenticate('local', { failureRedirect: '/auth/login/failed', failWithError: true }), (req, res) => {
     res.status(200).json({ success: true, message: 'successful', user: req.user })
 })
 
@@ -20,7 +20,6 @@ router.get('/google/redirect', passport.authenticate("google", {
 }))
 
 router.get('/login/success', async (req, res) => {
-    console.log(`req.user: ${req.user}`)
     if(req.user) {
         // grab all active and inactive roles for user
         const user_roles = await rolesDB.findByUser_All(req.user.id)
