@@ -74,7 +74,6 @@ passport.use(
                     // hash the password and save to user
                     const hash = await hashPassword(new_user.password)
                     new_user.password = hash
-                    delete new_user['username']
 
                     // create and register new user
                     const created_user = await db.register_user(new_user)
