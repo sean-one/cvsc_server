@@ -18,7 +18,6 @@ router.get('/', (req, res) => {
 // inside the createBusiness on submit
 // creates a new business with activeBusiness & arppoval set to false also creates a top user admin role
 router.post('/create', [ validateToken ], async (req, res, next) => {
-    // console.log(req.user)
     try {
         const new_business = req.body
 
