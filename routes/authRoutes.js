@@ -20,6 +20,7 @@ router.get('/google/redirect', passport.authenticate("google", {
 }))
 
 router.get('/login/success', async (req, res) => {
+    console.log(req.user)
     if(req.user) {
         // grab all active and inactive roles for user
         const user_roles = await rolesDB.findByUser_All(req.user.id)

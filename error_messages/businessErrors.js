@@ -7,9 +7,10 @@ const businessErrors = {
         status: 400,
         message: 'duplicate address not valid'
     },
-    businesses_name_unique: {
+    businesses_business_name_unique: {
         status: 400,
-        message: 'duplicate business name not valid'
+        message: 'business name already registered',
+        type: 'business_name'
     },
     businesses_contact_id_foreign: {
         status: 404,

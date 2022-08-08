@@ -78,7 +78,7 @@ passport.use(
                     // create and register new user
                     const created_user = await db.register_user(new_user)
 
-                    done(null, created_user)
+                    done(null, created_user[0])
                 }
 
                 if(!username || !password) { throw new Error('incomplete_input') }

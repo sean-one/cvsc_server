@@ -20,7 +20,7 @@ router.get('/', (req, res) => {
 router.post('/create', [ validateToken ], async (req, res, next) => {
     try {
         const new_business = req.body
-
+        console.log(req.user)
         new_business['business_admin'] = req.user.id
 
         // check to be sure if not brand must include address fields
@@ -34,7 +34,7 @@ router.post('/create', [ validateToken ], async (req, res, next) => {
     } catch (err) {
         console.log(err)
         if (err.constraint) {
-            next({ status: businessErrors[err.constraint]?.status, message: businessErrors[err.constraint]?.message })
+            next({ status: businessErrors[err.constraint]?.status, message: businessErrors[err.constraint]?.message, type: businessErrors[err.constraint]?.type })
         } else {
             next({ status: businessErrors[err.message]?.status, message: businessErrors[err.message]?.message })
         }

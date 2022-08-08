@@ -134,23 +134,7 @@ async function user_login(username) {
 }
 
 async function register_user(user) {
-    const new_user = await db('users').insert(user, [ 'id' ])
-    
-    if(new_user == null) {
-        throw new Error('insert_error')
-    } else {
-        return db('users')
-            .where({ 'users.id': new_user[0].id })
-            .select(
-                [
-                    'users.id',
-                    'users.username',
-                    'users.avatar',
-                    'users.email',
-                ]
-            )
-            .first()
-    }
+    return await db('users').insert(user, [ 'id', 'username', 'avatar', 'email' ])
 }
 
 async function updateAvatar(userId, avatar) {
