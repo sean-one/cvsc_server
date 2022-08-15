@@ -232,13 +232,13 @@ async function updateEvent(eventId, eventChanges) {
         })
 }
 
-function removeEvent(details) {
+function removeEvent(user_id, event_id) {
     // console.log(details)
     // console.log('inside remove')
     return db('events')
-        .where({ created_by: details.user })
+        .where({ created_by: user_id })
         .andWhere(function() {
-            this.where({ id: details.event })
+            this.where({ id: event_id })
         })
         .first()
         .del()

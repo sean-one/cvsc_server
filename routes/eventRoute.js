@@ -87,14 +87,10 @@ router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
-router.delete('/remove/:eventid', validateToken, async (req, res) => {
+router.delete('/remove/:eventid', async (req, res) => {
     try {
-        const deleteDetails = {
-            user: req.decodedToken.user_id,
-            event: parseInt(req.params.eventid)
-        }
-        // console.log(deleteDetails)
-        const deletedEvent = await db.removeEvent(deleteDetails)
+        const deletedEvent = await db.removeEvent(req.user.id, req.params.eventid)
+
         if (deletedEvent >= 1) {
             res.status(204).json();
         } else {
