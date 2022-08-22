@@ -74,6 +74,18 @@ router.put('/toggle-active/:business_id', (req, res) => {
         })
 })
 
+router.put('/toggle-request/:business_id', (req, res) => {
+    const { business_id } = req.params;
+    db.toggleBusinessRequest(business_id, req.user.id)
+        .then(business => {
+            res.status(200).json(business)
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(500).json({ message: 'something went a stray' })
+        })
+})
+
 // used in postman to get pending request
 router.get('/pending/business-request', (req, res) => {
     db.findPending()

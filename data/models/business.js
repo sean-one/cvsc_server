@@ -7,6 +7,7 @@ module.exports = {
     addBusiness,
     updateBusiness,
     toggleActiveBusiness,
+    toggleBusinessRequest,
     findPending,
     remove
 };
@@ -262,7 +263,7 @@ async function toggleActiveBusiness(business_id, admin_id) {
     const business = await db('businesses')
         .where({ 'businesses.id': business_id, 'businesses.business_admin': admin_id })
         .select(
-        [
+            [
                 'businesses.id',
                 'businesses.active_business',
             ]
@@ -298,6 +299,51 @@ async function toggleActiveBusiness(business_id, admin_id) {
                 'locations.zip_code',
                 'locations.formatted'
             ])
+            .first()
+}
+
+async function toggleBusinessRequest(business_id, admin_id) {
+    const business = await db('businesses')
+        .where({ 'businesses.id': business_id, 'businesses.business_admin': admin_id })
+        .select(
+            [
+                'businesses.id',
+                'businesses.business_request_open'
+            ]
+        )
+        .first()
+    
+    await db('businesses')
+            .where({ id: business.id })
+            .update({ business_request_open: !business.business_request_open })
+    
+    return await db('businesses')
+            .where({ 'businesses.id': business_id })
+            .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+            .select(
+                [
+                    'businesses.id',
+                    'businesses.business_name',
+                    'businesses.business_avatar',
+                    'businesses.business_description',
+                    'businesses.business_type',
+                    'businesses.business_request_open',
+                    'businesses.active_business',
+                    'businesses.business_admin',
+                    'businesses.business_email',
+                    'businesses.business_phone',
+                    'businesses.business_instagram',
+                    'businesses.business_facebook',
+                    'businesses.business_website',
+                    'businesses.business_twitter',
+                    'locations.id as location_id',
+                    'locations.street_address',
+                    'locations.location_city',
+                    'locations.location_state',
+                    'locations.zip_code',
+                    'locations.formatted'
+                ]
+            )
             .first()
 }
 
