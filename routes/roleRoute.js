@@ -27,6 +27,15 @@ router.get('/business/:business_id', (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
+router.get('/management/pending', (req, res) => {
+    db.findRolesPendingManagement(req.user.id)
+        .then(roles => {
+            res.status(200).json(roles)
+        })
+        .catch(err => res.status(500).json(err));
+
+})
+
 // add role request via the creatorRequestForm
 router.post('/create-request', async (req, res, next) => {
     try {

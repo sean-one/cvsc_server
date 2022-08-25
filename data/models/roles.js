@@ -5,6 +5,7 @@ module.exports = {
     findById,
     findRole,
     checkUserRoles,
+    findRolesPendingManagement,
     findByBusiness,
     userValidation,
     getUserBusinessRoles,
@@ -49,6 +50,39 @@ async function checkUserRoles(user_id, business_ids) {
             [
                 'roles.business_id',
                 'roles.role_type',
+            ]
+        )
+}
+
+// returns an array of pending role request based on accounts with manager and admin credentials
+async function findRolesPendingManagement(user_id) {
+    let business_ids = []
+    const management_roles = await db('roles')
+        .where({ user_id: user_id, active_role: true })
+        .whereNotIn('roles.role_type', ['creator'])
+        .select(
+            [
+                'roles.business_id'
+            ]
+        )
+    
+    await management_roles.map(role => {
+        return business_ids.push(role.business_id)
+    })
+    
+    return await db('roles')
+        .whereIn('roles.business_id', business_ids)
+        .andWhere('roles.active_role', false )
+        .leftJoin('users', 'roles.user_id', '=', 'users.id')
+        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
+        .select(
+            [
+                'roles.id',
+                'roles.business_id',
+                'roles.role_type',
+                'businesses.business_name',
+                'roles.user_id',
+                'users.username'
             ]
         )
 }
