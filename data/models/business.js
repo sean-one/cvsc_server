@@ -260,21 +260,36 @@ async function updateBusiness(business_id, business) {
 
 // toggle active business between true and false from business controls componenet
 async function toggleActiveBusiness(business_id, admin_id) {
-    const business = await db('businesses')
-        .where({ 'businesses.id': business_id, 'businesses.business_admin': admin_id })
-        .select(
-            [
-                'businesses.id',
-                'businesses.active_business',
-            ]
-        )
-        .first()
 
-    await db('businesses')
-            .where({ id: business.id })
+    return await db.transaction(async trx => {
+        // get current business object from the database to reference and toggle from, and confirm admin
+        const business = await db('businesses')
+            .where({ 'businesses.id': business_id, 'businesses.business_admin': admin_id })
+            .select(
+                [
+                    'businesses.id',
+                    'businesses.active_business',
+                ]
+            )
+            .first()
+
+        // change all roles that are not pending and update active role to match business
+        await db('roles')
+            .transacting(trx)
+            .where({ business_id: business_id })
+            .whereIn('roles.role_type', ['creator', 'manager'])
+            .whereNotNull('roles.approved_by')
+            .update({ active_role: !business.active_business })
+        
+        // update the active business status
+        await db('businesses')
+            .transacting(trx)
+            .where({ id: business_id })
             .update({ active_business: !business.active_business })
-    
-    return await db('businesses')
+        
+        // return the new business object with updated active status
+        return await db('businesses')
+            .transacting(trx)
             .where({ 'businesses.id': business_id })
             .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
             .select([
@@ -300,6 +315,7 @@ async function toggleActiveBusiness(business_id, admin_id) {
                 'locations.formatted'
             ])
             .first()
+    })
 }
 
 async function toggleBusinessRequest(business_id, admin_id) {

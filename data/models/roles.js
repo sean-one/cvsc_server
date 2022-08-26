@@ -60,14 +60,20 @@ async function findRolesPendingManagement(user_id) {
     const management_roles = await db('roles')
         .where({ user_id: user_id, active_role: true })
         .whereNotIn('roles.role_type', ['creator'])
+        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [
-                'roles.business_id'
+                'roles.business_id',
+                'businesses.active_business'
             ]
         )
     
     await management_roles.map(role => {
-        return business_ids.push(role.business_id)
+        if(role.active_business) {
+            return business_ids.push(role.business_id)
+        } else {
+            return
+        }
     })
     
     return await db('roles')
