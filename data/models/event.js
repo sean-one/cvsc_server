@@ -15,9 +15,11 @@ module.exports = {
 function find() {
     return db('events')
         .where('events.eventdate', '>=', new Date())
-        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
-        .join('businesses', 'events.brand_id', '=', 'businesses.id')
-        .join('users', 'events.created_by', '=', 'users.id')
+        // remove inactive events from event list return
+        .andWhere({ active_event: true })
+        .leftJoin('locations', 'events.venue_id', '=', 'locations.venue_id')
+        .leftJoin('businesses', 'events.brand_id', '=', 'businesses.id')
+        .leftJoin('users', 'events.created_by', '=', 'users.id')
         .select(
             [
                 'events.id as event_id',

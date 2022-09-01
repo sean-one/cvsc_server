@@ -8,20 +8,20 @@ exports.up = async function (knex) {
 
         events
             .string('eventname')
-            .notNullable()
+            // .notNullable()
             .unique()
 
         events
             .date('eventdate')
-            .notNullable()
+            // .notNullable()
 
         events
             .integer('eventstart')
-            .notNullable()
+            // .notNullable()
 
         events
             .integer('eventend')
-            .notNullable()
+            // .notNullable()
 
         events.string('eventmedia')
 
@@ -30,7 +30,7 @@ exports.up = async function (knex) {
             .unsigned()
             .references('id')
             .inTable('businesses')
-            .notNullable()
+            // .notNullable()
             .onDelete('cascade')
 
         events.text('details', 'longtext')
@@ -48,6 +48,10 @@ exports.up = async function (knex) {
             .references('id')
             .inTable('users')
             .onDelete('cascade')
+        
+        events
+            .boolean('active_event')
+            .defaultTo(false)
 
         events.timestamps(true, true)
     })
