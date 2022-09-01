@@ -17,9 +17,9 @@ function find() {
         .where('events.eventdate', '>=', new Date())
         // remove inactive events from event list return
         .andWhere({ active_event: true })
-        .leftJoin('locations', 'events.venue_id', '=', 'locations.venue_id')
-        .leftJoin('businesses', 'events.brand_id', '=', 'businesses.id')
-        .leftJoin('users', 'events.created_by', '=', 'users.id')
+        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
+        .join('businesses', 'events.brand_id', '=', 'businesses.id')
+        .join('users', 'events.created_by', '=', 'users.id')
         .select(
             [
                 'events.id as event_id',
@@ -149,9 +149,9 @@ function findByBrand(brand) {
 function findByCreator(user) {
     return db('events')
         .where({ created_by : user })
-        .where('events.eventdate', '>=', new Date())
-        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
-        .join('businesses', 'events.brand_id', '=', 'businesses.id')
+        .andWhere('events.eventdate', '>=', new Date())
+        .leftJoin('locations', 'events.venue_id', '=', 'locations.venue_id')
+        .leftJoin('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
             [
                 'events.id as event_id',
@@ -162,6 +162,7 @@ function findByCreator(user) {
                 'events.eventmedia',
                 'events.details',
                 'events.venue_id',
+                'events.active_event',
                 'locations.venue_name',
                 'locations.location_city',
                 'locations.formatted',

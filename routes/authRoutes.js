@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 
 const rolesDB = require('../data/models/roles')
+const eventDB = require('../data/models/event')
 
 const router = express.Router();
 
@@ -24,8 +25,9 @@ router.get('/login/success', async (req, res) => {
     if(req.user) {
         // grab all active and inactive roles for user
         const user_roles = await rolesDB.findByUser_All(req.user.id)
+        const user_events = await eventDB.findByCreator(req.user.id)
         // add user and roles to return
-        res.status(200).json({ success: true, message: 'successful', user: req.user, roles: user_roles || [] })
+        res.status(200).json({ success: true, message: 'successful', user: req.user, roles: user_roles || [], user_events: user_events || [] })
     } else {
         res.status(401).json({ success: false, message: 'user not found' })
     }

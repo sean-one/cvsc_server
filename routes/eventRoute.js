@@ -78,9 +78,17 @@ router.post('/', [ validateCreatorRights ], async (req, res, next) => {
     }
 });
 
-router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
-    const { id } = req.params;
-    db.findByCreator(id)
+router.get('/user/:user_id', (req, res) => {
+    const { user_id } = req.params;
+    db.findByCreator(user_id)
+        .then(events => {
+            res.status(200).json(events);
+        })
+        .catch(err => res.status(500).json(err));
+})
+
+router.get('/inactive/user', (req, res) => {
+    db.findInactive(req.user.id)
         .then(events => {
             res.status(200).json(events);
         })
