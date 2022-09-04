@@ -8,12 +8,12 @@ exports.up = async function (knex) {
 
         events
             .string('eventname')
-            // .notNullable()
+            .notNullable()
             .unique()
 
         events
             .date('eventdate')
-            // .notNullable()
+            .notNullable()
 
         events
             .integer('eventstart')
