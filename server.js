@@ -6,7 +6,7 @@ const morgan = require('morgan')
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport')
-const fileUpload = require('express-fileupload');
+// const fileUpload = require('express-fileupload');
 
 // routes
 const contactRouter = require('./routes/contactRoute');
@@ -21,9 +21,10 @@ const errorHandler = require('./helpers/errorHandler');
 
 const passportSetup = require('./passport-config');
 
-app.use(fileUpload({
-    createParentPath: true
-}))
+// REMOVED SO THAT MULTER WOULD WORK
+// app.use(fileUpload({
+//     createParentPath: true
+// }))
 
 app.use(morgan(':date[clf] :method :url :status :response-time ms - :res[content-length]'));
 
@@ -50,7 +51,7 @@ app.use(passport.session())
 app.use(cors({
     origin: [process.env.FRONTEND_CLIENT, "http://192.168.1.36:3000", /\.localhost:3000/ ],
     methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-    credentials: true
+    credentials: true,
 }));
 
 app.use('/contacts', contactRouter);

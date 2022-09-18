@@ -1,9 +1,15 @@
 const express = require('express');
+const multer = require('multer');
+const sharp = require('sharp');
 // const jwt = require('jsonwebtoken');
 
+const { uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
 const { validateToken, validateUser, validateUserRole, validateCreatorRights, validateEventEditRights } = require('../helpers/jwt_helper');
+
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 
 // '/events'
 const router = express.Router();
@@ -47,35 +53,52 @@ router.put('/:id', [ validateEventEditRights ], (req, res, next) => {
     }
 })
 
-router.post('/', [ validateCreatorRights ], async (req, res, next) => {
-    try {
-        const new_event = {
-            eventname: req.body.eventname,
-            eventdate: req.body.eventdate,
-            eventstart: req.body.eventstart,
-            eventend: req.body.eventend,
-            venue_id: req.body.venue_id,
-            brand_id: req.body.brand_id,
-            details: req.body.details,
-            eventmedia: req.body.eventmedia,
-            created_by: req.user.id
-
-        }
-        
-        const event = await db.createEvent(new_event)
-        
-        res.status(201).json(event);
-
-    } catch (error) {
-        console.log(error)
-        if (error.constraint === 'events_eventname_unique') {
-            next({ status: eventErrors[error.constraint]?.status, message: eventErrors[error.constraint]?.message })
-
-        } else {
-            next({ status: eventErrors[error.message]?.status, message: eventErrors[error.message]?.message })
-
-        }
+router.post('/', upload.single('eventmedia'), async (req, res, next) => {
+    const new_event = req.body
+    console.log('new event BEFORE ifs')
+    console.log(new_event)
+    if(!new_event.eventstart) {
+        delete new_event['eventstart']
+    } else {
+        new_event.eventstart = parseInt(new_event.eventstart.replace(':', ''))
     }
+
+    if(!new_event.eventend) {
+        delete new_event['eventend']
+    } else {
+        new_event.eventend = parseInt(new_event.eventend.replace(':',''))
+    }
+
+    if(!new_event.eventmedia) delete new_event['eventmedia']
+    if(!new_event.venue_id) delete new_event['venue_id']
+    if(!new_event.details) delete new_event['details']
+    if(!new_event.brand_id) delete new_event['brand_id']
+
+    console.log('new event AFTER ifs')
+    console.log(new_event)
+    if(req.file) {
+        // resize the image
+        req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+        
+        // upload the image to s3
+        const image_key = await uploadImageS3Url(req.file)
+    
+        // add uploaded image link to body & add created by user
+        new_event.eventmedia = `${process.env.AWS_IMAGELINK}${image_key}`
+    }
+    
+    // add user as created by admin for event
+    new_event.created_by = req.user.id
+
+    if(Object.keys(new_event).length === 9) {
+        new_event.active_event = true
+    } else {
+        new_event.active_event = false
+    }
+
+    const event = await db.createEvent(new_event)
+    
+    res.status(201).json(event)
 });
 
 router.get('/user/:user_id', (req, res) => {
