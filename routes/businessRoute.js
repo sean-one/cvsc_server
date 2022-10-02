@@ -74,8 +74,6 @@ router.post('/create', upload.single('business_avatar'), async (req, res, next) 
         // add business creator as business admin
         new_business['business_admin'] = req.user.id
         
-        console.log('just before sending to database')
-        console.log(new_business)
         const created_business = await db.addBusiness(new_business, business_location)
         
         res.status(201).json(created_business);
