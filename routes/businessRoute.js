@@ -1,12 +1,18 @@
 const express = require('express');
+const multer = require('multer');
+const sharp = require('sharp');
 
+const { uploadImageS3Url } = require('../s3');
 const db = require('../data/models/business');
 const businessErrors = require('../error_messages/businessErrors');
-const { validateToken } = require('../helpers/jwt_helper');
+// const { validateToken } = require('../helpers/jwt_helper');
 
-const router = express.Router()
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 
 // '/business'
+const router = express.Router()
+
 router.get('/', (req, res) => {
     db.find()
         .then(businesses => {
@@ -17,17 +23,60 @@ router.get('/', (req, res) => {
 
 // inside the createBusiness on submit
 // creates a new business with activeBusiness & arppoval set to false also creates a top user admin role
-router.post('/create', [ validateToken ], async (req, res, next) => {
+router.post('/create', upload.single('business_avatar'), async (req, res, next) => {
     try {
+        let business_location
         const new_business = req.body
-        console.log(req.user)
-        new_business['business_admin'] = req.user.id
+
+        // check for business type, if 'brand' remove address elements, else create location oject and delete address elements
+        if(new_business.business_type === 'brand') {
+            
+            delete new_business['street_address']
+            delete new_business['city']
+            delete new_business['state']
+            delete new_business['zip']
+
+        } else {
+            business_location = {
+                'venue_name': new_business.business_name,
+                'street_address': new_business.street_address,
+                'city': new_business.city,
+                'state': new_business.state,
+                'zip': new_business.zip
+            }
+
+            delete new_business['street_address']
+            delete new_business['city']
+            delete new_business['state']
+            delete new_business['zip']
+        }
+
+        if(!new_business.business_instagram) delete new_business['business_instagram']
+        if(!new_business.business_facebook) delete new_business['business_facebook']
+        if(!new_business.business_website) delete new_business['business_website']
+        if(!new_business.business_phone) delete new_business['business_phone']
+        if(!new_business.business_twitter) delete new_business['business_twitter']
 
         // check to be sure if not brand must include address fields
         if(new_business.business_type === 'brand' && typeof new_business.location === 'object') throw new Error('brand_address_not_valid')
         if(new_business.business_type !== 'brand' && new_business.location === null) throw new Error('business_address_required')
+        
+        if(req.file) {
+            // resize the image
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain'}).toBuffer()
+            
+            // upload the image to s3
+            const image_key = await uploadImageS3Url(req.file)
+            
+            new_business['business_avatar'] = `${process.env.AWS_IMAGELINK}${image_key}`
+        }
 
-        const created_business = await db.addBusiness(new_business)
+        // add business creator as business admin
+        new_business['business_admin'] = req.user.id
+        
+        console.log('just before sending to database')
+        console.log(new_business)
+        const created_business = await db.addBusiness(new_business, business_location)
         
         res.status(201).json(created_business);
 

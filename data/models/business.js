@@ -107,44 +107,24 @@ function findPending() {
 }
 
 // creates new business & new admin role for the user requesting the new business
-async function addBusiness(business) {
+async function addBusiness(business, location) {
+    console.log(location)
     try {
-        const new_business = {
-            business_avatar: business.business_avatar,
-            business_description: business.business_description,
-            business_name: business.business_name,
-            business_type: business.business_type,
-            business_email: business.business_email,
-            business_admin: business.business_admin,
-            // condidtionally add optional contact information
-            ...(business.business_instagram && { business_instagram: business.business_instagram }),
-            ...(business.business_phone && { business_phone: Number(business.business_phone) }),
-            ...(business.business_twitter && { business_twitter: business.business_twitter }),
-            ...(business.business_website && { business_website: business.business_website }),
-            // REMOVE LATER
-            active_business: true,
-        }
-
-        const business_location = {
-            ...(business.street_address && { street_address: business.street_address }),
-            ...(business.city && { location_city: business.city }),
-            ...(business.state && { location_state: business.state }),
-            ...(business.zip && { zip_code: business.zip }),
-        }
         
         return await db.transaction(async trx => {
-            
+
             // create new business
             const added_business = await db('businesses')
                 .transacting(trx)
-                .insert(new_business, ['id', 'business_name', 'business_admin', 'business_type'])
+                .insert(business, ['id', 'business_name', 'business_admin', 'business_type'])
             
             // check for location
-            if (added_business[0].business_type !== 'brand') {
+            // if (added_business[0].business_type !== 'brand') {
+            if (location !== undefined) {
                 // google api with address returning geocode information
                 const geoCode = await googleMapsClient.geocode(
                     {
-                        address: `${business_location.street_address}, ${business_location.location_city}, ${business_location.location_state} ${business_location.zip_code}`
+                        address: `${location.street_address}, ${location.city}, ${location.state} ${location.zip}`
                     }
                 ).asPromise();
                 
