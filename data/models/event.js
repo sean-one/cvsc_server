@@ -9,6 +9,7 @@ module.exports = {
     findByCreator,
     createEvent,
     updateEvent,
+    removeBusiness,
     removeEvent
 };
 
@@ -233,6 +234,31 @@ async function updateEvent(eventId, eventChanges) {
                 )
                 .first()
         })
+}
+
+async function removeBusiness(event_id, business_type) {
+    console.log(event_id, business_type)
+    if(business_type === 'venue') {
+        return await db('events')
+            .where({ id: event_id })
+            .update({
+                venue_id: null,
+                active_event: false
+            })
+
+    } else if(business_type === 'brand') {
+        return await db('events')
+            .where({ id: event_id })
+            .update({
+                brand_id: null,
+                active_event: false
+            })
+
+    } else {
+        console.log(event_id, business_type)
+        console.log('error inside the events model for remove business')
+        return
+    }
 }
 
 function removeEvent(user_id, event_id) {

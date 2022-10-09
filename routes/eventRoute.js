@@ -118,6 +118,18 @@ router.get('/inactive/user', (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
+router.put('/business/remove/:event_id', (req, res) => {
+    const { event_id } = req.params
+    db.removeBusiness(event_id, req.body.business_type)
+        .then(event => {
+            res.status(201).json(event)
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(500).json(err)
+        });
+})
+
 router.delete('/remove/:eventid', async (req, res) => {
     try {
         const deletedEvent = await db.removeEvent(req.user.id, req.params.eventid)
