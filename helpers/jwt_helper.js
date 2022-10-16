@@ -127,6 +127,7 @@ const validateToken = (req, res, next) => {
 }
 
 const validateEventEditRights = async (req, res, next) => {
+    console.log(req.body)
     try {
         const event_update = req.body
         const event_id = req.params.id

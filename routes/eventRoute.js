@@ -33,9 +33,8 @@ router.get('/:id', (req, res) => {
         });
 })
 
-router.put('/:id', [ validateEventEditRights ], (req, res, next) => {
+router.put('/:id', (req, res, next) => {
     try {
-        console.log('finished validation')
         const { id } = req.params
         const changes = req.body;
         db.updateEvent(id, changes)
@@ -104,6 +103,15 @@ router.post('/', upload.single('eventmedia'), async (req, res, next) => {
 router.get('/user/:user_id', (req, res) => {
     const { user_id } = req.params;
     db.findByCreator(user_id)
+        .then(events => {
+            res.status(200).json(events);
+        })
+        .catch(err => res.status(500).json(err));
+})
+
+router.get('/business/:business_id', (req, res) => {
+    const { business_id } = req.params;
+    db.findByBusiness(business_id)
         .then(events => {
             res.status(200).json(events);
         })
