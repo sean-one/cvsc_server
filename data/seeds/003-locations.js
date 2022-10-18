@@ -59,6 +59,17 @@ exports.seed = function(knex) {
           zip_code: "92211",
           formatted: "75048 Gerald Ford Dr #101, Palm Desert, CA 92211, USA",
           place_id: "ChIJg0Uo_PP82oARobd0smOx-M8"
+        },
+        {
+          id: 'db8e11ba-8884-43c1-9e06-0b7280bfa485',
+          venue_name: 'brads lounge',
+          venue_id: 'af87fc85-f800-4868-bf52-43996b16d4f0',
+          street_address: '1321 North Gene Autry Trail',
+          location_city: 'Palm Springs',
+          location_state: 'CA',
+          zip_code: '92262',
+          formatted: '1321 N Gene Autry Trail, Palm Springs, CA 92262, USA',
+          place_id: 'ChIJB9dB5XMc24ARNdiuQFz-OzE'
         }
       ]);
     });

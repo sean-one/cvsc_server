@@ -18,6 +18,27 @@ exports.seed = function(knex) {
           avatar: "https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png",
           password: '$2a$14$3HABR4cxzl.uP/.QosYes.Kkjnj72g9eR1Z7wkQ2413rQ8btNaZjC',
           email: 'jlopez760@gmail.com',
+        },
+        {
+          id: '7dfbf74b-418e-4ee2-a2d2-425a11b62337',
+          username: 'hank',
+          password: '$2a$14$n1hQOL7kh7LZaXqG57lvTOtF5aY8idipE7bU12DS5ZTRqky7B0P96',
+          avatar: 'https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png',
+          email: 'hankster@gmail.com',
+        },
+        {
+          id: 'c0154ccc-3686-45d2-a598-5d375f0a1a25',
+          username: 'brad',
+          password: '$2a$14$3r6IwxFXeJ3BPIdh3zzD7eCbR6N6IHsKOPV1NOeX619H4jaxLpVeq',
+          avatar: 'https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png',
+          email: 'bradly@gmail.com',
+        },
+        {
+          id: '33bd70f3-d480-465c-8a62-eae20aebccd0',
+          username: 'jon',
+          password: '$2a$14$.K2mvTgMuvjOlJPh4d.4OO331Pwhn1K/Js822P3fkIrHPCBQtoUDC',
+          avatar: 'https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png',
+          email: 'jonjon@gmail.com',
         }
       ]);
     });
