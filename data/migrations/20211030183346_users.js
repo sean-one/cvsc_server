@@ -16,12 +16,12 @@ exports.up = function (knex) {
 
         users
             .string('avatar')
-            .defaultTo("https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png")
+            .defaultTo(null)
+            // .defaultTo("https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png")
 
         users
             .string('email')
-            .unique()
-            .notNullable()
+            .defaultTo(null)
         
         users
             .string('google_id')

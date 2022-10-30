@@ -26,9 +26,9 @@ exports.up = function (knex) {
             .unique(['user_id', 'business_id'])
         
         roles
-            .enu('role_type', ['admin', 'creator', 'manager'])
+            .enu('role_type', [ 123, 456, 789])
             .notNullable()
-            .defaultTo('creator')
+            .defaultTo(123)
         
         roles
             .boolean('active_role')

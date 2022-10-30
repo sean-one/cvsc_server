@@ -2,7 +2,10 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 const LocalStrategy = require('passport-local').Strategy
 
-const db = require('./data/models/user');
+const dbUser = require('./data/models/user');
+const dbRoles = require('./data/models/roles');
+const dbEvents = require('./data/models/event');
+
 const { hashPassword, comparePassword } = require('./helpers/bcrypt_helper');
 const { createToken } = require('./helpers/jwt_helper');
 const authErrors = require('./error_messages/authErrors');
@@ -12,15 +15,20 @@ passport.serializeUser((user, done) => {
 })
 
 passport.deserializeUser(async (id, done) => {
-    const user = await db.findById(id)
+    const user = await dbUser.findById(id)
+    // const user_roles = await dbRoles.findByUser_All(id)
+    // const user_events = await dbEvents.findByCreator(id) 
 
     // create token then save to user
-    const token = createToken(user)
-    user.token = token
+    // const token = createToken(user)
+    // user.token = token
 
     done(null, user)
+    // done(null, { user: user, user_roles: user_roles || [], user_events: user_events || [] })
 })
 
+
+// Google login strategy
 passport.use(
     new GoogleStrategy(
         {
@@ -29,8 +37,10 @@ passport.use(
             callbackURL: process.env.GOOGLE_CALLBACK_URL
         },
         async (accessToken, refreshToken, profile, done) => {
-            const google_user = await db.search_google_user(profile.id)
+            // check for user to log in
+            const google_user = await dbUser.findByGoogleId(profile.id)
             
+            // no user found - register user
             if (google_user.length < 1) {
                 const new_user = {
                     username: profile.displayName,
@@ -39,10 +49,10 @@ passport.use(
                     avatar: profile.photos[0].value,
 
                 }
-
-                const added_google_register = await db.add_google_user(new_user)
+                // create new user with google information
+                const created_user = await dbUser.createUser(new_user)
                 
-                done(null, added_google_register)
+                done(null, created_user[0])
             } else {
                 done(null, google_user[0])
             }
@@ -50,53 +60,40 @@ passport.use(
     )
 )
 
+// Local login strategy
 passport.use(
     new LocalStrategy({
-        passReqToCallback: true
+        // passReqToCallback: true
     },
-        async (req, username, password, done) => {
+        async (username, password, done) => {
             try {
-                // check for new user
-                if(req.body.register) {
+                // check if username is in database
+                const check_user = await dbUser.findByUsername(username)
+                
+                // no user found - hash password and create new user
+                if(check_user === undefined) {
+                    const hash = await hashPassword(password)
 
-                    // check for complete registration
-                    const new_user = { username: req.body.username, password: req.body.password, email: req.body.email }
-                    if (!new_user.username || !new_user.password || !new_user.email) { throw new Error('incomplete_input') }
+                    const new_user = {
+                        username: username,
+                        password: hash,
+                    }
 
-                    // check for username duplicate
-                    const check_for_username = await db.usernameDuplicate(new_user.username)
-                    if(check_for_username) { throw new Error('duplicate_username') }
-
-                    // check for email duplicate
-                    const check_for_email = await db.emailDuplicate(new_user.email)
-                    if(check_for_email) { throw new Error('duplicate_email') }
-
-                    // hash the password and save to user
-                    const hash = await hashPassword(new_user.password)
-                    new_user.password = hash
-
-                    // create and register new user
-                    const created_user = await db.register_user(new_user)
+                    const created_user = await dbUser.createUser(new_user)
 
                     done(null, created_user[0])
-                }
-
-                if(!username || !password) { throw new Error('incomplete_input') }
-                
-                // check for username and validate password
-                const [ user ] = await db.findByUsername(username)
-                if(user) {
-                    const password_verify = await comparePassword(password, user.password)
-                    if(!password_verify) throw new Error('invalid_credentials')
-    
-                    delete user['password']
-    
-                    done(null, user)
                 } else {
-                    throw new Error('invalid_credentials')
-                }
-                
+                    if(!username || !password) { throw new Error('incomplete_input') }
+
+                    const password_verify = await comparePassword(password, check_user.password)
+                    if(!password_verify) throw new Error('invalid_credentials')
+
+                    delete check_user['password']
+
+                    done(null, check_user)
+                }    
             } catch (error) {
+                console.log(error)
                 // extra information added to new user object
                 if(error.code === '42703') { return done({ status: 400, message: 'invalid inputs and or fields', type: 'invalid_input'}, false) }
                 

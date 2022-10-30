@@ -2,6 +2,7 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
+    findUserAccountType,
     findById,
     findRole,
     checkUserRoles,
@@ -20,6 +21,13 @@ module.exports = {
 // for postman to check db
 function find() {
     return db('roles')
+}
+
+async function findUserAccountType(user_id) {
+    return db('roles')
+        .where({ user_id: user_id, active_role: true })
+        .orderBy('role_type', 'desc')
+        .limit(1)
 }
 
 // find role request by request_id
@@ -214,7 +222,7 @@ async function approveRoleRequest(request_id, admin_id) {
 async function upgradeCreatorRole(request_id, admin_id) {
     await db('roles')
         .where({ id: request_id })
-        .update({ role_type: 'manager', approved_by: admin_id})
+        .update({ role_type: 456, approved_by: admin_id})
     
     return await db('roles')
         .where({ 'roles.id': request_id })
@@ -236,7 +244,7 @@ async function upgradeCreatorRole(request_id, admin_id) {
 async function downgradeManagerRole(role_id, admin_id) {
     await db('roles')
         .where({ id: role_id })
-        .update({ role_type: 'creator', approved_by: admin_id})
+        .update({ role_type: 123, approved_by: admin_id})
     
     return await db('roles')
         .where({ 'roles.id': role_id })

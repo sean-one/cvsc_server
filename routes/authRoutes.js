@@ -1,14 +1,17 @@
 const express = require('express');
 const passport = require('passport');
 
-const rolesDB = require('../data/models/roles')
-const eventDB = require('../data/models/event')
-
 const router = express.Router();
 
+const { role_types } = require('../helpers/role_types')
+const rolesDB = require('../data/models/roles')
 
-router.post('/local', passport.authenticate('local', { failureRedirect: '/auth/login/failed', failWithError: true }), (req, res) => {
-    res.status(200).json({ success: true, message: 'successful', user: req.user })
+router.post('/local', passport.authenticate('local', {
+    failureRedirect: '/auth/login/failed',
+    failWithError: true,
+    session: true
+}), (req, res) => {
+    res.status(200).json(req.user)
 })
 
 // call google api for profile, email & google_id
@@ -20,16 +23,22 @@ router.get('/google/redirect', passport.authenticate("google", {
     session: true
 }))
 
-router.get('/login/success', async (req, res) => {
-    console.log(req.user)
-    if(req.user) {
-        // grab all active and inactive roles for user
-        const user_roles = await rolesDB.findByUser_All(req.user.id)
-        const user_events = await eventDB.findByCreator(req.user.id)
-        // add user and roles to return
-        res.status(200).json({ success: true, message: 'successful', user: req.user, roles: user_roles || [], user_events: user_events || [] })
-    } else {
-        res.status(401).json({ success: false, message: 'user not found' })
+router.get('/user_profile', async (req, res) => {
+    try {
+        const profile = req.user
+        if(profile === undefined) throw new Error('no user')
+
+        const account_type = await rolesDB.findUserAccountType(req.user.id)
+        console.log(account_type)
+        if (account_type.length > 0) {
+            profile.account_type = role_types[account_type[0].role_type]
+        } else {
+            profile.account_type = 'basic'
+        }
+        
+        res.status(200).json(profile)
+    } catch(error) {
+        console.log(error)
     }
 })
 

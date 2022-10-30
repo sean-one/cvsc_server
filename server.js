@@ -41,7 +41,7 @@ app.use(
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         },
         resave: false,
-        saveUninitialized: false,
+        saveUninitialized: true,
     })
 );
 

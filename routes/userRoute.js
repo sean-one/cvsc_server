@@ -15,6 +15,12 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
+router.get('/get_user', (req, res) => {
+    // console.log(req)
+    console.log(req.user)
+    return res.status(200).json(req.user);
+})
+
 router.post('/updateAvatar', [ validateToken ], async (req, res) => {
     try {
         const avatarLink = req.body
