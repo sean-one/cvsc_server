@@ -24,15 +24,24 @@ router.get('/google/redirect', passport.authenticate("google", {
 }))
 
 router.get('/user_profile', async (req, res) => {
+    if (req.isAuthenticated()) {
+        console.log('singed in')
+        console.log(`user: ${req.user.id}`)
+    } else {
+        console.log('not signed in')
+        console.log(`user: ${req.user.id}`)
+    }
     try {
         const profile = req.user
         if(profile === undefined) throw new Error('no user')
 
-        const account_type = await rolesDB.findUserAccountType(req.user.id)
-        console.log(account_type)
-        if (account_type.length > 0) {
-            profile.account_type = role_types[account_type[0].role_type]
+        const user_roles = await rolesDB.findUserAccountType(req.user.id)
+        
+        if (user_roles.length > 0) {
+            profile.roles = user_roles
+            profile.account_type = role_types[user_roles[0].role_type]
         } else {
+            profile.roles = []
             profile.account_type = 'basic'
         }
         

@@ -151,7 +151,7 @@ async function addBusiness(business, location) {
                 .insert({
                     user_id: added_business[0].business_admin,
                     business_id: added_business[0].id,
-                    role_type: "admin",
+                    role_type: 789,
                     // REMOVE AND UPDATE TO FALSE TO START
                     active_role: true,
                     approved_by: added_business[0].business_admin

@@ -15,9 +15,11 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
-router.get('/get_user', (req, res) => {
-    // console.log(req)
-    console.log(req.user)
+router.get('/get_profile', (req, res) => {
+    console.log(Object.keys(req))
+    console.log(req.session)
+    console.log(`user inside /users/get_profile: ${req.user}`)
+    if (req.user === undefined) { return res.status(400).json() }
     return res.status(200).json(req.user);
 })
 

@@ -24,10 +24,10 @@ function find() {
 }
 
 async function findUserAccountType(user_id) {
+    console.log('inside findUserAccountType', user_id)
     return db('roles')
         .where({ user_id: user_id, active_role: true })
         .orderBy('role_type', 'desc')
-        .limit(1)
 }
 
 // find role request by request_id

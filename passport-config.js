@@ -20,8 +20,8 @@ passport.deserializeUser(async (id, done) => {
     // const user_events = await dbEvents.findByCreator(id) 
 
     // create token then save to user
-    // const token = createToken(user)
-    // user.token = token
+    const token = createToken(user)
+    user.token = token
 
     done(null, user)
     // done(null, { user: user, user_roles: user_roles || [], user_events: user_events || [] })
@@ -63,39 +63,62 @@ passport.use(
 // Local login strategy
 passport.use(
     new LocalStrategy({
-        // passReqToCallback: true
+        passReqToCallback: true
     },
-        async (username, password, done) => {
+        async (req, username, password, done) => {
             try {
-                // check if username is in database
-                const check_user = await dbUser.findByUsername(username)
+                const requested_from = req.headers.referer.substring(req.headers.referer.lastIndexOf('/') + 1, req.headers.referer.length)
                 
-                // no user found - hash password and create new user
-                if(check_user === undefined) {
-                    const hash = await hashPassword(password)
-
-                    const new_user = {
-                        username: username,
-                        password: hash,
+                if (requested_from === 'login') {
+                    if(!username || !password) { throw new Error('incomplete_input') }
+                    
+                    // get user from database
+                    const check_user = await dbUser.findByUsername(username)
+                    
+                    // if no user is found then return error
+                    if (check_user === undefined) {
+                        throw new Error('invalid_credentials')
                     }
 
+                    // if a user is found, verify the user passowrd
+                    const password_verify = await comparePassword(password, check_user.password)
+                    if (!password_verify) { throw new Error('invalid_credentials') }
+
+                    // remove encrypted password from retur
+                    delete check_user['password']
+                    
+                    done(null, check_user)
+                } else if (requested_from === 'register') {
+                    
+                    // hash inputed password
+                    const hash = await hashPassword(password)
+                    
+                    // create new user object to inser
+                    const new_user = { username: username, password: hash }
+
+                    // insert new user
                     const created_user = await dbUser.createUser(new_user)
 
                     done(null, created_user[0])
                 } else {
-                    if(!username || !password) { throw new Error('incomplete_input') }
-
-                    const password_verify = await comparePassword(password, check_user.password)
-                    if(!password_verify) throw new Error('invalid_credentials')
-
-                    delete check_user['password']
-
-                    done(null, check_user)
-                }    
+                    throw new Error('invalid_origin')
+                }
             } catch (error) {
-                console.log(error)
+                console.log('passport-config')
+                console.log(error.message)
+                // duplicated username error
+                if (error.constraint === 'users_username_unique') { return done({
+                    status: authErrors['duplicate_username']?.status,
+                    message: authErrors['duplicate_username']?.message,
+                    type: authErrors['duplicate_username']?.type,
+                    }, false)
+                }
                 // extra information added to new user object
-                if(error.code === '42703') { return done({ status: 400, message: 'invalid inputs and or fields', type: 'invalid_input'}, false) }
+                if(error.code === '42703') { return done({ 
+                    status: 400,
+                    message: 'invalid inputs and or fields',
+                    type: 'invalid_input'}, false)
+                }
                 
                 // username or email missing from new user object
                 if(error.code === '23502') { return done({ status: 400, message: `${error.column} is a required field`, type: `${error.column}` }, false) }

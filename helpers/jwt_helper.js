@@ -8,7 +8,7 @@ const tokenErrors = require('../error_messages/tokenErrors');
 const createToken = (user) => {
     const payload = {
         user_id: user.id,
-        username: user.username,
+        // username: user.username,
     }
 
     const secret = process.env.JWT_SECRET;
