@@ -19,6 +19,12 @@ const createToken = (user) => {
     return jwt.sign(payload, secret, options);
 }
 
+const validateRole = (req, res, next) => {
+    const user_id = req.user.id
+    console.log(user_id)
+    return
+}
+
 // used - /roles/user/:id
 const validateUser = (req, res, next) => {
     if (req.user.id.toString() === req.decodedToken.user_id.toString()) {
@@ -185,6 +191,7 @@ const validateUserRole = async (req, res, next) => {
 
 module.exports = {
     createToken,
+    validateRole,
     validateToken,
     validateUser,
     validateCreatorRights,

@@ -25,28 +25,36 @@ exports.up = function (knex) {
 
         businesses
             .bigInteger('business_phone')
+            .nullable()
+            .defaultTo(null)
         
         businesses
             .string('business_instagram')
+            .nullable()
+            .defaultTo(null)
         
         businesses
             .string('business_twitter')
+            .nullable()
+            .defaultTo(null)
         
         businesses
             .string('business_facebook')
+            .nullable()
+            .defaultTo(null)
         
         businesses
             .string('business_website')
+            .nullable()
+            .defaultTo(null)
 
         // business open to user creator request, defaults to true
         businesses
             .boolean('business_request_open')
-            .nullable()
             .defaultTo(true)
         
         businesses
             .boolean('active_business')
-            .nullable()
             .defaultTo(false)
         
         businesses

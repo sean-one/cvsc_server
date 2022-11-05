@@ -15,7 +15,8 @@ exports.seed = function(knex) {
           business_facebook: 'stiiizy-facebook',
           business_phone: 7608675309,
           business_type: "brand",
-          active_business: "true",
+          business_request_open: true,
+          active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -27,7 +28,8 @@ exports.seed = function(knex) {
           business_instagram: 'west_coast_cure',
           business_website: 'https://www.wcc.com',
           business_type: "brand",
-          active_business: "true",
+          business_request_open: true,
+          active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -39,7 +41,8 @@ exports.seed = function(knex) {
           business_instagram: 'oldpal',
           business_facebook: 'oldpal-facebook',
           business_type: "brand",
-          active_business: "true",
+          business_request_open: true,
+          active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -51,7 +54,8 @@ exports.seed = function(knex) {
           business_instagram: 'cure_company',
           business_facebook: 'cure-facebook',
           business_type: "brand",
-          active_business: "true",
+          business_request_open: true,
+          active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -63,7 +67,8 @@ exports.seed = function(knex) {
           business_instagram: 'green_dragon',
           business_website: 'https://www.greendragon.com',
           business_type: "both",
-          active_business: "true",
+          business_request_open: true,
+          active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -74,7 +79,8 @@ exports.seed = function(knex) {
           business_email: 'Bare@gmail.com',
           business_instagram: 'bare420',
           business_type: "both",
-          active_business: "true",
+          business_request_open: true,
+          active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -86,7 +92,8 @@ exports.seed = function(knex) {
           business_instagram: 'deserts_finest',
           business_facebook: 'deserts_finest-facebook',
           business_type: "venue",
-          active_business: "true",
+          business_request_open: true,
+          active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -98,7 +105,8 @@ exports.seed = function(knex) {
           business_instagram: 'no_wait_meds',
           business_website: 'https://www.nowaitmeds.com',
           business_type: "venue",
-          active_business: "true",
+          business_request_open: true,
+          active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -111,7 +119,8 @@ exports.seed = function(knex) {
           business_website: 'https://www.palmroyalcannabis.com',
           business_facebook: 'palmroyal-facebook',
           business_type: "venue",
-          active_business: "true",
+          business_request_open: true,
+          active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -122,7 +131,8 @@ exports.seed = function(knex) {
           business_email: 'somethingnew@gmail.com',
           business_instagram: 'something_new',
           business_type: "brand",
-          active_business: "false",
+          business_request_open: true,
+          active_business: false,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         },
         {
@@ -137,9 +147,6 @@ exports.seed = function(knex) {
           business_email: 'hanksgrow@gmail.com',
           business_phone: 7609215647,
           business_instagram: 'hanksgrow',
-          business_facebook: null,
-          business_website: null,
-          business_twitter: null,
         },
         {
           id: 'af87fc85-f800-4868-bf52-43996b16d4f0',
@@ -153,7 +160,6 @@ exports.seed = function(knex) {
           business_email: 'bradsLounge@gmail.com',
           business_phone: 7608942561,
           business_instagram: 'brads_lounge',
-          business_facebook: null,
           business_website: 'https://www.bradslounge.com',
           business_twitter: 'bradslounge',
         }
