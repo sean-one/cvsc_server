@@ -19,9 +19,21 @@ const createToken = (user) => {
     return jwt.sign(payload, secret, options);
 }
 
-const validateRole = (req, res, next) => {
+const validateRole = async (req, res, next) => {
     const user_id = req.user.id
-    console.log(user_id)
+    const role_id = req.params.role_id
+    const { business_id } = await db.findById(role_id)
+
+    const { role_type } = await db.findUserBusinessRole(business_id, user_id)
+    
+    if (role_type >= 456) {
+        // management verified
+        next()
+    } else {
+        // no management role
+        res.status(404).json({ message: 'invalid role privileges'})
+    }
+
     return
 }
 

@@ -2,6 +2,7 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
+    findUserBusinessRole,
     findUserAccountType,
     findById,
     findRole,
@@ -21,6 +22,19 @@ module.exports = {
 // for postman to check db
 function find() {
     return db('roles')
+}
+
+function findUserBusinessRole(business_id, user_id) {
+    return db('roles')
+        .where({ user_id: user_id, business_id: business_id, active_role: true })
+        .select(
+            [
+                'roles.id',
+                'roles.business_id',
+                'roles.role_type'
+            ]
+        )
+        .first()
 }
 
 async function findUserAccountType(user_id) {

@@ -70,6 +70,7 @@ router.post('/create-request', async (req, res, next) => {
 
 // pendingRequest approval button
 router.post('/approve_pending/:role_id', [ validateRole ], async (req, res, next) => {
+    console.log(req.session)
     const management_id = await req.user.id
     const new_creator = await db.approveRoleRequest(req.params.role_id, management_id)
     
