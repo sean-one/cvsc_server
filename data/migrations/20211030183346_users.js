@@ -27,6 +27,10 @@ exports.up = function (knex) {
             .string('google_id')
             .defaultTo(null)
         
+        users
+            .string('refreshToken')
+            .defaultTo(null)
+        
         users.timestamps(true, true)
     })
 };
