@@ -3,6 +3,7 @@ const db = require('../dbConfig');
 module.exports = {
     find,
     createUser,
+    addRefreshToken,
     findById,
     findByGoogleId,
     findByUsername,
@@ -22,6 +23,12 @@ async function createUser(user) {
             'email',
             'avatar',
         ])
+}
+
+async function addRefreshToken(id, token) {
+    return await db('users')
+        .where({ id: id })
+        .update({ refreshToken: token })
 }
 
 function findById(id) {

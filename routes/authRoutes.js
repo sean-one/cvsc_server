@@ -4,14 +4,27 @@ const passport = require('passport');
 const router = express.Router();
 
 const { role_types } = require('../helpers/role_types')
-const rolesDB = require('../data/models/roles')
+const rolesDB = require('../data/models/roles');
 
 router.post('/local', passport.authenticate('local', {
     failureRedirect: '/auth/login/failed',
     failWithError: true,
     session: true
-}), (req, res) => {
-    res.status(200).json(req.user)
+}), async (req, res) => {
+    const user = req.user
+    const account_type = await rolesDB.findUserAccountType(user.id)
+    
+    if (account_type.length > 0) {
+        user.account_type = account_type[0].role_type
+    } else {
+        user.account_type = 100
+    }
+
+    res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
+    
+    delete user['refreshToken']
+
+    res.status(200).json(user)
 })
 
 // call google api for profile, email & google_id

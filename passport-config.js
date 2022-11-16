@@ -3,28 +3,29 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy
 const LocalStrategy = require('passport-local').Strategy
 
 const dbUser = require('./data/models/user');
-const dbRoles = require('./data/models/roles');
-const dbEvents = require('./data/models/event');
+// const dbRoles = require('./data/models/roles');
+// const dbEvents = require('./data/models/event');
 
 const { hashPassword, comparePassword } = require('./helpers/bcrypt_helper');
-const { createToken } = require('./helpers/jwt_helper');
+const { createAccessToken, createRefreshToken } = require('./helpers/jwt_helper');
 const authErrors = require('./error_messages/authErrors');
 
-passport.serializeUser((user, done) => {
+passport.serializeUser(async (user, done) => {
+    const accessToken = createAccessToken(user.id)
+    const refreshToken = createRefreshToken(user.id)
+    user.refreshToken = refreshToken
+    user.accessToken = accessToken
+
+    await dbUser.addRefreshToken(user.id, refreshToken)
+    
     done(null, user.id)
 })
 
 passport.deserializeUser(async (id, done) => {
+    console.log('inside deserial')
     const user = await dbUser.findById(id)
-    // const user_roles = await dbRoles.findByUser_All(id)
-    // const user_events = await dbEvents.findByCreator(id) 
-
-    // create token then save to user
-    const token = createToken(user)
-    user.token = token
 
     done(null, user)
-    // done(null, { user: user, user_roles: user_roles || [], user_events: user_events || [] })
 })
 
 

@@ -19,6 +19,32 @@ const createToken = (user) => {
     return jwt.sign(payload, secret, options);
 }
 
+const createAccessToken = (user_id) => {
+    const payload = {
+        user: user_id
+    }
+
+    const secret = process.env.JWT_ACCESSTOKEN_SECRET;
+    const options = {
+        expiresIn: process.env.JWT_ACCESSTOKEN_EXP
+    }
+
+    return jwt.sign(payload, secret, options);
+}
+
+const createRefreshToken = (user_id) => {
+    const payload = {
+        user: user_id
+    }
+
+    const secret = process.env.JWT_REFRESHTOKEN_SECRET;
+    const options = {
+        expiresIn: process.env.JWT_REFRESHTOKEN_EXP
+    }
+
+    return jwt.sign(payload, secret, options);
+}
+
 const validateRole = async (req, res, next) => {
     const user_id = req.user.id
     const role_id = req.params.role_id
@@ -203,6 +229,8 @@ const validateUserRole = async (req, res, next) => {
 
 module.exports = {
     createToken,
+    createAccessToken,
+    createRefreshToken,
     validateRole,
     validateToken,
     validateUser,
