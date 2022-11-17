@@ -1,10 +1,13 @@
 const express = require('express');
 const passport = require('passport');
+const jwt = require('jsonwebtoken')
 
 const router = express.Router();
 
-const { role_types } = require('../helpers/role_types')
+const { createAccessToken } = require('../helpers/jwt_helper');
+const { role_types } = require('../helpers/role_types');
 const rolesDB = require('../data/models/roles');
+const userDB = require('../data/models/user');
 
 router.post('/local', passport.authenticate('local', {
     failureRedirect: '/auth/login/failed',
@@ -25,6 +28,30 @@ router.post('/local', passport.authenticate('local', {
     delete user['refreshToken']
 
     res.status(200).json(user)
+})
+
+router.get('/refresh', async (req, res) => {
+    const cookies = req.cookies
+
+    if (!cookies.jwt) return res.sendStatus(401)
+
+    const refreshToken = cookies.jwt
+
+    const user_found = await userDB.findByRefresh(refreshToken)
+
+    if(!user_found) return res.sendStatus(403)
+
+    jwt.verify(
+        refreshToken,
+        process.env.JWT_REFRESHTOKEN_SECRET,
+        (err, decoded) => {
+            if(err || user_found.id !== decoded.user) return res.sendStatus(403)
+            
+            const accessToken = createAccessToken(decoded.id)
+           
+            res.json({ ...user_found, accessToken: accessToken })
+        }
+    )
 })
 
 // call google api for profile, email & google_id

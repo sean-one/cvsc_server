@@ -15,6 +15,15 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
+router.get('/:id', async ( req, res) => {
+    const { id } = req.params
+    await db.findById(id)
+        .then(response => {
+            res.status(200).json(response)
+        })
+        .catch(err => console.log(err))
+})
+
 router.get('/get_profile', (req, res) => {
     console.log(Object.keys(req))
     console.log(req.session)

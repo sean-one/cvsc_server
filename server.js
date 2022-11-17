@@ -5,6 +5,8 @@ const app = express()
 const morgan = require('morgan')
 const cors = require('cors');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
+
 const passport = require('passport')
 // const fileUpload = require('express-fileupload');
 
@@ -30,6 +32,8 @@ app.use(morgan(':date[clf] :method :url :status :response-time ms - :res[content
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+app.use(cookieParser())
 
 app.use(
     session({
