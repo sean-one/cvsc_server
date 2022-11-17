@@ -4,6 +4,7 @@ module.exports = {
     find,
     createUser,
     addRefreshToken,
+    removeRefreshToken,
     findByRefresh,
     findById,
     findByGoogleId,
@@ -30,6 +31,12 @@ async function addRefreshToken(id, token) {
     return await db('users')
         .where({ id: id })
         .update({ refreshToken: token })
+}
+
+async function removeRefreshToken(user_id) {
+    return await db('users')
+        .where({ id: user_id })
+        .update({ refreshToken: null })
 }
 
 async function findByRefresh(token) {

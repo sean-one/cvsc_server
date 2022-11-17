@@ -17,6 +17,7 @@ router.post('/local', passport.authenticate('local', {
     const user = req.user
     const account_type = await rolesDB.findUserAccountType(user.id)
     
+    console.log(user)
     if (account_type.length > 0) {
         user.account_type = account_type[0].role_type
     } else {
@@ -27,7 +28,7 @@ router.post('/local', passport.authenticate('local', {
     
     delete user['refreshToken']
 
-    res.status(200).json(user)
+    res.status(200).json({ user: user, roles: account_type })
 })
 
 router.get('/refresh', async (req, res) => {
@@ -44,12 +45,15 @@ router.get('/refresh', async (req, res) => {
     jwt.verify(
         refreshToken,
         process.env.JWT_REFRESHTOKEN_SECRET,
-        (err, decoded) => {
+        async (err, decoded) => {
             if(err || user_found.id !== decoded.user) return res.sendStatus(403)
             
             const accessToken = createAccessToken(decoded.id)
+            const user_roles = await rolesDB.findUserAccountType(decoded.id)
+            user_found.accessToken = accessToken
+            user_found.account_type = user_roles[0].account_type || '100'
            
-            res.json({ ...user_found, accessToken: accessToken })
+            res.json({ user: user_found, roles: user_roles })
         }
     )
 })
@@ -95,11 +99,27 @@ router.get('/login/failed', (req, res) => {
     res.status(401).redirect(`${process.env.FRONTEND_CLIENT}/login`)
 })
 
-router.get('/logout', (req, res, next) => {
-    req.logout((err) => {
-        if (err) { return next(err); }
-    })
-    res.status(200).json({ success: true, message: 'successful logout' })
+router.get('/logout', async (req, res, next) => {
+    const cookies = req.cookies;
+
+    // no jwt cookie was found so no need to erase
+    if(!cookies?.jwt) return res.sendStatus(204)
+    const refreshToken = cookies.jwt;
+
+    const user_found = await userDB.findByRefresh(refreshToken)
+    
+    if(!user_found) {
+        // refresh token not found, remove cookie and send 204
+        res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true });
+        return res.sendStatus(204)
+    }
+
+    // user found, removed from selected user and clear cookie
+    await userDB.removeRefreshToken(user_found.id)
+    
+    res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
+    res.sendStatus(204)
+
 })
 
 module.exports = router;
