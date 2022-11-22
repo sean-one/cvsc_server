@@ -22,7 +22,6 @@ passport.serializeUser(async (user, done) => {
 })
 
 passport.deserializeUser(async (id, done) => {
-    console.log('inside deserial')
     const user = await dbUser.findById(id)
 
     done(null, user)
