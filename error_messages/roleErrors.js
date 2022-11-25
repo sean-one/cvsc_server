@@ -4,6 +4,16 @@ const roleErrors = {
         message: 'request already pending',
         type: 'duplicate'
     },
+    string_to_uuid: {
+        status: 404,
+        message: 'invalid business id',
+        type: 'business not found'
+    },
+    business_request_closed: {
+        status: 400,
+        message: 'business not currently excepting request',
+        type: 'business request closed'
+    },
     missing_input: {
         status: 400,
         message: 'missing business id',

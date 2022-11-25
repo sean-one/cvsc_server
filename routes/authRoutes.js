@@ -17,7 +17,9 @@ router.post('/local', passport.authenticate('local', {
     const user = req.user
     const account_type = await rolesDB.findUserAccountType(user.id)
     
+    console.log('====signed_in_user================================================')
     console.log(user)
+    console.log('==================================================================')
     if (account_type.length > 0) {
         user.account_type = account_type[0].role_type
     } else {
@@ -51,7 +53,7 @@ router.get('/refresh', async (req, res) => {
             const accessToken = createAccessToken(decoded.user)
             const user_roles = await rolesDB.findUserAccountType(decoded.user)
             user_found.accessToken = accessToken
-            user_found.account_type = user_roles[0].role_type || '100'
+            user_found.account_type = user_roles[0]?.role_type || '100'
            
             res.json({ user: user_found, roles: user_roles })
         }

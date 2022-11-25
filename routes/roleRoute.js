@@ -1,8 +1,9 @@
 const express = require('express');
 
 const db = require('../data/models/roles');
+const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validateRole, validateUser, validateToken, validateManagmentRole, validateAdminRole } = require('../helpers/jwt_helper')
+const { validToken, validateRole, validateUser, validateToken, validateManagmentRole, validateAdminRole } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
@@ -27,8 +28,8 @@ router.get('/business/:business_id', (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
-router.get('/management/pending', (req, res) => {
-    db.findRolesPendingManagement(req.user.id)
+router.get('/management/pending', [ validToken ], (req, res) => {
+    db.findRolesPendingManagement(req.user_decoded)
         .then(roles => {
             res.status(200).json(roles)
         })
@@ -36,8 +37,51 @@ router.get('/management/pending', (req, res) => {
 
 })
 
+router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
+    try {
+        const { business_id } = req.params
+    
+        const selected_business = await dbBusiness.findById(business_id)
+    
+        if(!selected_business) return res.sendStatus(404)
+
+        if(!selected_business.business_request_open) throw new Error('business_request_closed')
+
+        const role_request = await db.createRoleRequest(business_id, req.user_decoded)
+
+        if(role_request[0]?.id) return res.status(201).json(role_request[0])
+
+    } catch (error) {
+        if(error.constraint === 'roles_user_id_business_id_unique') {
+            next({
+                status: roleErrors[error.constraint]?.status,
+                message: roleErrors[error.constraint]?.message,
+                type: roleErrors[error.constraint]?.type,
+            })
+        }
+        if(error?.message) {
+            next({
+                status: roleErrors[error.message]?.status,
+                message: roleErrors[error.message]?.message,
+                type: roleErrors[error.message]?.type,
+            })
+        }
+        // catch if business id is not uuid format
+        if(error?.routine === 'string_to_uuid') {
+            next({
+                status: roleErrors[error.routine]?.status,
+                message: roleErrors[error.routine]?.message,
+                type: roleErrors[error.routine]?.type,
+            })
+        }
+
+        // console.log(error)
+    }
+
+})
+
 // add role request via the creatorRequestForm
-router.post('/create-request', async (req, res, next) => {
+router.post('/create-request', [validateToken], async (req, res, next) => {
     try {
         const { business_id } = req.body
         

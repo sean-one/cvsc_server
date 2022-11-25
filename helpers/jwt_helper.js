@@ -4,6 +4,23 @@ const db = require('../data/models/roles');
 const eventDB = require('../data/models/event');
 const tokenErrors = require('../error_messages/tokenErrors');
 
+const validToken = (req, res, next) => {
+    try {
+        const cookies = req.cookies
+    
+        if(!cookies.jwt) throw new Error('cookie_not_found')
+    
+        const user_decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESHTOKEN_SECRET)
+    
+        req.user_decoded = user_decoded.user
+        
+        next()
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 // used at users/register, users/login
 const createToken = (user) => {
     const payload = {
@@ -228,6 +245,7 @@ const validateUserRole = async (req, res, next) => {
 }
 
 module.exports = {
+    validToken,
     createToken,
     createAccessToken,
     createRefreshToken,

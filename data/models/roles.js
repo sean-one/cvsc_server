@@ -17,6 +17,7 @@ module.exports = {
     downgradeManagerRole,
     removeUserRole,
     createRequest,
+    createRoleRequest,
 }
 
 // for postman to check db
@@ -314,4 +315,12 @@ async function createRequest(business_id, user_id) {
             ]
         )
     
+}
+
+async function createRoleRequest(business_id, user_id) {
+    return await db('roles')
+        .insert({
+            user_id: user_id,
+            business_id: business_id
+        }, ['id', 'role_type'])
 }
