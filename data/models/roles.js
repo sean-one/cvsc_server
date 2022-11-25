@@ -3,7 +3,7 @@ const db = require('../dbConfig');
 module.exports = {
     find,
     findUserBusinessRole,
-    findUserAccountType,
+    findRolesByUser,
     findById,
     findRole,
     checkUserRoles,
@@ -38,17 +38,19 @@ function findUserBusinessRole(business_id, user_id) {
         .first()
 }
 
-async function findUserAccountType(user_id) {
+// returns an array of roles active AND inactive -- returns ALL roles
+async function findRolesByUser(user_id) {
     return db('roles')
-        .where({ user_id: user_id, active_role: true })
+        .where({ user_id: user_id })
         .select(
             [
                 'roles.business_id',
                 'roles.role_type',
+                'roles.active_role'
             ]
         )
         .orderBy('roles.role_type', 'desc')
-        }
+}
 
 // find role request by request_id
 async function findById(request_id) {
@@ -322,5 +324,5 @@ async function createRoleRequest(business_id, user_id) {
         .insert({
             user_id: user_id,
             business_id: business_id
-        }, ['id', 'role_type'])
+        }, ['business_id', 'role_type', 'active_role'])
 }

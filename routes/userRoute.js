@@ -1,7 +1,6 @@
 const express = require('express');
 
 const db = require('../data/models/user')
-const { validateToken } = require('../helpers/jwt_helper');
 
 const router = express.Router();
 
@@ -32,7 +31,7 @@ router.get('/get_profile', (req, res) => {
     return res.status(200).json(req.user);
 })
 
-router.post('/updateAvatar', [ validateToken ], async (req, res) => {
+router.post('/updateAvatar', async (req, res) => {
     try {
         const avatarLink = req.body
         const { user_id } = req.decodedToken

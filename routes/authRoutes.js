@@ -15,22 +15,20 @@ router.post('/local', passport.authenticate('local', {
     session: true
 }), async (req, res) => {
     const user = req.user
-    const account_type = await rolesDB.findUserAccountType(user.id)
+    const user_roles = await rolesDB.findRolesByUser(user.id)
+    const filter_inactive = user_roles.filter(role => role.active_role)
+    user.account_type = filter_inactive[0]?.role_type || '100'
     
-    console.log('====signed_in_user================================================')
-    console.log(user)
-    console.log('==================================================================')
-    if (account_type.length > 0) {
-        user.account_type = account_type[0].role_type
-    } else {
-        user.account_type = 100
-    }
+    // console.log('====signed_in_user================================================')
+    // console.log(user)
+    // console.log(user_roles)
+    // console.log('==================================================================')
 
     res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
     
     delete user['refreshToken']
 
-    res.status(200).json({ user: user, roles: account_type })
+    res.status(200).json({ user: user, roles: user_roles })
 })
 
 router.get('/refresh', async (req, res) => {
@@ -49,11 +47,16 @@ router.get('/refresh', async (req, res) => {
         process.env.JWT_REFRESHTOKEN_SECRET,
         async (err, decoded) => {
             if(err || user_found.id !== decoded.user) return res.sendStatus(403)
-
+            // get user information
             const accessToken = createAccessToken(decoded.user)
-            const user_roles = await rolesDB.findUserAccountType(decoded.user)
+            // find ALL roles attached to user active & inactive
+            const user_roles = await rolesDB.findRolesByUser(decoded.user)
+            // set the accesstoken to the user details
             user_found.accessToken = accessToken
-            user_found.account_type = user_roles[0]?.role_type || '100'
+            // filter out all inactive role request
+            const filter_inactive = user_roles.filter(role => role.active_role)
+            // get highest role type in all active only roles
+            user_found.account_type = filter_inactive[0]?.role_type || '100'
            
             res.json({ user: user_found, roles: user_roles })
         }
@@ -69,33 +72,33 @@ router.get('/google/redirect', passport.authenticate("google", {
     session: true
 }))
 
-router.get('/user_profile', async (req, res) => {
-    if (req.isAuthenticated()) {
-        console.log('singed in')
-        console.log(`user: ${req.user.id}`)
-    } else {
-        console.log('not signed in')
-        console.log(`user: ${req.user.id}`)
-    }
-    try {
-        const profile = req.user
-        if(profile === undefined) throw new Error('no user')
+// router.get('/user_profile', async (req, res) => {
+//     if (req.isAuthenticated()) {
+//         console.log('singed in')
+//         console.log(`user: ${req.user.id}`)
+//     } else {
+//         console.log('not signed in')
+//         console.log(`user: ${req.user.id}`)
+//     }
+//     try {
+//         const profile = req.user
+//         if(profile === undefined) throw new Error('no user')
 
-        const user_roles = await rolesDB.findUserAccountType(req.user.id)
+//         const user_roles = await rolesDB.findUserAccountType(req.user.id)
         
-        if (user_roles.length > 0) {
-            profile.roles = user_roles
-            profile.account_type = role_types[user_roles[0].role_type]
-        } else {
-            profile.roles = []
-            profile.account_type = 'basic'
-        }
+//         if (user_roles.length > 0) {
+//             profile.roles = user_roles
+//             profile.account_type = role_types[user_roles[0].role_type]
+//         } else {
+//             profile.roles = []
+//             profile.account_type = 'basic'
+//         }
         
-        res.status(200).json(profile)
-    } catch(error) {
-        console.log(error)
-    }
-})
+//         res.status(200).json(profile)
+//     } catch(error) {
+//         console.log(error)
+//     }
+// })
 
 router.get('/login/failed', (req, res) => {
     res.status(401).redirect(`${process.env.FRONTEND_CLIENT}/login`)

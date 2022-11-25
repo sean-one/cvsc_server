@@ -1,7 +1,6 @@
 const express = require('express');
 
 const db = require('../data/models/contact');
-const { validateToken } = require('../helpers/jwt_helper');
 
 const router = express.Router();
 
@@ -29,7 +28,7 @@ router.get('/:id', (req, res) => {
         });
 });
 
-router.post('/update', [ validateToken ], (req, res) => {
+router.post('/update', (req, res) => {
     const contactUpdate = req.body;
     const { user_id } = req.decodedToken;
     db.updateContact(contactUpdate, user_id)

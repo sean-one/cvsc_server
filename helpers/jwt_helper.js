@@ -16,8 +16,11 @@ const validToken = (req, res, next) => {
         
         next()
     } catch (error) {
-        console.log(error)
-        next(error)
+        next({
+            status: tokenErrors[error.name]?.status,
+            message: tokenErrors[error.name]?.message,
+            type: tokenErrors[error.name]?.type,
+        })
     }
 }
 
@@ -156,37 +159,6 @@ const validateAdminRole = async (req, res, next) => {
     }
 }
 
-const validateToken = (req, res, next) => {
-    // console.log(req.headers)
-    try {
-        const token = req.headers.authorization.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        
-        req.decodedToken = decoded;
-        
-        next()
-    } catch (error) {
-        if(error.name === 'TypeError' || error.name === 'JsonWebTokenError') {
-            next({ 
-                status: tokenErrors['invalid_token']?.status,
-                message: tokenErrors['invalid_token']?.message,
-                type: tokenErrors['invalid_token']?.type
-            })
-
-        } else if(error.name === 'TokenExpiredError') {
-            next({
-                status: tokenErrors['expired_token']?.status,
-                message: tokenErrors['expired_token']?.message,
-                type: tokenErrors['expired_token']?.type
-            })
-
-        } else {
-            next(error)
-
-        }
-    }
-}
-
 const validateEventEditRights = async (req, res, next) => {
     console.log(req.body)
     try {
@@ -250,7 +222,6 @@ module.exports = {
     createAccessToken,
     createRefreshToken,
     validateRole,
-    validateToken,
     validateUser,
     validateCreatorRights,
     validateManagmentRole,

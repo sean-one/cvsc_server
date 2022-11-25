@@ -6,7 +6,7 @@ const sharp = require('sharp');
 const { uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
-const { validateToken, validateUser, validateUserRole, validateCreatorRights, validateEventEditRights } = require('../helpers/jwt_helper');
+const { validateUser, validateUserRole, validateCreatorRights, validateEventEditRights } = require('../helpers/jwt_helper');
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })

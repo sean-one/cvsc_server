@@ -3,12 +3,11 @@ const express = require('express');
 const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken, validateRole, validateUser, validateToken, validateManagmentRole, validateAdminRole } = require('../helpers/jwt_helper')
+const { validToken, validateRole, validateUser, validateManagmentRole, validateAdminRole } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
 // used on /profile page inside getroles
-// router.get('/user/:id', [ validateToken, validateUser ], (req, res) => {
 router.get('/user/:id', (req, res) => {
     // const { user_id } = req.decodedToken
     db.findByUser_All(req.user.id)
@@ -49,7 +48,7 @@ router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
 
         const role_request = await db.createRoleRequest(business_id, req.user_decoded)
 
-        if(role_request[0]?.id) return res.status(201).json(role_request[0])
+        if(role_request[0]?.business_id) return res.status(201).json(role_request[0])
 
     } catch (error) {
         if(error.constraint === 'roles_user_id_business_id_unique') {
@@ -81,7 +80,7 @@ router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
 })
 
 // add role request via the creatorRequestForm
-router.post('/create-request', [validateToken], async (req, res, next) => {
+router.post('/create-request', async (req, res, next) => {
     try {
         const { business_id } = req.body
         
