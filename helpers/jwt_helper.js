@@ -4,41 +4,6 @@ const db = require('../data/models/roles');
 const eventDB = require('../data/models/event');
 const tokenErrors = require('../error_messages/tokenErrors');
 
-const validToken = (req, res, next) => {
-    try {
-        const cookies = req.cookies
-    
-        if(!cookies.jwt) throw new Error('cookie_not_found')
-    
-        const user_decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESHTOKEN_SECRET)
-    
-        req.user_decoded = user_decoded.user
-        
-        next()
-    } catch (error) {
-        next({
-            status: tokenErrors[error.name]?.status,
-            message: tokenErrors[error.name]?.message,
-            type: tokenErrors[error.name]?.type,
-        })
-    }
-}
-
-// used at users/register, users/login
-const createToken = (user) => {
-    const payload = {
-        user_id: user.id,
-        // username: user.username,
-    }
-
-    const secret = process.env.JWT_SECRET;
-    const options = {
-        expiresIn: process.env.JWT_EXPIRES
-    }
-
-    return jwt.sign(payload, secret, options);
-}
-
 const createAccessToken = (user_id) => {
     const payload = {
         user: user_id
@@ -65,22 +30,64 @@ const createRefreshToken = (user_id) => {
     return jwt.sign(payload, secret, options);
 }
 
-const validateRole = async (req, res, next) => {
-    const user_id = req.user.id
-    const role_id = req.params.role_id
-    const { business_id } = await db.findById(role_id)
-
-    const { role_type } = await db.findUserBusinessRole(business_id, user_id)
+//! updated helper
+const validToken = (req, res, next) => {
+    try {
+        const cookies = req.cookies
     
-    if (role_type >= 456) {
-        // management verified
+        if(!cookies.jwt) throw new Error('cookie_not_found')
+    
+        const user_decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESHTOKEN_SECRET)
+    
+        req.user_decoded = user_decoded.user
+        
         next()
-    } else {
-        // no management role
-        res.status(404).json({ message: 'invalid role privileges'})
-    }
+    } catch (error) {
+       
+        next({
+            status: tokenErrors[error.name]?.status,
+            message: tokenErrors[error.name]?.message,
+            type: tokenErrors[error.name]?.type,
+        })
 
-    return
+    }
+}
+
+//! updated helper
+const validateManager = async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+
+        if(!user_id) throw new Error('invalid_user')
+        // console.log(`user_id: ${user_id}`)
+
+        const { role_id } = req.params
+        // console.log(`request_id: ${role_id}`)
+
+        if(!role_id) throw new Error('request_not_found')
+        const { business_id } = await db.findById(role_id)
+        // console.log(`business_id: ${business_id}`)
+
+        if(!business_id) throw new Error('request_not_found')
+        const role_rights = await db.findBusinessRoleByUser(business_id, user_id)
+        // console.log(`role_type: ${role_rights.role_type}`)
+
+        if(!role_rights) throw new Error('invalid_user')
+
+        if(role_rights.role_type >= 456) {
+            next()
+        } else {
+            throw new Error('invalid_role_rights')
+        }
+    } catch (error) {
+        
+        next({
+            status: tokenErrors[error.name]?.status,
+            message: tokenErrors[error.name]?.message,
+            type: tokenErrors[error.name]?.type,
+        })
+        
+    }
 }
 
 // used - /roles/user/:id
@@ -218,10 +225,9 @@ const validateUserRole = async (req, res, next) => {
 
 module.exports = {
     validToken,
-    createToken,
+    validateManager,
     createAccessToken,
     createRefreshToken,
-    validateRole,
     validateUser,
     validateCreatorRights,
     validateManagmentRole,

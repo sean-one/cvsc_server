@@ -2,6 +2,7 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
+    findBusinessRoleByUser,
     findUserBusinessRole,
     findRolesByUser,
     findById,
@@ -23,6 +24,18 @@ module.exports = {
 // for postman to check db
 function find() {
     return db('roles')
+}
+
+function findBusinessRoleByUser(business_id, user_id) {
+    return db('roles')
+        .where({ user_id: user_id, business_id: business_id })
+        .select(
+            [
+                'roles.business_id',
+                'roles.role_type'
+            ]
+        )
+        .first()
 }
 
 function findUserBusinessRole(business_id, user_id) {
@@ -218,11 +231,11 @@ function findByUser_All(user_id) {
 }
 
 // pendingRequest /roles/approve/:request_id
-async function approveRoleRequest(request_id, admin_id) {
+async function approveRoleRequest(request_id, management_id) {
 
     await db('roles')
         .where({ id: request_id })
-        .update({ active_role: true, approved_by: admin_id})
+        .update({ active_role: true, approved_by: management_id})
 
     return await db('roles')
         .where({ 'roles.id': request_id })
@@ -241,10 +254,10 @@ async function approveRoleRequest(request_id, admin_id) {
         .first()
 }
 
-async function upgradeCreatorRole(request_id, admin_id) {
+async function upgradeCreatorRole(request_id, management_id) {
     await db('roles')
         .where({ id: request_id })
-        .update({ role_type: 456, approved_by: admin_id})
+        .update({ role_type: 456, approved_by: management_id})
     
     return await db('roles')
         .where({ 'roles.id': request_id })

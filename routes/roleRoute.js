@@ -3,7 +3,7 @@ const express = require('express');
 const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken, validateRole, validateUser, validateManagmentRole, validateAdminRole } = require('../helpers/jwt_helper')
+const { validToken, validateUser, validateManagmentRole, validateAdminRole, validateManager } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
@@ -36,6 +36,8 @@ router.get('/management/pending', [ validToken ], (req, res) => {
 
 })
 
+// creates a new business role request
+//! updated endpoint
 router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
     try {
         const { business_id } = req.params
@@ -79,49 +81,17 @@ router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
 
 })
 
-// add role request via the creatorRequestForm
-router.post('/create-request', async (req, res, next) => {
-    try {
-        const { business_id } = req.body
-        
-        if (!business_id) {
-            throw new Error('missing_input')
-        }
-        const result = await db.createRequest(business_id, req.user.id)
-
-        res.status(200).json(result)
-
-    } catch (error) {
-        
-        if (error.constraint) {
-            next({
-                status: roleErrors[error.constraint]?.status,
-                message: roleErrors[error.constraint]?.message,
-                type: roleErrors[error.constraint]?.type
-            })
-
-        } else {
-            next({ 
-                status: roleErrors[error.message]?.status,
-                message: roleErrors[error.message]?.message,
-                type: roleErrors[error.message]?.type
-            })
-
-        }
-    }
-})
-
 // pendingRequest approval button
-router.post('/approve_pending/:role_id', [ validateRole ], async (req, res, next) => {
-    console.log(req.session)
-    const management_id = await req.user.id
+//! updated endpoint
+router.post('/approve_request/:role_id', [ validToken, validateManager ], async (req, res, next) => {
+    const management_id = await req.user_decoded
     const new_creator = await db.approveRoleRequest(req.params.role_id, management_id)
     
     res.status(200).json(new_creator)
 })
 
-router.post('/upgrade_creator/:role_id', [ validateManagmentRole], async (req, res, next) => {
-    const management_id = await req.user.id
+router.post('/upgrade_creator/:role_id', [ validToken, validateManager ], async (req, res, next) => {
+    const management_id = await req.user_decoded
     const new_manager = await db.upgradeCreatorRole(req.params.role_id, management_id)
 
     res.status(200).json(new_manager)
