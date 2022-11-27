@@ -6,7 +6,7 @@ const sharp = require('sharp');
 const { uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
-const { validateUser, validateUserRole, validateCreatorRights, validateEventEditRights } = require('../helpers/jwt_helper');
+const { validToken, validateCreator, validateUser, validateUserRole, validateEventEditRights } = require('../helpers/jwt_helper');
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -14,6 +14,7 @@ const upload = multer({ storage: storage })
 // '/events'
 const router = express.Router();
 
+//! updated endpoint - needs error handling
 router.get('/', (req, res) => {
     db.find()
         .then(events => {
@@ -52,29 +53,32 @@ router.put('/:id', (req, res, next) => {
     }
 })
 
-router.post('/', upload.single('eventmedia'), async (req, res, next) => {
+//! updated endpoint - needs error handling
+router.post('/', upload.single('eventmedia'), [validToken, validateCreator], async (req, res, next) => {
+    
     const new_event = req.body
-    console.log('new event BEFORE ifs')
-    console.log(new_event)
+    
+    // format eventstart
     if(!new_event.eventstart) {
         delete new_event['eventstart']
     } else {
         new_event.eventstart = parseInt(new_event.eventstart.replace(':', ''))
     }
 
+    // format eventend
     if(!new_event.eventend) {
         delete new_event['eventend']
     } else {
         new_event.eventend = parseInt(new_event.eventend.replace(':',''))
     }
 
+    // remove empty entries
     if(!new_event.eventmedia) delete new_event['eventmedia']
     if(!new_event.venue_id) delete new_event['venue_id']
     if(!new_event.details) delete new_event['details']
     if(!new_event.brand_id) delete new_event['brand_id']
 
-    console.log('new event AFTER ifs')
-    console.log(new_event)
+    // check for file upload
     if(req.file) {
         // resize the image
         req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
@@ -87,8 +91,9 @@ router.post('/', upload.single('eventmedia'), async (req, res, next) => {
     }
     
     // add user as created by admin for event
-    new_event.created_by = req.user.id
+    new_event.created_by = req.user_decoded
 
+    // if all options are complete event marked as active, else inactive
     if(Object.keys(new_event).length === 9) {
         new_event.active_event = true
     } else {

@@ -196,8 +196,7 @@ async function userValidation(user_id, business_id) {
     }
 }
 
-// returns an array of business_id(s) for given user id
-// used validateUserRole for create and update events
+// jwt_helper validateCreator - returns an array of business_id(s)
 async function getUserBusinessRoles(user_id) {
     const user_roles = await db('roles')
         .where({ user_id: user_id, active_role: true })

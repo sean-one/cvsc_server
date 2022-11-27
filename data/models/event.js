@@ -13,6 +13,7 @@ module.exports = {
     removeEvent
 };
 
+//! main calendar event call
 function find() {
     return db('events')
         .where('events.eventdate', '>=', new Date())
@@ -175,6 +176,7 @@ function findByCreator(user) {
         .orderBy('events.eventdate')
 }
 
+//! eventRoute - .post('/')
 async function createEvent(event) {
     return await db('events').insert(event, ['id'])
         .then(eventId => {

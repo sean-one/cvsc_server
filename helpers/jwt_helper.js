@@ -54,6 +54,34 @@ const validToken = (req, res, next) => {
 }
 
 //! updated helper
+const validateCreator = async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+
+        if (!user_id) throw new Error('invalid_user')
+
+        const { venue_id, brand_id } = req.body
+
+        const { business_ids } = await db.getUserBusinessRoles(user_id)
+
+        if(business_ids.includes(venue_id) || business_ids.includes(brand_id)) {
+            next()
+        } else {
+            throw new Error('invalid_role_rights')
+        }
+
+    } catch (error) {
+
+        next({
+            status: tokenErrors[error.name]?.status,
+            message: tokenErrors[error.name]?.message,
+            type: tokenErrors[error.name]?.type,
+        })
+
+    }
+}
+
+//! updated helper
 const validateManager = async (req, res, next) => {
     try {
         const user_id = req.user_decoded
@@ -133,26 +161,6 @@ const validateUser = (req, res, next) => {
         next()
     } else {
         res.status(404).json({ message: 'wrong user' })
-    }
-}
-
-const validateCreatorRights = async (req, res, next) => {
-    try {
-        const user_id = req.user.id
-        const { business_ids } = await db.getUserBusinessRoles(user_id)
-
-        if(business_ids.includes(req.body.venue_id) || business_ids.includes(req.body.brand_id)) {
-            next()
-        } else {
-            throw new Error('invalid_role_rights')
-        }
-        
-    } catch (error) {
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type,
-        })
     }
 }
 
@@ -238,12 +246,12 @@ const validateUserRole = async (req, res, next) => {
 
 module.exports = {
     validToken,
+    validateCreator,
     validateManager,
     validateAdmin,
     createAccessToken,
     createRefreshToken,
     validateUser,
-    validateCreatorRights,
     validateAdminRole,
     validateEventEditRights,
     validateUserRole,
