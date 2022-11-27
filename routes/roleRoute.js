@@ -3,7 +3,7 @@ const express = require('express');
 const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken, validateUser, validateManagmentRole, validateAdminRole, validateManager } = require('../helpers/jwt_helper')
+const { validToken, validateUser, validateAdminRole, validateManager, validateAdmin } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
@@ -82,7 +82,7 @@ router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
 })
 
 // pendingRequest approval button
-//! updated endpoint
+//! updated endpoint - needs error handling
 router.post('/approve_request/:role_id', [ validToken, validateManager ], async (req, res, next) => {
     const management_id = await req.user_decoded
     const new_creator = await db.approveRoleRequest(req.params.role_id, management_id)
@@ -90,6 +90,8 @@ router.post('/approve_request/:role_id', [ validToken, validateManager ], async 
     res.status(200).json(new_creator)
 })
 
+// upgradeButton - upgrades creator to manager
+//! updated endpoint - needs error handling
 router.post('/upgrade_creator/:role_id', [ validToken, validateManager ], async (req, res, next) => {
     const management_id = await req.user_decoded
     const new_manager = await db.upgradeCreatorRole(req.params.role_id, management_id)
@@ -97,15 +99,18 @@ router.post('/upgrade_creator/:role_id', [ validToken, validateManager ], async 
     res.status(200).json(new_manager)
 })
 
-router.post('/downgrade_manager/:role_id', [ validateAdminRole ], async (req, res, next) => {
-    const admin_id = await req.user.id
+// downgradeButton - downgrades manager to creator
+//! updated enpoint - needs error handling
+router.post('/downgrade_manager/:role_id', [ validToken, validateAdmin ], async (req, res, next) => {
+    const admin_id = await req.user_decoded
     const creator_role = await db.downgradeManagerRole(req.params.role_id, admin_id)
 
     res.status(200).json(creator_role)
 })
 
-// pendingRequest reject button
-router.delete('/user_remove/:role_id', [ validateManagmentRole ], async (req, res, next) => {
+// pendingRequest reject button & creator role delete
+//! updated endpoint - needs error handling
+router.delete('/user_remove/:role_id', [ validToken, validateManager ], async (req, res, next) => {
     try {
         const deleted_count = await db.removeUserRole(req.params.role_id)
         
@@ -115,9 +120,12 @@ router.delete('/user_remove/:role_id', [ validateManagmentRole ], async (req, re
     }
 })
 
-router.delete('/manager_remove/:role_id', [ validateAdminRole ], async (req, res, next) => {
+// removeRoleButton - removes manager role
+//! updated endpoint - needs error handling
+router.delete('/manager_remove/:role_id', [ validToken, validateAdmin ], async (req, res, next) => {
     try {
-        const deleted_count = await db.removeUserRole(req.params.role_id)
+        const { role_id } = req.params
+        const deleted_count = await db.removeUserRole(role_id)
         
         res.status(200).json(deleted_count)
     } catch (error) {

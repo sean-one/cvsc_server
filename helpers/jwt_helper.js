@@ -90,6 +90,43 @@ const validateManager = async (req, res, next) => {
     }
 }
 
+//! updated helper
+const validateAdmin = async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+
+        if(!user_id) throw new Error('invalid_user')
+        // console.log(`user_id: ${user_id}`)
+
+        const { role_id } = req.params
+        // console.log(`request_id: ${role_id}`)
+
+        if(!role_id) throw new Error('request_not_found')
+        const { business_id } = await db.findById(role_id)
+        // console.log(`business_id: ${business_id}`)
+
+        if(!business_id) throw new Error('request_not_found')
+        const role_rights = await db.findBusinessRoleByUser(business_id, user_id)
+        // console.log(`role_type: ${role_rights.role_type}`)
+
+        if(!role_rights) throw new Error('invalid_user')
+
+        if(role_rights.role_type >= 789) {
+            next()
+        } else {
+            throw new Error('invalid_role_rights')
+        }
+    } catch (error) {
+        
+        next({
+            status: tokenErrors[error.name]?.status,
+            message: tokenErrors[error.name]?.message,
+            type: tokenErrors[error.name]?.type,
+        })
+        
+    }
+}
+
 // used - /roles/user/:id
 const validateUser = (req, res, next) => {
     if (req.user.id.toString() === req.decodedToken.user_id.toString()) {
@@ -115,30 +152,6 @@ const validateCreatorRights = async (req, res, next) => {
             status: tokenErrors[error.message]?.status,
             message: tokenErrors[error.message]?.message,
             type: tokenErrors[error.message]?.type,
-        })
-    }
-}
-
-// USED - /roles/approve/:request_id, /roles/reject/:id
-const validateManagmentRole = async (req, res, next) => {
-    try {
-        const user_id = req.user.id
-        const role_id = req.params.role_id
-
-        const user_role_request = await db.findById(role_id)
-        const admin_role = await db.findRole(user_id, user_role_request.business_id)
-
-        if(admin_role.role_type === 'admin' || admin_role.role_type === 'manager'){
-            next()
-        } else {
-            throw new Error('invalid_role_rights')
-        }
-
-    } catch (error) {
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type
         })
     }
 }
@@ -226,11 +239,11 @@ const validateUserRole = async (req, res, next) => {
 module.exports = {
     validToken,
     validateManager,
+    validateAdmin,
     createAccessToken,
     createRefreshToken,
     validateUser,
     validateCreatorRights,
-    validateManagmentRole,
     validateAdminRole,
     validateEventEditRights,
     validateUserRole,

@@ -254,6 +254,7 @@ async function approveRoleRequest(request_id, management_id) {
         .first()
 }
 
+// upgradeButton 
 async function upgradeCreatorRole(request_id, management_id) {
     await db('roles')
         .where({ id: request_id })
@@ -276,6 +277,7 @@ async function upgradeCreatorRole(request_id, management_id) {
         .first()
 }
 
+// downgradeButton
 async function downgradeManagerRole(role_id, admin_id) {
     await db('roles')
         .where({ id: role_id })
