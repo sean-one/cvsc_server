@@ -1,7 +1,8 @@
 const eventErrors = {
     events_eventname_unique: {
         status: 400,
-        message: 'eventname already exist'
+        message: 'eventname already exist',
+        type: 'eventname'
     },
     events_venue_id_foreign: {
         status: 404,

@@ -205,7 +205,14 @@ async function createEvent(event) {
                 )
                 .first()
         })
-        .catch(err => {throw err})
+        .catch(err => {
+            if(err?.constraint === 'events_eventname_unique') {
+                throw new Error('events_eventname_unique')
+            } else {
+                console.log('uncaught error inside create event model')
+                throw err
+            }
+        })
 }
 
 async function updateEvent(eventId, eventChanges) {

@@ -54,55 +54,69 @@ router.put('/:id', (req, res, next) => {
 })
 
 //! updated endpoint - needs error handling
-router.post('/', upload.single('eventmedia'), [validToken, validateCreator], async (req, res, next) => {
-    
-    const new_event = req.body
-    
-    // format eventstart
-    if(!new_event.eventstart) {
-        delete new_event['eventstart']
-    } else {
-        new_event.eventstart = parseInt(new_event.eventstart.replace(':', ''))
-    }
-
-    // format eventend
-    if(!new_event.eventend) {
-        delete new_event['eventend']
-    } else {
-        new_event.eventend = parseInt(new_event.eventend.replace(':',''))
-    }
-
-    // remove empty entries
-    if(!new_event.eventmedia) delete new_event['eventmedia']
-    if(!new_event.venue_id) delete new_event['venue_id']
-    if(!new_event.details) delete new_event['details']
-    if(!new_event.brand_id) delete new_event['brand_id']
-
-    // check for file upload
-    if(req.file) {
-        // resize the image
-        req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+router.post('/', [upload.single('eventmedia'), validToken, validateCreator], async (req, res, next) => {
+    try {
+        const new_event = req.body
         
-        // upload the image to s3
-        const image_key = await uploadImageS3Url(req.file)
+        // format eventstart
+        if(!new_event.eventstart) {
+            delete new_event['eventstart']
+        } else {
+            new_event.eventstart = parseInt(new_event.eventstart.replace(':', ''))
+        }
     
-        // add uploaded image link to body & add created by user
-        new_event.eventmedia = `${process.env.AWS_IMAGELINK}${image_key}`
+        // format eventend
+        if(!new_event.eventend) {
+            delete new_event['eventend']
+        } else {
+            new_event.eventend = parseInt(new_event.eventend.replace(':',''))
+        }
+    
+        // remove empty entries
+        // for (let event_field in new_event) {
+        //     if (!new_event[event_field]) {
+        //         delete new_event[event_field]
+        //     }
+        // }
+        if(!new_event.eventmedia) delete new_event['eventmedia']
+        if(!new_event.venue_id) delete new_event['venue_id']
+        if(!new_event.details) delete new_event['details']
+        if(!new_event.brand_id) delete new_event['brand_id']
+    
+        // check for file upload
+        if(req.file) {
+            // resize the image
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+            
+            // upload the image to s3
+            const image_key = await uploadImageS3Url(req.file)
+        
+            // add uploaded image link to body & add created by user
+            new_event.eventmedia = `${process.env.AWS_IMAGELINK}${image_key}`
+        }
+        
+        // add user as created by admin for event
+        new_event.created_by = req.user_decoded
+    
+        // if all options are complete event marked as active, else inactive
+        if(Object.keys(new_event).length === 9) {
+            new_event.active_event = true
+        } else {
+            new_event.active_event = false
+        }
+    
+        const event = await db.createEvent(new_event)
+        
+        res.status(201).json(event)
+        
+    } catch (error) {
+        console.log(error.name)
+        next({
+            status: eventErrors[error.message]?.status,
+            message: eventErrors[error.message]?.message,
+            type: eventErrors[error.message]?.type,
+        })
     }
-    
-    // add user as created by admin for event
-    new_event.created_by = req.user_decoded
-
-    // if all options are complete event marked as active, else inactive
-    if(Object.keys(new_event).length === 9) {
-        new_event.active_event = true
-    } else {
-        new_event.active_event = false
-    }
-
-    const event = await db.createEvent(new_event)
-    
-    res.status(201).json(event)
 });
 
 router.get('/user/:user_id', (req, res) => {

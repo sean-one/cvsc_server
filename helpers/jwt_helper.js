@@ -32,18 +32,21 @@ const createRefreshToken = (user_id) => {
 
 //! updated helper
 const validToken = (req, res, next) => {
+    console.log('inside validToken')
     try {
         const cookies = req.cookies
     
         if(!cookies.jwt) throw new Error('cookie_not_found')
     
         const user_decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESHTOKEN_SECRET)
-    
+        console.log('decoded')
+        console.log(user_decoded)
         req.user_decoded = user_decoded.user
         
+        console.log('valid token')
         next()
     } catch (error) {
-       
+       console.log(error.name)
         next({
             status: tokenErrors[error.name]?.status,
             message: tokenErrors[error.name]?.message,
@@ -55,6 +58,7 @@ const validToken = (req, res, next) => {
 
 //! updated helper
 const validateCreator = async (req, res, next) => {
+    console.log('inside validateCreator')
     try {
         const user_id = req.user_decoded
 
@@ -65,6 +69,7 @@ const validateCreator = async (req, res, next) => {
         const { business_ids } = await db.getUserBusinessRoles(user_id)
 
         if(business_ids.includes(venue_id) || business_ids.includes(brand_id)) {
+            console.log('valid creator')
             next()
         } else {
             throw new Error('invalid_role_rights')
@@ -83,6 +88,7 @@ const validateCreator = async (req, res, next) => {
 
 //! updated helper
 const validateManager = async (req, res, next) => {
+    console.log('inside validateManager')
     try {
         const user_id = req.user_decoded
 
@@ -120,6 +126,7 @@ const validateManager = async (req, res, next) => {
 
 //! updated helper
 const validateAdmin = async (req, res, next) => {
+    console.log('inside validateAdmin')
     try {
         const user_id = req.user_decoded
 
