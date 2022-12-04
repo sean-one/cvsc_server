@@ -15,7 +15,27 @@ const eventErrors = {
     events_created_by_foreign: {
         status: 404,
         message: 'user not found'
-    }
+    },
+    invalid_time_format: {
+        // invalid formatting of time on insert
+        status: 400,
+        message: 'please be sure time has correct formatting',
+        type: 'time_format'
+    },
+    invalid_admin: {
+        status: 401,
+        message: 'unauthorized',
+    },
+    missing_image: {
+        status: 400,
+        message: 'image error',
+        type: 'eventmedia'
+    },
+    upload_error: {
+        status: 400,
+        message: 'image upload error',
+        type: 'eventmedia'
+    },
 }
 
 module.exports = eventErrors;

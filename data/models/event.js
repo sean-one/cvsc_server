@@ -8,6 +8,7 @@ module.exports = {
     findByBrand,
     findByCreator,
     createEvent,
+    updateImage,
     updateEvent,
     removeBusiness,
     removeEvent
@@ -206,6 +207,16 @@ async function createEvent(event) {
                 .first()
         })
         .catch(err => {
+            // console.log(err)
+            if(err?.code === '23502') {
+                // err.column is created_by for no admin
+                throw new Error('invalid_admin')
+            }
+
+            if(err?.routine === 'DecodeDateTime') {
+                throw new Error('invalid_time_format')
+            }
+
             if(err?.constraint === 'events_eventname_unique') {
                 throw new Error('events_eventname_unique')
             } else {
@@ -213,6 +224,41 @@ async function createEvent(event) {
                 throw err
             }
         })
+}
+
+//! adds an image to a created event during create process
+async function updateImage(event_id, image_update) {
+    try {
+        await db('events').where({ id: event_id }).update({ eventmedia: image_update })
+        
+        return db('events')
+            .where('events.id', event_id)
+            .join('locations', 'events.venue_id', '=', 'locations.venue_id')
+            .join('businesses', 'events.brand_id', '=', 'businesses.id')
+            .select(
+                [
+                    'events.id as event_id',
+                    'events.eventname',
+                    'events.eventdate',
+                    'events.eventstart',
+                    'events.eventend',
+                    'events.eventmedia',
+                    'events.details',
+                    'events.venue_id',
+                    'locations.venue_name',
+                    'locations.location_city',
+                    'locations.formatted',
+                    'events.brand_id',
+                    'businesses.business_name as brand_name',
+                    'events.created_by'
+                ]
+            )
+            .first()
+
+    } catch (error) {
+        console.log(error)
+    }
+
 }
 
 async function updateEvent(eventId, eventChanges) {

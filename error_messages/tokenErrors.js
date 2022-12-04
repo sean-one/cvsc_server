@@ -22,6 +22,14 @@ const tokenErrors = {
         status: 404,
         message: 'role request not found'
     },
+    not_found : {
+        status: 404,
+        message: 'not found'
+    },
+    event_not_found: {
+        status: 404,
+        message: 'event not found'
+    },
     invalid_role_rights : {
         status: 403,
         message: 'user does not have correct role rights',

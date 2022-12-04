@@ -36,7 +36,7 @@ const validToken = (req, res, next) => {
     try {
         const cookies = req.cookies
     
-        if(!cookies.jwt) throw new Error('cookie_not_found')
+        if(!cookies.jwt) throw new Error('invalid_token')
     
         const user_decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESHTOKEN_SECRET)
         console.log('decoded')
@@ -46,11 +46,11 @@ const validToken = (req, res, next) => {
         console.log('valid token')
         next()
     } catch (error) {
-       console.log(error.name)
+       console.log(error.message)
         next({
-            status: tokenErrors[error.name]?.status,
-            message: tokenErrors[error.name]?.message,
-            type: tokenErrors[error.name]?.type,
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type,
         })
 
     }
@@ -66,6 +66,7 @@ const validateCreator = async (req, res, next) => {
 
         const { venue_id, brand_id } = req.body
 
+        // get array of business_id's for ALL ACTIVE roles for CREATOR, MANAGER & ADMIN 
         const { business_ids } = await db.getUserBusinessRoles(user_id)
 
         if(business_ids.includes(venue_id) || business_ids.includes(brand_id)) {
@@ -78,9 +79,9 @@ const validateCreator = async (req, res, next) => {
     } catch (error) {
 
         next({
-            status: tokenErrors[error.name]?.status,
-            message: tokenErrors[error.name]?.message,
-            type: tokenErrors[error.name]?.type,
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type,
         })
 
     }
@@ -162,6 +163,30 @@ const validateAdmin = async (req, res, next) => {
     }
 }
 
+//! updated helper
+const validateEventAdmin = async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+        const { event_id } = req.params
+        if(!user_id || !event_id) throw new Error('not_found')
+
+        const { created_by } = await eventDB.findById(event_id)
+        if(!created_by) throw new Error('event_not_found')
+
+        if(created_by === user_id) {
+            next()
+        } else {
+            throw new Error('invalid_role_rights')
+        }
+    } catch (error) {
+        console.log(error)
+        next({
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type,
+        })
+    }
+}
 // used - /roles/user/:id
 const validateUser = (req, res, next) => {
     if (req.user.id.toString() === req.decodedToken.user_id.toString()) {
@@ -256,6 +281,7 @@ module.exports = {
     validateCreator,
     validateManager,
     validateAdmin,
+    validateEventAdmin,
     createAccessToken,
     createRefreshToken,
     validateUser,
