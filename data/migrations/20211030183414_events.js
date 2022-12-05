@@ -51,7 +51,7 @@ exports.up = async function (knex) {
         
         events
             .boolean('active_event')
-            .defaultTo(false)
+            .defaultTo(true)
 
         events.timestamps(true, true)
     })

@@ -6,7 +6,7 @@ const sharp = require('sharp');
 const { uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
-const { validToken, validateCreator, validateEventAdmin, validateUser, validateUserRole, validateEventEditRights } = require('../helpers/jwt_helper');
+const { validToken, validateCreator, eventCreator, validateUser, validateUserRole, validateEventEditRights } = require('../helpers/jwt_helper');
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
-//! updated endpoint - needs error handling
+//! updated endpoint
 router.post('/', [upload.single('eventmedia'), validToken, validateCreator], async (req, res, next) => {
     try {
         const new_event = req.body
@@ -56,9 +56,9 @@ router.post('/', [upload.single('eventmedia'), validToken, validateCreator], asy
     }
 });
 
-router.get('/:id', (req, res) => {
-    const { id } = req.params
-    db.findById(id)
+router.get('/:event_id', (req, res) => {
+    const { event_id } = req.params
+    db.findById(event_id)
         .then(event => {
             res.status(200).json(event);
         })
@@ -67,24 +67,22 @@ router.get('/:id', (req, res) => {
         });
 })
 
-router.put('/:event_id', [ validToken, validateEventAdmin ], (req, res, next) => {
+router.put('/:event_id', [ validToken, eventCreator ], async (req, res, next) => {
     try {
-        console.log('made it in!')
-        return
-        // const { event_id } = req.params
-        // const changes = req.body;
-        // db.updateEvent(id, changes)
-        //     .then(event => {
-        //         res.status(201).json(event)
-        //     })
-        //     .catch(err => {
-        //         console.log(err)
-        //         res.status(500).json({ message: "server not connected", err });
-        //     });
+        const { event_id } = req.params
+        const event_updates = req.body;
+        
+        const event_updated = await db.updateEvent(event_id, event_updates)
+        
+        res.status(201).json(event_updated)
     } catch (error) {
         console.log('this is the error in event route')
         console.log(error.message)
-        next(error)
+        next({
+            status: eventErrors[error.message]?.status,
+            message: eventErrors[error.message]?.message,
+            type: eventErrors[error.message]?.type,
+        })
     }
 })
 

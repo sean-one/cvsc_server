@@ -73,7 +73,7 @@ const validateCreator = async (req, res, next) => {
             console.log('valid creator')
             next()
         } else {
-            throw new Error('invalid_role_rights')
+            throw new Error('invalid_user')
         }
 
     } catch (error) {
@@ -112,7 +112,7 @@ const validateManager = async (req, res, next) => {
         if(role_rights.role_type >= 456) {
             next()
         } else {
-            throw new Error('invalid_role_rights')
+            throw new Error('invalid_user')
         }
     } catch (error) {
         
@@ -150,7 +150,7 @@ const validateAdmin = async (req, res, next) => {
         if(role_rights.role_type >= 789) {
             next()
         } else {
-            throw new Error('invalid_role_rights')
+            throw new Error('invalid_user')
         }
     } catch (error) {
         
@@ -164,11 +164,11 @@ const validateAdmin = async (req, res, next) => {
 }
 
 //! updated helper
-const validateEventAdmin = async (req, res, next) => {
+const eventCreator = async (req, res, next) => {
     try {
         const user_id = req.user_decoded
         const { event_id } = req.params
-        if(!user_id || !event_id) throw new Error('not_found')
+        if(!user_id || !event_id) throw new Error('invalid_request')
 
         const { created_by } = await eventDB.findById(event_id)
         if(!created_by) throw new Error('event_not_found')
@@ -176,7 +176,7 @@ const validateEventAdmin = async (req, res, next) => {
         if(created_by === user_id) {
             next()
         } else {
-            throw new Error('invalid_role_rights')
+            throw new Error('invalid_user')
         }
     } catch (error) {
         console.log(error)
@@ -207,7 +207,7 @@ const validateAdminRole = async (req, res, next) => {
         if(admin_role.role_type === 'admin'){
             next()
         } else {
-            throw new Error('invalid_role_rights')
+            throw new Error('invalid_user')
         }
 
     } catch (error) {
@@ -248,7 +248,7 @@ const validateEventEditRights = async (req, res, next) => {
 
         const validated_index = editor_roles.findIndex(role => role.role_type === 'admin' || role.role_type === 'manager')
         
-        if (validated_index === -1) { throw new Error('invalid_role_rights') }
+        if (validated_index === -1) { throw new Error('invalid_user') }
         
         next()
 
@@ -269,7 +269,7 @@ const validateUserRole = async (req, res, next) => {
             // validated user roles
             next()
         } else {
-            throw new Error('invalid_role_rights')
+            throw new Error('invalid_user')
         }
     } catch (error) {
         next({ status: tokenErrors[error.message]?.status, message: tokenErrors[error.message]?.message })
@@ -281,7 +281,7 @@ module.exports = {
     validateCreator,
     validateManager,
     validateAdmin,
-    validateEventAdmin,
+    eventCreator,
     createAccessToken,
     createRefreshToken,
     validateUser,

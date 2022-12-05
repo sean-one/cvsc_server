@@ -189,7 +189,7 @@ async function userValidation(user_id, business_id) {
 
     if (role_request == null) {
         
-        throw new Error('invalid_role_rights')
+        throw new Error('invalid_user')
     } else {
         
         return role_request;
