@@ -38,15 +38,13 @@ const validToken = (req, res, next) => {
     
         if(!cookies.jwt) throw new Error('invalid_token')
     
-        const user_decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESHTOKEN_SECRET)
-        console.log('decoded')
-        console.log(user_decoded)
+        const user_decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESHTOKEN_SECRET, 'invalid_token')
         req.user_decoded = user_decoded.user
         
-        console.log('valid token')
         next()
     } catch (error) {
-       console.log(error.message)
+        console.log('error in token validation')
+        // console.log(error)
         next({
             status: tokenErrors[error.message]?.status,
             message: tokenErrors[error.message]?.message,
@@ -179,7 +177,8 @@ const eventCreator = async (req, res, next) => {
             throw new Error('invalid_user')
         }
     } catch (error) {
-        console.log(error)
+        console.log('error in event creator token')
+        // console.log(error)
         next({
             status: tokenErrors[error.message]?.status,
             message: tokenErrors[error.message]?.message,
