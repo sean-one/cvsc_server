@@ -18,6 +18,11 @@ const tokenErrors = {
         status: 401,
         message: 'invalid user rights'
     },
+    // inside eventCreator when eventDB.findById fired - error
+    TypeError: {
+        status: 400,
+        message: 'invalid event'
+    },
     request_not_found : {
         status: 404,
         message: 'role request not found'

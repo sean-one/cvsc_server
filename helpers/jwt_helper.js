@@ -44,7 +44,6 @@ const validToken = (req, res, next) => {
         next()
     } catch (error) {
         console.log('error in token validation')
-        // console.log(error)
         next({
             status: tokenErrors[error.message]?.status,
             message: tokenErrors[error.message]?.message,
@@ -169,7 +168,7 @@ const eventCreator = async (req, res, next) => {
         if(!user_id || !event_id) throw new Error('invalid_request')
 
         const { created_by } = await eventDB.findById(event_id)
-        if(!created_by) throw new Error('event_not_found')
+        if(!created_by) throw new Error('invalid_event')
 
         if(created_by === user_id) {
             next()
@@ -179,11 +178,20 @@ const eventCreator = async (req, res, next) => {
     } catch (error) {
         console.log('error in event creator token')
         // console.log(error)
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type,
-        })
+        if(error.name === 'TypeError') {
+            // when findById does not find an event a typeerror is thrown
+            next({
+                status: tokenErrors[error.name]?.status,
+                message: tokenErrors[error.name]?.message,
+                type: tokenErrors[error.name]?.type,
+            })
+        } else {
+            next({
+                status: tokenErrors[error.message]?.status,
+                message: tokenErrors[error.message]?.message,
+                type: tokenErrors[error.message]?.type,
+            })
+        }
     }
 }
 // used - /roles/user/:id

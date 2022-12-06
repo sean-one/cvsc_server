@@ -45,10 +45,10 @@ function find() {
 
 }
 
-// used inside validateEventEditRights
-function findById(eventId) {
-    return db('events')
-        .where({ 'events.id' : eventId })
+//! used inside jwt_helper eventCreator
+async function findById(eventId) {
+    return await db('events')
+        .where({ 'events.id': eventId })
         .join('locations', 'events.venue_id', '=', 'locations.venue_id')
         .join('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
@@ -261,6 +261,7 @@ async function updateImage(event_id, image_update) {
 
 }
 
+//! updates event
 async function updateEvent(eventId, eventChanges) {
     return await db('events').where({ id: eventId }).update(eventChanges, ['id'])
         .then(eventId => {
@@ -288,6 +289,24 @@ async function updateEvent(eventId, eventChanges) {
                     ]
                 )
                 .first()
+        })
+        .catch(error => {
+            if(error?.constraint === 'events_eventname_unique') {
+                throw new Error('events_eventname_unique')
+            }
+
+            if(error?.routine === 'DateTimeParseError') {
+                throw new Error('invalid_date_format')
+            }
+
+            if(error?.routine === 'pg_strtoint32') {
+                throw new Error('invalid_time_format')
+            }
+
+            if(error?.routine === 'string_to_uuid') {
+                throw new Error('invalid_business_id')
+            }
+            console.log(error)
         })
 }
 

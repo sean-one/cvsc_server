@@ -22,6 +22,16 @@ const eventErrors = {
         message: 'please be sure time has correct formatting',
         type: 'time_format'
     },
+    invalid_business_id: {
+        status: 400,
+        message: 'please be sure business ID is correct',
+        type: 'server',
+    },
+    invalid_date_format: {
+        status: 400,
+        message: 'please be sure date has correct formatting',
+        type: 'eventdate'
+    },
     invalid_admin: {
         status: 401,
         message: 'unauthorized',
