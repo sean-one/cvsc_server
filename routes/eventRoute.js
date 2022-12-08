@@ -65,8 +65,8 @@ router.get('/:event_id', (req, res) => {
             res.status(500).json(err);
         });
 })
-
-router.post('/update/:event_id', [ upload.single('eventmedia'), validToken, eventCreator ], async (req, res, next) => {
+//! updated endpoint
+router.post('/update/:event_id', [upload.single('eventmedia'), validToken, eventCreator], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
