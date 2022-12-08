@@ -73,12 +73,11 @@ const deleteImageS3 = async(image_key) => {
     
         const command = new DeleteObjectCommand(imageParams)
     
-        const data_return = await s3.send(command)
+        // if successful returns $metadata.httpStatusCode of 204
+        const deleted = await s3.send(command)
 
-        console.log('delete successful')
-        console.log(data_return)
-        console.log('============================================================')
-        return data_return
+        console.log(deleted)
+        return
 
     } catch (error) {
         console.log('s3 error', error)

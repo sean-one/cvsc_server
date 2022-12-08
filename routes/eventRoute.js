@@ -68,6 +68,7 @@ router.get('/:event_id', (req, res) => {
 
 router.post('/update/:event_id', [ upload.single('eventmedia'), validToken, eventCreator ], async (req, res, next) => {
     try {
+        const check_link = /^(http|https)/g
         const { event_id } = req.params
         const event_updates = req.body;
         const { eventmedia } = await db.findById(event_id)
@@ -79,8 +80,11 @@ router.post('/update/:event_id', [ upload.single('eventmedia'), validToken, even
             // upload to s3 and get key
             const image_key = await uploadImageS3Url(req.file)
 
-            await deleteImageS3(eventmedia)
-            
+            if (!check_link.test(eventmedia)) {
+                // if on s3 remove from bucket
+                await deleteImageS3(eventmedia)
+            }
+
             event_updates['eventmedia'] = image_key
         }
 
@@ -97,40 +101,6 @@ router.post('/update/:event_id', [ upload.single('eventmedia'), validToken, even
         })
     }
 })
-
-router.post('/update_image/:event_id', [upload.single('eventmedia'), validToken, eventCreator], async (req, res, next) => {
-    try {
-        console.log(req.file)
-        // get the event id
-        if(!req.file) throw new Error('missing_image')
-        const { event_id } = req.params
-        
-        // get the event 'eventmedia' from the database
-        // save current eventmedia link
-        const { eventmedia } = await db.findById(event_id)
-
-        // resize the image
-        req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
-
-        // update database with new event media link
-        const new_image_key = await uploadImageS3Url(req.file)
-
-        if(!new_image_key) throw new Error('upload_error')
-
-        const updated_event = await db.updateImage(event_id, new_image_key)
-
-        // if on s3 remove from bucket
-        await deleteImageS3(eventmedia)
-
-        // return event with updated event media included
-        res.status(202).json(updated_event)
-        
-    } catch (error) {
-        console.log('error inside the update_image route')
-        console.log(error)
-    }
-})
-
 
 router.get('/user/:user_id', (req, res) => {
     const { user_id } = req.params;
