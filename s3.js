@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 // const aws = require('aws-sdk');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const crypto = require('crypto');
 const { promisify } = require('util');
 const randomBytes = promisify(crypto.randomBytes)
@@ -63,7 +63,31 @@ const uploadImageS3Url = async (imageFile) => {
     return imageName;
 }
 
+const deleteImageS3 = async(image_key) => {
+    console.log('deleting image from s3')
+    try {
+        const imageParams = {
+            Bucket: bucketName,
+            Key: image_key,
+        }
+    
+        const command = new DeleteObjectCommand(imageParams)
+    
+        const data_return = await s3.send(command)
+
+        console.log('delete successful')
+        console.log(data_return)
+        console.log('============================================================')
+        return data_return
+
+    } catch (error) {
+        console.log('s3 error', error)
+        
+    }
+}
+
 module.exports = {
     generateUploadURL,
-    uploadImageS3Url
+    uploadImageS3Url,
+    deleteImageS3,
 }

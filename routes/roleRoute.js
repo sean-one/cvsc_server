@@ -3,7 +3,7 @@ const express = require('express');
 const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken, validateUser, validateAdminRole, validateManager, validateAdmin } = require('../helpers/jwt_helper')
+const { validToken, validateManager, validateAdmin } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 

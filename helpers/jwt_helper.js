@@ -30,9 +30,8 @@ const createRefreshToken = (user_id) => {
     return jwt.sign(payload, secret, options);
 }
 
-//! updated helper
 const validToken = (req, res, next) => {
-    console.log('inside validToken')
+    console.log('inside validtoken')
     try {
         const cookies = req.cookies
     
@@ -44,18 +43,26 @@ const validToken = (req, res, next) => {
         next()
     } catch (error) {
         console.log('error in token validation')
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type,
-        })
+        // console.log(error.name)
+        if(error?.name === 'TokenExpiredError') {
+            next({
+                status: tokenErrors[error.name]?.status,
+                message: tokenErrors[error.name]?.message,
+                type: tokenErrors[error.name]?.type,
+            })
+
+        } else {
+            next({
+                status: tokenErrors[error.message]?.status,
+                message: tokenErrors[error.message]?.message,
+                type: tokenErrors[error.message]?.type,
+            })
+        }
 
     }
 }
 
-//! updated helper
 const validateCreator = async (req, res, next) => {
-    console.log('inside validateCreator')
     try {
         const user_id = req.user_decoded
 
@@ -74,7 +81,7 @@ const validateCreator = async (req, res, next) => {
         }
 
     } catch (error) {
-
+        console.log('error in validcreator')
         next({
             status: tokenErrors[error.message]?.status,
             message: tokenErrors[error.message]?.message,
@@ -84,7 +91,6 @@ const validateCreator = async (req, res, next) => {
     }
 }
 
-//! updated helper
 const validateManager = async (req, res, next) => {
     console.log('inside validateManager')
     try {
@@ -122,7 +128,6 @@ const validateManager = async (req, res, next) => {
     }
 }
 
-//! updated helper
 const validateAdmin = async (req, res, next) => {
     console.log('inside validateAdmin')
     try {
@@ -160,8 +165,8 @@ const validateAdmin = async (req, res, next) => {
     }
 }
 
-//! updated helper
 const eventCreator = async (req, res, next) => {
+    console.log('inside eventCreator')
     try {
         const user_id = req.user_decoded
         const { event_id } = req.params
@@ -171,6 +176,7 @@ const eventCreator = async (req, res, next) => {
         if(!created_by) throw new Error('invalid_event')
 
         if(created_by === user_id) {
+            console.log('valid event creator')
             next()
         } else {
             throw new Error('invalid_user')
@@ -194,105 +200,13 @@ const eventCreator = async (req, res, next) => {
         }
     }
 }
-// used - /roles/user/:id
-const validateUser = (req, res, next) => {
-    if (req.user.id.toString() === req.decodedToken.user_id.toString()) {
-        next()
-    } else {
-        res.status(404).json({ message: 'wrong user' })
-    }
-}
-
-const validateAdminRole = async (req, res, next) => {
-    try {
-        const admin_id = req.user.id
-        const role_id = req.params.role_id
-
-        const user_role_request = await db.findById(role_id)
-        const admin_role = await db.findRole(admin_id, user_role_request.business_id)
-
-        if(admin_role.role_type === 'admin'){
-            next()
-        } else {
-            throw new Error('invalid_user')
-        }
-
-    } catch (error) {
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type
-        })
-    }
-}
-
-const validateEventEditRights = async (req, res, next) => {
-    console.log(req.body)
-    try {
-        const event_update = req.body
-        const event_id = req.params.id
-        const { venue_id, brand_id, created_by } = await eventDB.findById(event_id)
-        let business_id_list = [ venue_id, brand_id ]
-        
-        // if user is the user who created the event access granted
-        if(created_by === req.user.id) { next() }
-        
-        // if updating venue update business_ids
-        if(event_update.venue_id !== venue_id) {
-            business_id_list[0] = event_update.venue_id
-        }
-        
-        // if updating brand update business_ids
-        if(event_update.brand_id !== brand_id) {
-            business_id_list[1] = event_update.brand_id
-        }
-    
-        const editor_roles = await db.checkUserRoles(req.user.id, business_id_list)
-        
-        if (editor_roles.length <= 0) {
-            throw new Error('roles_not_found')
-        }
-
-        const validated_index = editor_roles.findIndex(role => role.role_type === 'admin' || role.role_type === 'manager')
-        
-        if (validated_index === -1) { throw new Error('invalid_user') }
-        
-        next()
-
-    } catch (error) {
-        next({ 
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type
-        })
-    }
-}
-
-// validates a user when creating or making changes to an event
-const validateUserRole = async (req, res, next) => {
-    try {
-        const { business_ids } = await db.getUserBusinessRoles(req.decodedToken.user_id)
-        if (business_ids.includes(req.body.venue_id) || business_ids.includes(req.body.brand_id)) {
-            // validated user roles
-            next()
-        } else {
-            throw new Error('invalid_user')
-        }
-    } catch (error) {
-        next({ status: tokenErrors[error.message]?.status, message: tokenErrors[error.message]?.message })
-    }
-}
 
 module.exports = {
+    createAccessToken,
+    createRefreshToken,
     validToken,
     validateCreator,
     validateManager,
     validateAdmin,
     eventCreator,
-    createAccessToken,
-    createRefreshToken,
-    validateUser,
-    validateAdminRole,
-    validateEventEditRights,
-    validateUserRole,
 }
