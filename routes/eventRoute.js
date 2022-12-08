@@ -65,6 +65,7 @@ router.get('/:event_id', (req, res) => {
             res.status(500).json(err);
         });
 })
+
 //! updated endpoint
 router.post('/update/:event_id', [upload.single('eventmedia'), validToken, eventCreator], async (req, res, next) => {
     try {
@@ -99,6 +100,30 @@ router.post('/update/:event_id', [upload.single('eventmedia'), validToken, event
             message: eventErrors[error.message]?.message,
             type: eventErrors[error.message]?.type,
         })
+    }
+})
+
+//! updated endpoint
+router.delete('/remove/:event_id', [validToken, eventCreator], async (req, res) => {
+    try {
+        const check_link = /^(http|https)/g
+        const { event_id } = req.params
+        const { eventmedia } = await db.findById(event_id)
+
+        const deletedEvent = await db.removeEvent(event_id)
+
+        if (deletedEvent >= 1) {
+            // check for image hosted on s3 and delete if found
+            if(!check_link.test(eventmedia)) await deleteImageS3(eventmedia)
+
+            res.status(204).json();
+        } else {
+            console.log(deletedEvent)
+            res.status(400).json({ message: 'invalid credentials' })
+        }
+    } catch (err) {
+        console.log('not found')
+        res.status(401).json({ message: 'invalid token', error: err })
     }
 })
 
@@ -140,20 +165,6 @@ router.put('/business/remove/:event_id', (req, res) => {
         });
 })
 
-router.delete('/remove/:eventid', async (req, res) => {
-    try {
-        const deletedEvent = await db.removeEvent(req.user.id, req.params.eventid)
 
-        if (deletedEvent >= 1) {
-            res.status(204).json();
-        } else {
-            console.log(deletedEvent)
-            res.status(400).json({ message: 'invalid credentials' })
-        }
-    } catch (err) {
-        console.log('not found')
-        res.status(401).json({ message: 'invalid token', error: err})
-    }
-})
 
 module.exports = router;

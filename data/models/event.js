@@ -227,6 +227,7 @@ async function createEvent(event) {
 }
 
 //! adds an image to a created event during create process
+// doing this separtely allows me to make sure the event is valid prior to uploading to s3
 async function updateImage(event_id, image_update) {
     try {
         await db('events').where({ id: event_id }).update({ eventmedia: image_update })
@@ -335,14 +336,9 @@ async function removeBusiness(event_id, business_type) {
     }
 }
 
-function removeEvent(user_id, event_id) {
-    // console.log(details)
-    // console.log('inside remove')
+function removeEvent(event_id) {
     return db('events')
-        .where({ created_by: user_id })
-        .andWhere(function() {
-            this.where({ id: event_id })
-        })
+        .where({ id: event_id })
         .first()
         .del()
 }
