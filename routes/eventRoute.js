@@ -64,7 +64,7 @@ router.get('/:event_id', (req, res) => {
         .catch(err => {
             res.status(500).json(err);
         });
-})
+});
 
 //! updated endpoint
 router.post('/update/:event_id', [upload.single('eventmedia'), validToken, eventCreator], async (req, res, next) => {
@@ -100,6 +100,21 @@ router.post('/update/:event_id', [upload.single('eventmedia'), validToken, event
             message: eventErrors[error.message]?.message,
             type: eventErrors[error.message]?.type,
         })
+    }
+});
+
+router.put('/remove_business/:event_id', async (req, res, next) => {
+    try {
+        const { event_id } = req.params
+        const business_info = req.body
+
+        const removed = await db.removeBusiness(event_id, business_info.business_type)
+
+        console.log('business removed')
+        console.log(removed)
+        res.status(201).json(removed)
+    } catch (error) {
+        console.log(error)
     }
 })
 
