@@ -55,15 +55,17 @@ router.post('/', [upload.single('eventmedia'), validToken, validateCreator], asy
     }
 });
 
-router.get('/:event_id', (req, res) => {
-    const { event_id } = req.params
-    db.findById(event_id)
-        .then(event => {
-            res.status(200).json(event);
-        })
-        .catch(err => {
-            res.status(500).json(err);
-        });
+router.get('/:event_id', async (req, res, next) => {
+    try {
+        const { event_id } = req.params
+        const selected_event = await db.findById(event_id)
+
+        console.log(selected_event)
+
+        res.status(200).json(selected_event)
+    } catch (error) {
+        console.log(error)
+    }
 });
 
 //! updated endpoint

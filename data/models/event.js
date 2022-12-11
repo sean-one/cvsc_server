@@ -49,8 +49,8 @@ function find() {
 async function findById(eventId) {
     return await db('events')
         .where({ 'events.id': eventId })
-        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
-        .join('businesses', 'events.brand_id', '=', 'businesses.id')
+        .leftJoin('locations', 'events.venue_id', '=', 'locations.venue_id')
+        .leftJoin('businesses', 'events.brand_id', '=', 'businesses.id')
         .select(
             [
                 'events.id as event_id',
@@ -160,52 +160,58 @@ async function updateImage(event_id, image_update) {
 }
 
 //! updates event
-async function updateEvent(eventId, eventChanges) {
-    return await db('events').where({ id: eventId }).update(eventChanges, ['id'])
-        .then(eventId => {
-            const { id } = eventId[0]
-            return db('events')
-                .where('events.id', id)
-                .join('locations', 'events.venue_id', '=', 'locations.venue_id')
-                .join('businesses', 'events.brand_id', '=', 'businesses.id')
-                .select(
-                    [
-                        'events.id as event_id',
-                        'events.eventname',
-                        'events.eventdate',
-                        'events.eventstart',
-                        'events.eventend',
-                        'events.eventmedia',
-                        'events.details',
-                        'events.venue_id',
-                        'locations.venue_name',
-                        'locations.location_city',
-                        'locations.formatted',
-                        'events.brand_id',
-                        'businesses.business_name as brand_name',
-                        'events.created_by'
-                    ]
-                )
-                .first()
-        })
-        .catch(error => {
-            if(error?.constraint === 'events_eventname_unique') {
-                throw new Error('events_eventname_unique')
-            }
+async function updateEvent(event_id, eventChanges) {
+    try {
+        const updated_event = await db('events').where({ id: event_id }).update(eventChanges, ['id', 'brand_id', 'venue_id'])
+        const { id, brand_id, venue_id} = updated_event[0]
 
-            if(error?.routine === 'DateTimeParseError') {
-                throw new Error('invalid_date_format')
-            }
+        if(brand_id !== null && venue_id !== null) {
+            await db('events').where({ id: id }).update({ active_event: true })
+        }
 
-            if(error?.routine === 'pg_strtoint32') {
-                throw new Error('invalid_time_format')
-            }
-
-            if(error?.routine === 'string_to_uuid') {
-                throw new Error('invalid_business_id')
-            }
-            console.log(error)
-        })
+        return db('events')
+            .where('events.id', id)
+            .join('locations', 'events.venue_id', '=', 'locations.venue_id')
+            .join('businesses', 'events.brand_id', '=', 'businesses.id')
+            .select(
+                [
+                    'events.id as event_id',
+                    'events.eventname',
+                    'events.eventdate',
+                    'events.eventstart',
+                    'events.eventend',
+                    'events.eventmedia',
+                    'events.details',
+                    'events.venue_id',
+                    'locations.venue_name',
+                    'locations.location_city',
+                    'locations.formatted',
+                    'events.brand_id',
+                    'businesses.business_name as brand_name',
+                    'events.created_by'
+                ]
+            )
+            .first()
+        
+    } catch (error) {
+        if(error?.constraint === 'events_eventname_unique') {
+            throw new Error('events_eventname_unique')
+        }
+    
+        if(error?.routine === 'DateTimeParseError') {
+            throw new Error('invalid_date_format')
+        }
+    
+        if(error?.routine === 'pg_strtoint32') {
+            throw new Error('invalid_time_format')
+        }
+    
+        if(error?.routine === 'string_to_uuid') {
+            throw new Error('invalid_business_id')
+        }
+        console.log(error)
+        
+    }
 }
 
 //! remove event
