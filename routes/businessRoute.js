@@ -4,7 +4,9 @@ const sharp = require('sharp');
 
 const { uploadImageS3Url } = require('../s3');
 const db = require('../data/models/business');
+
 const businessErrors = require('../error_messages/businessErrors');
+const { validToken } = require('../helpers/jwt_helper')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -22,7 +24,7 @@ router.get('/', (req, res) => {
 
 // inside the createBusiness on submit
 // creates a new business with activeBusiness & arppoval set to false also creates a top user admin role
-router.post('/create', upload.single('business_avatar'), async (req, res, next) => {
+router.post('/create', [upload.single('business_avatar'), validToken ], async (req, res, next) => {
     try {
         let business_location
         const new_business = req.body
@@ -67,11 +69,12 @@ router.post('/create', upload.single('business_avatar'), async (req, res, next) 
             // upload the image to s3
             const image_key = await uploadImageS3Url(req.file)
             
-            new_business['business_avatar'] = `${process.env.AWS_IMAGELINK}${image_key}`
+            new_business['business_avatar'] = image_key
         }
 
         // add business creator as business admin
-        new_business['business_admin'] = req.user.id
+        new_business['business_admin'] = req.user_decoded
+        new_business['active_business'] = true
         
         const created_business = await db.addBusiness(new_business, business_location)
         
@@ -80,14 +83,21 @@ router.post('/create', upload.single('business_avatar'), async (req, res, next) 
     } catch (err) {
         console.log(err)
         if (err.constraint) {
-            next({ status: businessErrors[err.constraint]?.status, message: businessErrors[err.constraint]?.message, type: businessErrors[err.constraint]?.type })
-        } else {
-            next({ status: businessErrors[err.message]?.status, message: businessErrors[err.message]?.message })
-        }
-        // else if (err instanceof TypeError) {
-        //     res.status(400).json({ message: 'invalid address', type: 'street_address' })
+            
+            next({
+                status: businessErrors[err.constraint]?.status,
+                message: businessErrors[err.constraint]?.message,
+                type: businessErrors[err.constraint]?.type
+            })
 
-        // } 
+        } else {
+            
+            next({
+                status: businessErrors[err.message]?.status,
+                message: businessErrors[err.message]?.message
+            })
+
+        }
     }
 })
 
