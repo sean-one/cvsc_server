@@ -14,12 +14,16 @@ const upload = multer({ storage: storage })
 // '/business'
 const router = express.Router()
 
+//! get all businesses
 router.get('/', (req, res) => {
-    db.find()
-        .then(businesses => {
-            res.status(200).json(businesses);
-        })
-        .catch(err => res.status(500).json(err));
+    try {
+        const businesses = db.find()
+        
+        res.status(200).json(businesses)
+        
+    } catch (error) {
+        console.log(error)
+    }
 });
 
 // inside the createBusiness on submit
