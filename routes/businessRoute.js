@@ -15,9 +15,9 @@ const upload = multer({ storage: storage })
 const router = express.Router()
 
 //! get all businesses
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        const businesses = db.find()
+        const businesses = await db.find()
         
         res.status(200).json(businesses)
         
