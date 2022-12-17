@@ -44,9 +44,9 @@ function find() {
         )
 }
 
-function findById(id) {
+function findById(business_id) {
     return db('businesses')
-        .where({ 'businesses.id': id })
+        .where({ 'businesses.id': business_id })
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
@@ -198,39 +198,70 @@ async function addBusiness(business, location) {
 
 }
 
-async function updateBusiness(business_id, business) {
+async function updateBusiness(business_id, changes) {
     try {
-        await db('businesses')
-            .where({ 'businesses.id': business_id})
-            .update(business)
-        
-        return db('businesses')
-            .where({ 'businesses.id': business_id})
-            .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
-            .select([
-                'businesses.id',
-                'businesses.business_name',
-                'businesses.business_avatar',
-                'businesses.business_description',
-                'businesses.business_type',
-                'businesses.business_request_open',
-                'businesses.active_business',
-                'businesses.business_admin',
-                'businesses.business_email',
-                'businesses.business_phone',
-                'businesses.business_instagram',
-                'businesses.business_facebook',
-                'businesses.business_website',
-                'businesses.business_twitter',
-                'locations.id as location_id',
-                'locations.street_address',
-                'locations.location_city',
-                'locations.location_state',
-                'locations.zip_code',
-                'locations.formatted'
-            ])
-            .first()
-            
+        return await db.transaction(async trx => {
+
+            // if changes.location_id is not there then none of the following steps should be needed
+            if(changes?.location_id) {
+                // google api with address returning geocode information
+                const geoCode = await googleMapsClient.geocode(
+                    {
+                        address: `${changes?.street_address}, ${changes?.city}, ${changes?.state} ${changes?.zip}`
+                    }
+                ).asPromise();
+
+                // save return from geocode and newly added business information
+                location = {
+                    street_address: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
+                    location_city: geoCode.json.results[0].address_components[2].long_name,
+                    location_state: geoCode.json.results[0].address_components[4].short_name,
+                    zip_code: geoCode.json.results[0].address_components[6].short_name,
+                    formatted: geoCode.json.results[0].formatted_address,
+                    place_id: geoCode.json.results[0].place_id
+                }
+
+                // insert location information
+                await db('locations').transacting(trx).where({ id: changes.location_id }).update(location)
+
+                delete changes['street_address']
+                delete changes['city']
+                delete changes['state']
+                delete changes['zip']
+                delete changes['location_id']
+            }
+
+            if(Object.keys(changes).length > 0) {
+                await db('businesses').where({ id: business_id }).update(changes)
+            }
+
+            return db('businesses')
+                .where({ 'businesses.id': business_id})
+                .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
+                .select([
+                    'businesses.id',
+                    'businesses.business_name',
+                    'businesses.business_avatar',
+                    'businesses.business_description',
+                    'businesses.business_type',
+                    'businesses.business_request_open',
+                    'businesses.active_business',
+                    'businesses.business_admin',
+                    'businesses.business_email',
+                    'businesses.business_phone',
+                    'businesses.business_instagram',
+                    'businesses.business_facebook',
+                    'businesses.business_website',
+                    'businesses.business_twitter',
+                    'locations.id as location_id',
+                    'locations.street_address',
+                    'locations.location_city',
+                    'locations.location_state',
+                    'locations.zip_code',
+                    'locations.formatted'
+                ])
+                .first()
+        })  
     } catch (error) {
         // console.log(error)
         throw error

@@ -2,11 +2,11 @@ const express = require('express');
 const multer = require('multer');
 const sharp = require('sharp');
 
-const { uploadImageS3Url } = require('../s3');
+const { uploadImageS3Url, deleteImageS3 } = require('../s3');
 const db = require('../data/models/business');
 
 const businessErrors = require('../error_messages/businessErrors');
-const { validToken } = require('../helpers/jwt_helper')
+const { validToken, businessAdmin } = require('../helpers/jwt_helper')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -68,7 +68,7 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
         
         if(req.file) {
             // resize the image
-            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain'}).toBuffer()
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
             
             // upload the image to s3
             const image_key = await uploadImageS3Url(req.file)
@@ -105,21 +105,41 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
     }
 })
 
-router.put('/:business_id', (req, res) => {
-    const { business_id } = req.params;
-    const business_update = req.body;
-    db.updateBusiness(business_id, business_update)
-        .then(business => {
-            res.status(201).json(business)
-        })
-        .catch(err => {
-            console.log(err.constraint)
-            if (err.constraint === 'contacts_email_unique') {
-                res.status(400).json({ message: 'duplicate email', type: 'email'})
-            } else {
-                res.status(500).json({ message: "server not connected", err });
+router.put('/:business_id', [upload.single('business_avatar'), validToken, businessAdmin], async (req, res, next) => {
+    try {
+        const check_link = /^(http|https)/g
+        const { business_id } = req.params;
+        const business_update = req.body;
+        const { business_avatar } = await db.findById(business_id)
+
+        // if there is an image to update resize, save and delete previous
+        if(req.file) {
+            // resize the image
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+
+            // upload the image to s3
+            const image_key = await uploadImageS3Url(req.file)
+            
+            if(!check_link.test(business_avatar)) {
+                await deleteImageS3(business_avatar)
             }
-        })
+
+            business_update['business_avatar'] = image_key
+        }
+    
+        const updated_business = await db.updateBusiness(business_id, business_update)
+        
+        res.status(201).json(updated_business)
+        
+    } catch (error) {
+        console.log(error)
+        // if (err.constraint === 'contacts_email_unique') {
+        //     res.status(400).json({ message: 'duplicate email', type: 'email'})
+        // } else {
+        //     res.status(500).json({ message: "server not connected", err });
+        // }
+        
+    }
 })
 
 router.put('/toggle-active/:business_id', (req, res) => {

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/roles');
+const businessDB = require('../data/models/business');
 const eventDB = require('../data/models/event');
 const tokenErrors = require('../error_messages/tokenErrors');
 
@@ -165,6 +166,31 @@ const validateAdmin = async (req, res, next) => {
     }
 }
 
+const businessAdmin = async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+        const { business_id } = req.params
+        if(!user_id || !business_id) throw new Error('invalid_request')
+
+        const { business_admin } = await businessDB.findById(business_id)
+        if(!business_admin) throw new Error('invalid_request')
+
+        if(business_admin === user_id) {
+            next()
+        } else {
+            throw new Error('invalid_user')
+        }
+
+    } catch (error) {
+        console.log(error)
+        next({
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type,
+        })
+    }
+}
+
 const eventCreator = async (req, res, next) => {
     console.log('inside eventCreator')
     try {
@@ -173,7 +199,7 @@ const eventCreator = async (req, res, next) => {
         if(!user_id || !event_id) throw new Error('invalid_request')
 
         const { created_by } = await eventDB.findById(event_id)
-        if(!created_by) throw new Error('invalid_event')
+        if(!created_by) throw new Error('invalid_request')
 
         if(created_by === user_id) {
             console.log('valid event creator')
@@ -208,5 +234,6 @@ module.exports = {
     validateCreator,
     validateManager,
     validateAdmin,
+    businessAdmin,
     eventCreator,
 }
