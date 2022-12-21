@@ -29,7 +29,6 @@ function findByBusiness(business_id) {
                 'location_city',
                 'location_state',
                 'zip_code',
-                'venue_name',
                 'formatted'
             ]
         )

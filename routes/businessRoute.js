@@ -105,6 +105,7 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
     }
 })
 
+//! update busines by id
 router.put('/:business_id', [upload.single('business_avatar'), validToken, businessAdmin], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g

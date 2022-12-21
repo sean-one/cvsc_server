@@ -201,7 +201,8 @@ async function addBusiness(business, location) {
 async function updateBusiness(business_id, changes) {
     try {
         return await db.transaction(async trx => {
-
+            const { business_name } = await db('businesses').where({ id: business_id }).first()
+            
             // if changes.location_id is not there then none of the following steps should be needed
             if(changes?.location_id) {
                 // google api with address returning geocode information
@@ -221,8 +222,14 @@ async function updateBusiness(business_id, changes) {
                     place_id: geoCode.json.results[0].place_id
                 }
 
-                // insert location information
-                await db('locations').transacting(trx).where({ id: changes.location_id }).update(location)
+                if(changes.location_id === 'new_location') {
+                    location['venue_id'] = business_id
+                    location['venue_name'] = business_name
+                    await db('locations').transacting(trx).insert(location)
+                } else {
+                    // insert location information
+                    await db('locations').transacting(trx).where({ id: changes.location_id }).update(location)
+                }
 
                 delete changes['street_address']
                 delete changes['city']
