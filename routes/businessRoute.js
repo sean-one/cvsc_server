@@ -26,22 +26,15 @@ router.get('/', async (req, res) => {
     }
 });
 
-// inside the createBusiness on submit
 // creates a new business with activeBusiness & arppoval set to false also creates a top user admin role
 router.post('/create', [upload.single('business_avatar'), validToken ], async (req, res, next) => {
     try {
         let business_location
         const new_business = req.body
+        console.log(new_business)
 
         // check for business type, if 'brand' remove address elements, else create location oject and delete address elements
-        if(new_business.business_type === 'brand') {
-            
-            delete new_business['street_address']
-            delete new_business['city']
-            delete new_business['state']
-            delete new_business['zip']
-
-        } else {
+        if(new_business.bubsiness_location) {
             business_location = {
                 'venue_name': new_business.business_name,
                 'street_address': new_business.street_address,
@@ -49,22 +42,19 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
                 'state': new_business.state,
                 'zip': new_business.zip
             }
-
-            delete new_business['street_address']
-            delete new_business['city']
-            delete new_business['state']
-            delete new_business['zip']
         }
+        
+        delete new_business['street_address']
+        delete new_business['city']
+        delete new_business['state']
+        delete new_business['zip']
+        delete new_business['business_location']
 
         if(!new_business.business_instagram) delete new_business['business_instagram']
         if(!new_business.business_facebook) delete new_business['business_facebook']
         if(!new_business.business_website) delete new_business['business_website']
         if(!new_business.business_phone) delete new_business['business_phone']
         if(!new_business.business_twitter) delete new_business['business_twitter']
-
-        // check to be sure if not brand must include address fields
-        if(new_business.business_type === 'brand' && typeof new_business.location === 'object') throw new Error('brand_address_not_valid')
-        if(new_business.business_type !== 'brand' && new_business.location === null) throw new Error('business_address_required')
         
         if(req.file) {
             // resize the image
