@@ -133,28 +133,32 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
     }
 })
 
-router.put('/toggle-active/:business_id', (req, res) => {
-    const { business_id } = req.params;
-    db.toggleActiveBusiness(business_id, req.user.id)
-        .then(business => {
-            res.status(200).json(business)
-        })
-        .catch(err => {
-            console.log(err)
-            res.status(500).json({ message: 'something wrong yo'})
-        })
+router.put('/toggle-active/:business_id', [validToken, businessAdmin], async (req, res) => {
+    try {
+        const { business_id } = req.params;
+        const business = await db.toggleActiveBusiness(business_id)
+
+        res.status(201).json(business)
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'something went wrong yo!' })
+    }
 })
 
-router.put('/toggle-request/:business_id', [validToken, businessAdmin], (req, res) => {
-    const { business_id } = req.params;
-    db.toggleBusinessRequest(business_id)
-        .then(business => {
-            res.status(200).json(business)
-        })
-        .catch(err => {
-            console.log(err)
-            res.status(500).json({ message: 'something went a stray' })
-        })
+//! toggleBusinessRequest
+router.put('/toggle-request/:business_id', [validToken, businessAdmin], async (req, res) => {
+    try {
+        const { business_id } = req.params;
+        const business = await db.toggleBusinessRequest(business_id)
+        
+        res.status(201).json(business)
+            
+        } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'something went a stray' })
+        
+    }
 })
 
 // used in postman to get pending request

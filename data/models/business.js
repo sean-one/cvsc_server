@@ -275,13 +275,14 @@ async function updateBusiness(business_id, changes) {
     }
 }
 
-// toggle active business between true and false from business controls componenet
-async function toggleActiveBusiness(business_id, admin_id) {
+// toggle active business between true and false
+// sets approved roles between active & inactive, leaves unapporved roles alone
+async function toggleActiveBusiness(business_id) {
 
     return await db.transaction(async trx => {
         // get current business object from the database to reference and toggle from, and confirm admin
         const business = await db('businesses')
-            .where({ 'businesses.id': business_id, 'businesses.business_admin': admin_id })
+            .where({ 'businesses.id': business_id })
             .select(
                 [
                     'businesses.id',
@@ -294,7 +295,7 @@ async function toggleActiveBusiness(business_id, admin_id) {
         await db('roles')
             .transacting(trx)
             .where({ business_id: business_id })
-            .whereIn('roles.role_type', ['creator', 'manager'])
+            .whereIn('roles.role_type', [123, 456])
             .whereNotNull('roles.approved_by')
             .update({ active_role: !business.active_business })
         
