@@ -335,9 +335,9 @@ async function toggleActiveBusiness(business_id, admin_id) {
     })
 }
 
-async function toggleBusinessRequest(business_id, admin_id) {
+async function toggleBusinessRequest(business_id) {
     const business = await db('businesses')
-        .where({ 'businesses.id': business_id, 'businesses.business_admin': admin_id })
+        .where({ 'businesses.id': business_id })
         .select(
             [
                 'businesses.id',

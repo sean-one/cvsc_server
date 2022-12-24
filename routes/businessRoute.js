@@ -96,7 +96,7 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
 })
 
 //! update busines by id
-router.put('/:business_id', [upload.single('business_avatar'), validToken, businessAdmin], async (req, res, next) => {
+router.put('/update/:business_id', [upload.single('business_avatar'), validToken, businessAdmin], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;
@@ -145,9 +145,9 @@ router.put('/toggle-active/:business_id', (req, res) => {
         })
 })
 
-router.put('/toggle-request/:business_id', (req, res) => {
+router.put('/toggle-request/:business_id', [validToken, businessAdmin], (req, res) => {
     const { business_id } = req.params;
-    db.toggleBusinessRequest(business_id, req.user.id)
+    db.toggleBusinessRequest(business_id)
         .then(business => {
             res.status(200).json(business)
         })
