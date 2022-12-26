@@ -16,9 +16,9 @@ module.exports = {
     approveRoleRequest,
     upgradeCreatorRole,
     downgradeManagerRole,
-    removeUserRole,
     createRequest,
     createRoleRequest,
+    removeRole,
 }
 
 // for postman to check db
@@ -102,7 +102,7 @@ async function findRolesPendingManagement(user_id) {
     let business_ids = []
     const management_roles = await db('roles')
         .where({ user_id: user_id, active_role: true })
-        .whereNotIn('roles.role_type', ['creator'])
+        .whereNotIn('roles.role_type', [100,123])
         .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [
@@ -253,7 +253,7 @@ async function approveRoleRequest(request_id, management_id) {
         .first()
 }
 
-// upgradeButton 
+// upgradeRole for creator role 
 async function upgradeCreatorRole(request_id, management_id) {
     await db('roles')
         .where({ id: request_id })
@@ -276,7 +276,6 @@ async function upgradeCreatorRole(request_id, management_id) {
         .first()
 }
 
-// downgradeButton
 async function downgradeManagerRole(role_id, admin_id) {
     await db('roles')
         .where({ id: role_id })
@@ -297,18 +296,6 @@ async function downgradeManagerRole(role_id, admin_id) {
             ]
         )
         .first()
-}
-
-async function removeUserRole(request_id) {
-    const deleted_count = await db('roles')
-        .where({ id: request_id})
-        .del()
-
-    if(deleted_count >= 1) {
-        return deleted_count;
-    } else {
-        throw new Error('delete_error')
-    }
 }
 
 // roles/create-request
@@ -339,4 +326,16 @@ async function createRoleRequest(business_id, user_id) {
             user_id: user_id,
             business_id: business_id
         }, ['business_id', 'role_type', 'active_role'])
+}
+
+async function removeRole(role_id) {
+    const deleted_count = await db('roles')
+        .where({ id: role_id })
+        .del()
+
+    if (deleted_count >= 1) {
+        return deleted_count;
+    } else {
+        throw new Error('delete_error')
+    }
 }

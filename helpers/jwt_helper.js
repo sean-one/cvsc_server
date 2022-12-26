@@ -92,6 +92,38 @@ const validateCreator = async (req, res, next) => {
     }
 }
 
+const validateManagement = async (req, res, next) => {
+    console.log('inside validate management')
+    try {
+        const user_id = req.user_decoded
+
+        if(!user_id) throw new Error('invalid_user')
+
+        const { role_id } = req.params
+
+        if(!role_id) throw new Error('request_not_found')
+        const { business_id, role_type} = await db.findById(role_id)
+
+        if(!business_id || !role_type) throw new Error('request_not_found')
+        const manager_role = await db.findBusinessRoleByUser(business_id, user_id)
+
+        if(!manager_role) throw new Error('invalid_user')
+
+        if(manager_role.role_type > role_type) {
+            next()
+        } else {
+            throw new Error('invalid_user')
+        }
+    } catch (error) {
+        console.log(error)
+        next({
+            status: tokenErrors[error.name]?.status,
+            message: tokenErrors[error.name]?.message,
+            type: tokenErrors[error.name]?.type,
+        })
+    }
+}
+
 const validateManager = async (req, res, next) => {
     console.log('inside validateManager')
     try {
@@ -232,6 +264,7 @@ module.exports = {
     createRefreshToken,
     validToken,
     validateCreator,
+    validateManagement,
     validateManager,
     validateAdmin,
     businessAdmin,

@@ -41,7 +41,8 @@ app.use(
         secret: process.env.COOKIE_SECRET,
         cookie: {
             maxAge: 60 * 60 * 24 * 1000,
-            secure: process.env.NODE_ENV === "production" ? "true" : "auto",
+            // secure: process.env.NODE_ENV === "production" ? "true" : "auto",
+            secure: true,
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         },
         resave: false,

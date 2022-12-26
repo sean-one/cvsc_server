@@ -133,6 +133,7 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
     }
 })
 
+//! toggleActiveBusiness
 router.put('/toggle-active/:business_id', [validToken, businessAdmin], async (req, res) => {
     try {
         const { business_id } = req.params;
