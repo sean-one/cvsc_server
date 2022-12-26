@@ -2,15 +2,11 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
-    findBusinessRoleByUser,
     findUserBusinessRole,
-    findRolesByUser,
+    findUserRoles,
     findById,
-    findRole,
-    checkUserRoles,
     findRolesPendingManagement,
     findByBusiness,
-    userValidation,
     getUserBusinessRoles,
     findByUser_All,
     approveRoleRequest,
@@ -26,18 +22,7 @@ function find() {
     return db('roles')
 }
 
-function findBusinessRoleByUser(business_id, user_id) {
-    return db('roles')
-        .where({ user_id: user_id, business_id: business_id })
-        .select(
-            [
-                'roles.business_id',
-                'roles.role_type'
-            ]
-        )
-        .first()
-}
-
+// validateRoleManagement inside jwt_helper - finds business role for user
 function findUserBusinessRole(business_id, user_id) {
     return db('roles')
         .where({ user_id: user_id, business_id: business_id, active_role: true })
@@ -51,15 +36,17 @@ function findUserBusinessRole(business_id, user_id) {
         .first()
 }
 
-// returns an array of roles active AND inactive -- returns ALL roles
-async function findRolesByUser(user_id) {
+// used in authRoute when user signs in
+async function findUserRoles(user_id) {
     return db('roles')
         .where({ user_id: user_id })
+        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [
                 'roles.business_id',
                 'roles.role_type',
-                'roles.active_role'
+                'roles.active_role',
+                'businesses.business_name'
             ]
         )
         .orderBy('roles.role_type', 'desc')
@@ -83,18 +70,6 @@ async function findById(request_id) {
     } else {
         return role_request;
     }
-}
-
-async function checkUserRoles(user_id, business_ids) {
-    return await db('roles')
-        .where({ user_id: user_id, active_role: true })
-        .whereIn('business_id', business_ids)
-        .select(
-            [
-                'roles.business_id',
-                'roles.role_type',
-            ]
-        )
 }
 
 // returns an array of pending role request based on accounts with manager and admin credentials
@@ -136,22 +111,6 @@ async function findRolesPendingManagement(user_id) {
         )
 }
 
-async function findRole(user_id, business_id) {
-    const role = await db('roles')
-        .where({ user_id: user_id, business_id: business_id })
-        .select(
-            [
-                'roles.role_type'
-            ]
-        )
-        .first()
-    if(role === null) {
-        throw new Error('manage_role_not_found')
-    } else {
-        return role;
-    }
-}
-
 // find all role entries by business id
 async function findByBusiness(business_id) {
     return db('roles')
@@ -168,32 +127,6 @@ async function findByBusiness(business_id) {
                 'roles.approved_by',
             ]
         )
-}
-
-// USED - inside jwt_helper validateRequestRights
-// validates users account_type is above 'creator' - returns only 'manager' & 'admin'
-async function userValidation(user_id, business_id) {
-    
-    const role_request = await db('roles')
-        .where({ user_id: user_id, business_id: business_id, active_role: true })
-        .whereNotIn('roles.role_type', ['creator'])
-        .select(
-            [
-                'roles.id',
-                'roles.user_id',
-                'roles.business_id',
-                'roles.role_type'
-            ]
-        )
-        .first()
-
-    if (role_request == null) {
-        
-        throw new Error('invalid_user')
-    } else {
-        
-        return role_request;
-    }
 }
 
 // jwt_helper validateCreator - returns an array of business_id(s)
@@ -276,6 +209,7 @@ async function upgradeCreatorRole(request_id, management_id) {
         .first()
 }
 
+// downgradeRole for manager role
 async function downgradeManagerRole(role_id, admin_id) {
     await db('roles')
         .where({ id: role_id })

@@ -15,15 +15,10 @@ router.post('/local', passport.authenticate('local', {
     session: true
 }), async (req, res) => {
     const user = req.user
-    const user_roles = await rolesDB.findRolesByUser(user.id)
+    const user_roles = await rolesDB.findUserRoles(user.id)
     const filter_inactive = user_roles.filter(role => role.active_role)
     user.account_type = filter_inactive[0]?.role_type || '100'
     
-    // console.log('====signed_in_user================================================')
-    // console.log(user)
-    // console.log(user_roles)
-    // console.log('==================================================================')
-
     res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
     
     delete user['refreshToken']

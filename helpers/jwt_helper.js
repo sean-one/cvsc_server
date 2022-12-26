@@ -92,7 +92,7 @@ const validateCreator = async (req, res, next) => {
     }
 }
 
-const validateManagement = async (req, res, next) => {
+const validateRoleManagement = async (req, res, next) => {
     console.log('inside validate management')
     try {
         const user_id = req.user_decoded
@@ -105,7 +105,7 @@ const validateManagement = async (req, res, next) => {
         const { business_id, role_type} = await db.findById(role_id)
 
         if(!business_id || !role_type) throw new Error('request_not_found')
-        const manager_role = await db.findBusinessRoleByUser(business_id, user_id)
+        const manager_role = await db.findUserBusinessRole(business_id, user_id)
 
         if(!manager_role) throw new Error('invalid_user')
 
@@ -115,86 +115,12 @@ const validateManagement = async (req, res, next) => {
             throw new Error('invalid_user')
         }
     } catch (error) {
-        console.log(error)
+
         next({
-            status: tokenErrors[error.name]?.status,
-            message: tokenErrors[error.name]?.message,
-            type: tokenErrors[error.name]?.type,
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type,
         })
-    }
-}
-
-const validateManager = async (req, res, next) => {
-    console.log('inside validateManager')
-    try {
-        const user_id = req.user_decoded
-
-        if(!user_id) throw new Error('invalid_user')
-        // console.log(`user_id: ${user_id}`)
-
-        const { role_id } = req.params
-        // console.log(`request_id: ${role_id}`)
-
-        if(!role_id) throw new Error('request_not_found')
-        const { business_id } = await db.findById(role_id)
-        // console.log(`business_id: ${business_id}`)
-
-        if(!business_id) throw new Error('request_not_found')
-        const role_rights = await db.findBusinessRoleByUser(business_id, user_id)
-        // console.log(`role_type: ${role_rights.role_type}`)
-
-        if(!role_rights) throw new Error('invalid_user')
-
-        if(role_rights.role_type >= 456) {
-            next()
-        } else {
-            throw new Error('invalid_user')
-        }
-    } catch (error) {
-        
-        next({
-            status: tokenErrors[error.name]?.status,
-            message: tokenErrors[error.name]?.message,
-            type: tokenErrors[error.name]?.type,
-        })
-        
-    }
-}
-
-const validateAdmin = async (req, res, next) => {
-    console.log('inside validateAdmin')
-    try {
-        const user_id = req.user_decoded
-
-        if(!user_id) throw new Error('invalid_user')
-        // console.log(`user_id: ${user_id}`)
-
-        const { role_id } = req.params
-        // console.log(`request_id: ${role_id}`)
-
-        if(!role_id) throw new Error('request_not_found')
-        const { business_id } = await db.findById(role_id)
-        // console.log(`business_id: ${business_id}`)
-
-        if(!business_id) throw new Error('request_not_found')
-        const role_rights = await db.findBusinessRoleByUser(business_id, user_id)
-        // console.log(`role_type: ${role_rights.role_type}`)
-
-        if(!role_rights) throw new Error('invalid_user')
-
-        if(role_rights.role_type >= 789) {
-            next()
-        } else {
-            throw new Error('invalid_user')
-        }
-    } catch (error) {
-        
-        next({
-            status: tokenErrors[error.name]?.status,
-            message: tokenErrors[error.name]?.message,
-            type: tokenErrors[error.name]?.type,
-        })
-        
     }
 }
 
@@ -264,9 +190,7 @@ module.exports = {
     createRefreshToken,
     validToken,
     validateCreator,
-    validateManagement,
-    validateManager,
-    validateAdmin,
+    validateRoleManagement,
     businessAdmin,
     eventCreator,
 }

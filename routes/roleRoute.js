@@ -3,21 +3,11 @@ const express = require('express');
 const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken, validateManager, validateAdmin, validateManagement } = require('../helpers/jwt_helper')
+const { validToken, validateRoleManagement } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
-// used on /profile page inside getroles
-router.get('/user/:id', (req, res) => {
-    // const { user_id } = req.decodedToken
-    db.findByUser_All(req.user.id)
-        .then(user_roles => {
-            // [ { business_id: uuid, role_type: 'admin' }, { business_id: uuid, role_type: 'creator' } ]
-            res.status(200).json(user_roles);
-        })
-        .catch(err => res.status(500).json(err));
-})
-
+// used in rolesApi inside getBusinessRoles - get all roles associated with selected business
 router.get('/business/:business_id', async (req, res) => {
     try {
         const { business_id } = req.params
@@ -26,7 +16,12 @@ router.get('/business/:business_id', async (req, res) => {
         res.status(200).json(business_roles);
         
     } catch (error) {
-        res.status(500).json(error)
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
+        
     }
 })
 
@@ -86,32 +81,60 @@ router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
 
 // pendingRequest approval button
 //! updated endpoint - needs error handling
-router.post('/approve_request/:role_id', [ validToken, validateManager ], async (req, res, next) => {
-    const management_id = await req.user_decoded
-    const new_creator = await db.approveRoleRequest(req.params.role_id, management_id)
-    
-    res.status(200).json(new_creator)
+router.post('/approve/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
+    try {
+        const { role_id } = req.params
+        const management_id = await req.user_decoded
+
+        const new_creator = await db.approveRoleRequest(role_id, management_id)
+        
+        res.status(200).json(new_creator)
+    } catch (error) {
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
+    }
 })
 
 //! updated endpoint - needs error handling
-router.post('/upgrade_creator/:role_id', [ validToken, validateManagement ], async (req, res, next) => {
-    const { role_id } = req.params
-    const management_id = await req.user_decoded
-    const new_manager = await db.upgradeCreatorRole(role_id, management_id)
-
-    res.status(200).json(new_manager)
+router.post('/upgrade/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
+    try {
+        const { role_id } = req.params
+        const management_id = await req.user_decoded
+        const new_manager = await db.upgradeCreatorRole(role_id, management_id)
+    
+        res.status(200).json(new_manager)
+        
+    } catch (error) {
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
+    }
 })
 
 //! updated enpoint - needs error handling
-router.post('/downgrade_manager/:role_id', [ validToken, validateManagement ], async (req, res, next) => {
-    const { role_id } = req.params
-    const admin_id = await req.user_decoded
-    const creator_role = await db.downgradeManagerRole(role_id, admin_id)
-
-    res.status(200).json(creator_role)
+router.post('/downgrade/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
+    try {
+        const { role_id } = req.params
+        const admin_id = await req.user_decoded
+        const creator_role = await db.downgradeManagerRole(role_id, admin_id)
+    
+        res.status(200).json(creator_role)
+        
+    } catch (error) {
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
+    }
 })
 
-router.delete('/remove/:role_id', [ validToken, validateManagement ], async (req, res, next) => {
+router.delete('/remove/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
     try {
         const { role_id } = req.params
 
@@ -120,8 +143,11 @@ router.delete('/remove/:role_id', [ validToken, validateManagement ], async (req
         res.status(204).json(deleted_role_count)
 
     } catch (error) {
-        
-        next(error)
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
     }
 })
 

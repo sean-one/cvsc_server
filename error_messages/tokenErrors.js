@@ -15,7 +15,7 @@ const tokenErrors = {
         type: 'token'
     },
     invalid_user: {
-        status: 401,
+        status: 400,
         message: 'invalid user rights'
     },
     // inside eventCreator when eventDB.findById fired - error
