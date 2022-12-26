@@ -151,7 +151,7 @@ router.delete('/remove/:role_id', [validToken, validateRoleManagement ], async (
     }
 })
 
-router.delete('/user_removed/:role_id', [validToken, roleRequestUser], async (req, res, next) => {
+router.delete('/user_remove/:role_id', [validToken, roleRequestUser], async (req, res, next) => {
     try {
         const { role_id } = req.params
 

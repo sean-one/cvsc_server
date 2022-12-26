@@ -125,14 +125,15 @@ const validateRoleManagement = async (req, res, next) => {
 }
 
 const roleRequestUser = async (req, res, next) => {
+    console.log('inside the role request user')
     try {
         const request_user = req.user_decoded
-        if(!user_id) throw new Error('invalid_user')
+        if(!request_user) throw new Error('invalid_user')
 
         const { role_id } = req.params
         if(!role_id) throw new Error('request_not_found')
+        
         const { user_id } = await db.findById(role_id)
-
         if(!user_id) throw new Error('invalid_user')
 
         if(user_id === request_user) {

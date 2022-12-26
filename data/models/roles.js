@@ -8,7 +8,6 @@ module.exports = {
     findRolesPendingManagement,
     findByBusiness,
     getUserBusinessRoles,
-    findByUser_All,
     approveRoleRequest,
     upgradeCreatorRole,
     downgradeManagerRole,
@@ -42,6 +41,7 @@ async function findUserRoles(user_id) {
         .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [
+                'roles.id',
                 'roles.business_id',
                 'roles.role_type',
                 'roles.active_role',
@@ -144,21 +144,6 @@ async function getUserBusinessRoles(user_id) {
     } else {
         return user_roles
     }
-}
-
-// used at profile
-function findByUser_All(user_id) {
-    return db('roles')
-        .where({ 'roles.user_id': user_id })
-        .join('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.business_id',
-                'businesses.business_name',
-                'roles.role_type',
-                'roles.active_role'
-            ]
-        )
 }
 
 // pendingRequest /roles/approve/:request_id
