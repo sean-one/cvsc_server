@@ -3,7 +3,7 @@ const express = require('express');
 const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken, validateRoleManagement } = require('../helpers/jwt_helper')
+const { validToken, roleRequestUser, validateRoleManagement } = require('../helpers/jwt_helper')
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.get('/business/:business_id', async (req, res) => {
             message: roleErrors[error.message]?.message,
             type: roleErrors[error.message]?.type,
         })
-        
+
     }
 })
 
@@ -148,6 +148,24 @@ router.delete('/remove/:role_id', [validToken, validateRoleManagement ], async (
             message: roleErrors[error.message]?.message,
             type: roleErrors[error.message]?.type,
         })
+    }
+})
+
+router.delete('/user_removed/:role_id', [validToken, roleRequestUser], async (req, res, next) => {
+    try {
+        const { role_id } = req.params
+
+        const deleted_role_count = await db.removeRole(role_id)
+
+        res.status(204).json(deleted_role_count)
+
+    } catch (error) {
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
+        
     }
 })
 

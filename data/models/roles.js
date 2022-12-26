@@ -12,7 +12,6 @@ module.exports = {
     approveRoleRequest,
     upgradeCreatorRole,
     downgradeManagerRole,
-    createRequest,
     createRoleRequest,
     removeRole,
 }
@@ -233,7 +232,7 @@ async function downgradeManagerRole(role_id, admin_id) {
 }
 
 // roles/create-request
-async function createRequest(business_id, user_id) {
+async function createRoleRequest(business_id, user_id) {
     const created_role = await db('roles')
         .insert({
             user_id: user_id,
@@ -252,14 +251,6 @@ async function createRequest(business_id, user_id) {
             ]
         )
     
-}
-
-async function createRoleRequest(business_id, user_id) {
-    return await db('roles')
-        .insert({
-            user_id: user_id,
-            business_id: business_id
-        }, ['business_id', 'role_type', 'active_role'])
 }
 
 async function removeRole(role_id) {
