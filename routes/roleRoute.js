@@ -7,7 +7,7 @@ const { validToken, roleRequestUser, validateRoleManagement } = require('../help
 
 const router = express.Router();
 
-// used in rolesApi inside getBusinessRoles - get all roles associated with selected business
+// useBusinessRolesQuery - getBusinessRoles - useRolesApi
 router.get('/business/:business_id', async (req, res) => {
     try {
         const { business_id } = req.params
@@ -25,17 +25,28 @@ router.get('/business/:business_id', async (req, res) => {
     }
 })
 
-router.get('/management/pending', [ validToken ], (req, res) => {
-    db.findRolesPendingManagement(req.user_decoded)
-        .then(roles => {
-            res.status(200).json(roles)
+// usePendingBusinessRolesQuery - getBusinessPendingRoles - useRolesApi
+router.get('/management/:user_id', [ validToken ], async (req, res, next) => {
+    try {
+        const { user_id } = req.user_decoded
+        
+        const management_roles = await db.findRolesPendingManagement(user_id)
+        
+        res.status(200).json(management_roles)
+            
+    } catch (error) {
+        
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
         })
-        .catch(err => res.status(500).json(err));
+        
+    }
 
 })
 
-// creates a new business role request
-//! updated endpoint
+// useCreateRoleMutation - createRoleRequest - useRolesApi
 router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
     try {
         const { business_id } = req.params
@@ -79,8 +90,7 @@ router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
 
 })
 
-// pendingRequest approval button
-//! updated endpoint - needs error handling
+// useApproveRoleMutation - approveRole - useRolesApi
 router.post('/approve/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
     try {
         const { role_id } = req.params
@@ -98,7 +108,7 @@ router.post('/approve/:role_id', [validToken, validateRoleManagement ], async (r
     }
 })
 
-//! updated endpoint - needs error handling
+// useUpgradeRoleMutation - upgradeRole - useRolesApi
 router.post('/upgrade/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
     try {
         const { role_id } = req.params
@@ -116,7 +126,7 @@ router.post('/upgrade/:role_id', [validToken, validateRoleManagement ], async (r
     }
 })
 
-//! updated enpoint - needs error handling
+// useDowngradeRoleMutation - downgradeRole - useRolesApi
 router.post('/downgrade/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
     try {
         const { role_id } = req.params
@@ -134,6 +144,7 @@ router.post('/downgrade/:role_id', [validToken, validateRoleManagement ], async 
     }
 })
 
+// useRemoveRoleMutation - removeRole - useRolesApi
 router.delete('/remove/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
     try {
         const { role_id } = req.params
@@ -151,6 +162,7 @@ router.delete('/remove/:role_id', [validToken, validateRoleManagement ], async (
     }
 })
 
+// useRemoveUserRoleMutation - removeUserRole - useRolesApi
 router.delete('/user_remove/:role_id', [validToken, roleRequestUser], async (req, res, next) => {
     try {
         const { role_id } = req.params
@@ -167,14 +179,6 @@ router.delete('/user_remove/:role_id', [validToken, roleRequestUser], async (req
         })
         
     }
-})
-
-router.get('/', (req, res) => {
-    db.find()
-        .then(roles => {
-            res.status(200).json(roles);
-        })
-        .catch(err => res.status(500).json(err));
 })
 
 

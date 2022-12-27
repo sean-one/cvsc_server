@@ -63,11 +63,15 @@ const validToken = (req, res, next) => {
     }
 }
 
-// validates creator rights for either brand_id or venue_id
+
+// =============================================
+//      ROLES VALIDATIONS
+// =============================================
+
+// confirms event creator has 'creator' or higher roles with either brand_id or venue_id
 const validateEventCreation = async (req, res, next) => {
     try {
         const user_id = req.user_decoded
-
         if (!user_id) throw new Error('invalid_user')
 
         const { venue_id, brand_id } = req.body
@@ -93,23 +97,24 @@ const validateEventCreation = async (req, res, next) => {
     }
 }
 
+// confirms management role for making changes to business roles
 const validateRoleManagement = async (req, res, next) => {
-    console.log('inside validate management')
     try {
         const user_id = req.user_decoded
-
         if(!user_id) throw new Error('invalid_user')
 
         const { role_id } = req.params
-
         if(!role_id) throw new Error('request_not_found')
+        
+        // get role id and search for the role returning the business_id & role_type
         const { business_id, role_type} = await db.findRoleById(role_id)
-
         if(!business_id || !role_type) throw new Error('request_not_found')
+        
+        // get the user/manager role for requested business
         const manager_role = await db.findUserBusinessRole(business_id, user_id)
-
         if(!manager_role) throw new Error('invalid_user')
 
+        // confirm the user/managers role is higher then requested role
         if(manager_role.role_type > role_type) {
             next()
         } else {
@@ -125,8 +130,8 @@ const validateRoleManagement = async (req, res, next) => {
     }
 }
 
+// confirms user making change is user on the role
 const roleRequestUser = async (req, res, next) => {
-    console.log('inside the role request user')
     try {
         const request_user = req.user_decoded
         if(!request_user) throw new Error('invalid_user')
@@ -134,9 +139,11 @@ const roleRequestUser = async (req, res, next) => {
         const { role_id } = req.params
         if(!role_id) throw new Error('request_not_found')
         
+        // get the user_from the role attempting to be changed
         const { user_id } = await db.findRoleById(role_id)
         if(!user_id) throw new Error('invalid_user')
 
+        // confirm that the user attempting to delete role is the user from the role
         if(user_id === request_user) {
             next()
         } else {
@@ -152,15 +159,23 @@ const roleRequestUser = async (req, res, next) => {
     }
 }
 
+
+// =============================================
+//      BUSINESS VALIDATIONS
+// =============================================
+
+// confirm user making change to business is business_admin
 const businessAdmin = async (req, res, next) => {
     try {
         const user_id = req.user_decoded
         const { business_id } = req.params
         if(!user_id || !business_id) throw new Error('invalid_request')
 
+        // get the business admin for selected business
         const { business_admin } = await businessDB.findById(business_id)
         if(!business_admin) throw new Error('invalid_request')
 
+        // confirm request user is same as business_admin listed on business
         if(business_admin === user_id) {
             next()
         } else {
@@ -177,16 +192,22 @@ const businessAdmin = async (req, res, next) => {
     }
 }
 
+
+// =============================================
+//      EVENT VALIDATIONS
+// =============================================
+
 const eventCreator = async (req, res, next) => {
-    console.log('inside eventCreator')
     try {
         const user_id = req.user_decoded
         const { event_id } = req.params
         if(!user_id || !event_id) throw new Error('invalid_request')
 
+        // get the created_by user from the event
         const { created_by } = await eventDB.findById(event_id)
         if(!created_by) throw new Error('invalid_request')
 
+        // confirm user making changes to event is the creator of the event
         if(created_by === user_id) {
             console.log('valid event creator')
             next()

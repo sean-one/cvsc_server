@@ -45,7 +45,7 @@ router.get('/refresh', async (req, res) => {
             // get user information
             const accessToken = createAccessToken(decoded.user)
             // find ALL roles attached to user active & inactive
-            const user_roles = await rolesDB.findRolesByUser(decoded.user)
+            const user_roles = await rolesDB.findUserRoles(decoded.user)
             // set the accesstoken to the user details
             user_found.accessToken = accessToken
             // filter out all inactive role request
