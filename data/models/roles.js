@@ -1,12 +1,11 @@
 const db = require('../dbConfig');
 
 module.exports = {
-    find,
     findUserBusinessRole,
     findUserRoles,
-    findById,
+    findRoleById,
     findRolesPendingManagement,
-    findByBusiness,
+    findRoleByBusiness,
     getUserBusinessRoles,
     approveRoleRequest,
     upgradeCreatorRole,
@@ -15,10 +14,6 @@ module.exports = {
     removeRole,
 }
 
-// for postman to check db
-function find() {
-    return db('roles')
-}
 
 // validateRoleManagement inside jwt_helper - finds business role for user
 function findUserBusinessRole(business_id, user_id) {
@@ -51,8 +46,8 @@ async function findUserRoles(user_id) {
         .orderBy('roles.role_type', 'desc')
 }
 
-// find role request by request_id
-async function findById(request_id) {
+// used in jwt_helper - inside validateRoleManagement & roleRequestUser
+async function findRoleById(request_id) {
     const role_request = await db('roles')
         .where({ 'roles.id': request_id })
         .select(
@@ -110,8 +105,8 @@ async function findRolesPendingManagement(user_id) {
         )
 }
 
-// find all role entries by business id
-async function findByBusiness(business_id) {
+// use int roleroute returns an array of roles for a selected business
+async function findRoleByBusiness(business_id) {
     return db('roles')
         .where({ 'roles.business_id': business_id })
         .leftJoin('users', 'roles.user_id', '=', 'users.id')
@@ -128,7 +123,7 @@ async function findByBusiness(business_id) {
         )
 }
 
-// jwt_helper validateCreator - returns an array of business_id(s)
+// jwt_helper validateEventCreation - returns an array of business_id(s)
 async function getUserBusinessRoles(user_id) {
     const user_roles = await db('roles')
         .where({ user_id: user_id, active_role: true })
@@ -146,7 +141,29 @@ async function getUserBusinessRoles(user_id) {
     }
 }
 
-// pendingRequest /roles/approve/:request_id
+// useCreateRoleMutation - useRolesApi
+async function createRoleRequest(business_id, user_id) {
+    const created_role = await db('roles')
+        .insert({
+            user_id: user_id,
+            business_id: business_id
+        }, ['id'])
+
+    return await db('roles')
+        .where({ 'roles.id': created_role[0].id })
+        .join('businesses', 'roles.business_id', '=', 'businesses.id')
+        .select(
+            [
+                'roles.business_id',
+                'businesses.business_name',
+                'roles.role_type',
+                'roles.active_role'
+            ]
+        )
+
+}
+
+// useApproveRoleMutation - useRolesApi
 async function approveRoleRequest(request_id, management_id) {
 
     await db('roles')
@@ -170,7 +187,7 @@ async function approveRoleRequest(request_id, management_id) {
         .first()
 }
 
-// upgradeRole for creator role 
+// useUpgradeRoleMutation - useRolesApi 
 async function upgradeCreatorRole(request_id, management_id) {
     await db('roles')
         .where({ id: request_id })
@@ -193,7 +210,7 @@ async function upgradeCreatorRole(request_id, management_id) {
         .first()
 }
 
-// downgradeRole for manager role
+// useDowngradeRoleMutation - useRolesApi
 async function downgradeManagerRole(role_id, admin_id) {
     await db('roles')
         .where({ id: role_id })
@@ -216,28 +233,7 @@ async function downgradeManagerRole(role_id, admin_id) {
         .first()
 }
 
-// roles/create-request
-async function createRoleRequest(business_id, user_id) {
-    const created_role = await db('roles')
-        .insert({
-            user_id: user_id,
-            business_id: business_id
-        }, ['id'])
-        
-    return await db('roles')
-        .where({ 'roles.id': created_role[0].id })
-        .join('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.business_id',
-                'businesses.business_name',
-                'roles.role_type',
-                'roles.active_role'
-            ]
-        )
-    
-}
-
+// useRemoveRoleMutation & useRemoveUserRoleMutation - useRolesApi
 async function removeRole(role_id) {
     const deleted_count = await db('roles')
         .where({ id: role_id })

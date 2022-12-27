@@ -63,7 +63,8 @@ const validToken = (req, res, next) => {
     }
 }
 
-const validateCreator = async (req, res, next) => {
+// validates creator rights for either brand_id or venue_id
+const validateEventCreation = async (req, res, next) => {
     try {
         const user_id = req.user_decoded
 
@@ -102,7 +103,7 @@ const validateRoleManagement = async (req, res, next) => {
         const { role_id } = req.params
 
         if(!role_id) throw new Error('request_not_found')
-        const { business_id, role_type} = await db.findById(role_id)
+        const { business_id, role_type} = await db.findRoleById(role_id)
 
         if(!business_id || !role_type) throw new Error('request_not_found')
         const manager_role = await db.findUserBusinessRole(business_id, user_id)
@@ -133,7 +134,7 @@ const roleRequestUser = async (req, res, next) => {
         const { role_id } = req.params
         if(!role_id) throw new Error('request_not_found')
         
-        const { user_id } = await db.findById(role_id)
+        const { user_id } = await db.findRoleById(role_id)
         if(!user_id) throw new Error('invalid_user')
 
         if(user_id === request_user) {
@@ -216,7 +217,7 @@ module.exports = {
     createAccessToken,
     createRefreshToken,
     validToken,
-    validateCreator,
+    validateEventCreation,
     validateRoleManagement,
     roleRequestUser,
     businessAdmin,

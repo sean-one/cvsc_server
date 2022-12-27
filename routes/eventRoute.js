@@ -5,7 +5,7 @@ const sharp = require('sharp');
 const { deleteImageS3, uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
-const { validToken, validateCreator, eventCreator } = require('../helpers/jwt_helper');
+const { validToken, validateEventCreation, eventCreator } = require('../helpers/jwt_helper');
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
 });
 
 //! updated endpoint
-router.post('/', [upload.single('eventmedia'), validToken, validateCreator], async (req, res, next) => {
+router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation], async (req, res, next) => {
     try {
         const new_event = req.body
 

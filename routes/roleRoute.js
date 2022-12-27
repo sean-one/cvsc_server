@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/business/:business_id', async (req, res) => {
     try {
         const { business_id } = req.params
-        const business_roles = await db.findByBusiness(business_id)
+        const business_roles = await db.findRoleByBusiness(business_id)
         
         res.status(200).json(business_roles);
         
