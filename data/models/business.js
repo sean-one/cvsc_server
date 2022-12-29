@@ -3,12 +3,11 @@ const googleMapsClient = require('../../helpers/geocoder');
 
 module.exports = {
     find,
-    findById,
+    findBusinessById,
     addBusiness,
     updateBusiness,
     toggleActiveBusiness,
     toggleBusinessRequest,
-    findPending,
     remove
 };
 
@@ -44,7 +43,8 @@ function find() {
         )
 }
 
-function findById(business_id) {
+// .put('/business/update/:business_id)
+function findBusinessById(business_id) {
     return db('businesses')
         .where({ 'businesses.id': business_id })
         .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
@@ -75,50 +75,18 @@ function findById(business_id) {
         .first();
 }
 
-// used in postman to get pending request
-function findPending() {
-    return db('businesses')
-        .where({ activeBusiness: false })
-        .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
-        .select(
-            [
-                'businesses.id',
-                'businesses.business_name',
-                'businesses.business_avatar',
-                'businesses.business_description',
-                'businesses.business_type',
-                'businesses.business_request_open',
-                'businesses.active_business',
-                'businesses.business_admin',
-                'businesses.business_email',
-                'businesses.business_phone',
-                'businesses.business_instagram',
-                'businesses.business_facebook',
-                'businesses.business_website',
-                'businesses.business_twitter',
-                'locations.id as location_id',
-                'locations.street_address',
-                'locations.location_city',
-                'locations.location_state',
-                'locations.zip_code',
-                'locations.formatted'
-            ]
-        )
-}
-
-// creates new business & new admin role for the user requesting the new business
+// .post('/business/create) - creates a new business
 async function addBusiness(business, location) {
     try {
         
         return await db.transaction(async trx => {
 
-            // create new business
+            // insert new business into database
             const added_business = await db('businesses')
                 .transacting(trx)
                 .insert(business, ['id', 'business_name', 'business_admin', 'business_type'])
             
-            // check for location
-            // if (added_business[0].business_type !== 'brand') {
+            // check for location and save if submitted
             if (location !== undefined) {
                 // google api with address returning geocode information
                 const geoCode = await googleMapsClient.geocode(
@@ -145,7 +113,7 @@ async function addBusiness(business, location) {
                     .insert(location)
             }
             
-            // create an business admin role for the user requesting the new business
+            // create a business_admin role for the user requesting the new business
             await db('roles')
                 .transacting(trx)
                 .insert({
@@ -198,6 +166,7 @@ async function addBusiness(business, location) {
 
 }
 
+// .put('/business/update/:business_id) - updates existing business
 async function updateBusiness(business_id, changes) {
     try {
         return await db.transaction(async trx => {
@@ -275,8 +244,7 @@ async function updateBusiness(business_id, changes) {
     }
 }
 
-// toggle active business between true and false
-// sets approved roles between active & inactive, leaves unapporved roles alone
+// .put('/business/toggle-active/:business_id) - toggles 'active_business', all roles.active_roles toggle too
 async function toggleActiveBusiness(business_id) {
 
     return await db.transaction(async trx => {
@@ -336,6 +304,7 @@ async function toggleActiveBusiness(business_id) {
     })
 }
 
+// .put('/business/toggle-request/:business_id) - toggles 'business_request_open'
 async function toggleBusinessRequest(business_id) {
     const business = await db('businesses')
         .where({ 'businesses.id': business_id })

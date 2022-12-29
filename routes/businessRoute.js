@@ -1,3 +1,4 @@
+
 const express = require('express');
 const multer = require('multer');
 const sharp = require('sharp');
@@ -14,7 +15,7 @@ const upload = multer({ storage: storage })
 // '/business'
 const router = express.Router()
 
-//! get all businesses
+// useBusinessesQuery - getBusiness - useBusinessApi
 router.get('/', async (req, res) => {
     try {
         const businesses = await db.find()
@@ -26,15 +27,28 @@ router.get('/', async (req, res) => {
     }
 });
 
-// creates a new business with activeBusiness & arppoval set to false also creates a top user admin role
+// useBusinessQuery - getBusiness - useBusinessApi
+router.get('/single/:business_id', async (req, res, next) => {
+    try {
+        const { business_id } = req.params;
+        const business = await db.findBusinessById(business_id)
+
+        res.status(200).json(business);
+
+    } catch (error) {
+        res.status(404).json({ message: 'business not found' });
+
+    }
+});
+
+// useCreateBusinessMutation - createBusiness - useBusinessApi
 router.post('/create', [upload.single('business_avatar'), validToken ], async (req, res, next) => {
     try {
         let business_location
         const new_business = req.body
-        console.log(new_business)
 
-        // check for business type, if 'brand' remove address elements, else create location oject and delete address elements
-        if(new_business.bubsiness_location) {
+        // check if business location is attached
+        if(new_business.business_location !== 'false') {
             business_location = {
                 'venue_name': new_business.business_name,
                 'street_address': new_business.street_address,
@@ -44,18 +58,21 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
             }
         }
         
+        // remove address elements
         delete new_business['street_address']
         delete new_business['city']
         delete new_business['state']
         delete new_business['zip']
         delete new_business['business_location']
 
+        // remove any empty contact information
         if(!new_business.business_instagram) delete new_business['business_instagram']
         if(!new_business.business_facebook) delete new_business['business_facebook']
         if(!new_business.business_website) delete new_business['business_website']
         if(!new_business.business_phone) delete new_business['business_phone']
         if(!new_business.business_twitter) delete new_business['business_twitter']
         
+        // check for file - if found upload and return image key
         if(req.file) {
             // resize the image
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
@@ -70,6 +87,7 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
         new_business['business_admin'] = req.user_decoded
         new_business['active_business'] = true
         
+        console.log(business_location)
         const created_business = await db.addBusiness(new_business, business_location)
         
         res.status(201).json(created_business);
@@ -95,13 +113,13 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
     }
 })
 
-//! update busines by id
+// useUpdateBusinessMutation - updateBusiness - useBusinessApi
 router.put('/update/:business_id', [upload.single('business_avatar'), validToken, businessAdmin], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;
         const business_update = req.body;
-        const { business_avatar } = await db.findById(business_id)
+        const { business_avatar } = await db.findBusinessById(business_id)
 
         // if there is an image to update resize, save and delete previous
         if(req.file) {
@@ -133,7 +151,7 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
     }
 })
 
-//! toggleActiveBusiness
+// useActiveBusinessToggle - toggleActiveBusiness - useBusinessApi
 router.put('/toggle-active/:business_id', [validToken, businessAdmin], async (req, res) => {
     try {
         const { business_id } = req.params;
@@ -147,7 +165,7 @@ router.put('/toggle-active/:business_id', [validToken, businessAdmin], async (re
     }
 })
 
-//! toggleBusinessRequest
+// useBusinessRequestToggle - toggleBusinessRequest - useBusinessApi
 router.put('/toggle-request/:business_id', [validToken, businessAdmin], async (req, res) => {
     try {
         const { business_id } = req.params;
@@ -161,31 +179,6 @@ router.put('/toggle-request/:business_id', [validToken, businessAdmin], async (r
         
     }
 })
-
-// used in postman to get pending request
-router.get('/pending/business-request', (req, res) => {
-    db.findPending()
-        .then(businesses => {
-            res.status(200).json(businesses)
-        })
-        .catch(err => res.status(500).json(err))
-})
-
-router.get('/:id', (req, res) => {
-    const { id } = req.params;
-    db.findById(id)
-    .then(business => {
-        if(business) {
-            res.status(200).json(business);
-        } else {
-            res.status(404).json({ message: 'business not found'});
-        }
-    })
-    .catch(err => {
-        console.log(err)
-        res.status(500).json({ message: 'failure', error: err });
-    });
-});
 
 router.delete('/remove/:business_id', async (req, res, next) => {
     try {

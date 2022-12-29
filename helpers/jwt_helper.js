@@ -172,7 +172,7 @@ const businessAdmin = async (req, res, next) => {
         if(!user_id || !business_id) throw new Error('invalid_request')
 
         // get the business admin for selected business
-        const { business_admin } = await businessDB.findById(business_id)
+        const { business_admin } = await businessDB.findBusinessById(business_id)
         if(!business_admin) throw new Error('invalid_request')
 
         // confirm request user is same as business_admin listed on business

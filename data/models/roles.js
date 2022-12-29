@@ -79,7 +79,7 @@ async function findRolesPendingManagement(user_id) {
                 'businesses.active_business'
             ]
         )
-    
+
     await management_roles.map(role => {
         if(role.active_business) {
             return business_ids.push(role.business_id)
@@ -88,9 +88,11 @@ async function findRolesPendingManagement(user_id) {
         }
     })
     
+    console.log(business_ids)
     return await db('roles')
+        // .where('roles.active_role', false)
         .whereIn('roles.business_id', business_ids)
-        .andWhere('roles.active_role', false )
+        .andWhere('roles.active_role', 'false' )
         .leftJoin('users', 'roles.user_id', '=', 'users.id')
         .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
@@ -154,6 +156,7 @@ async function createRoleRequest(business_id, user_id) {
         .join('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [
+                'roles.id',
                 'roles.business_id',
                 'businesses.business_name',
                 'roles.role_type',

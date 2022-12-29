@@ -28,14 +28,14 @@ router.get('/business/:business_id', async (req, res) => {
 // usePendingBusinessRolesQuery - getBusinessPendingRoles - useRolesApi
 router.get('/management/:user_id', [ validToken ], async (req, res, next) => {
     try {
-        const { user_id } = req.user_decoded
+        const user_id = req.user_decoded
         
         const management_roles = await db.findRolesPendingManagement(user_id)
         
         res.status(200).json(management_roles)
             
     } catch (error) {
-        
+        console.log(error)
         next({
             status: roleErrors[error.message]?.status,
             message: roleErrors[error.message]?.message,
@@ -51,7 +51,7 @@ router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
     try {
         const { business_id } = req.params
     
-        const selected_business = await dbBusiness.findById(business_id)
+        const selected_business = await dbBusiness.findBusinessById(business_id)
     
         if(!selected_business) return res.sendStatus(404)
 
