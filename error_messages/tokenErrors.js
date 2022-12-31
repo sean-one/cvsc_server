@@ -1,7 +1,12 @@
 const tokenErrors = {
     invalid_token: {
         status: 401,
-        message: 'missing or invalid token, please log in',
+        message: 'invalid token, please log in',
+        type: 'token'
+    },
+    no_token: {
+        status: 401,
+        message: 'missing token, please log in',
         type: 'token'
     },
     TokenExpiredError: {

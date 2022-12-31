@@ -162,6 +162,44 @@ router.delete('/remove/:role_id', [validToken, validateRoleManagement ], async (
     }
 })
 
+router.get('/user/:user_id', [validToken], async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+
+        const user_roles = await db.findUserRoles(user_id)
+
+        res.status(200).json(user_roles)
+
+    } catch (error) {
+        
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
+
+    }
+})
+
+router.get('/user_role/:business_id', [validToken], async (req, res, next) => {
+    try {
+        const { business_id } = req.params
+        const user_id = req.user_decoded
+
+        const user_role = await db.findUserBusinessRole(business_id, user_id)
+
+        res.status(200).json(user_role)
+    } catch (error) {
+        
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
+        
+    }
+})
+
 // useRemoveUserRoleMutation - removeUserRole - useRolesApi
 router.delete('/user_remove/:role_id', [validToken, roleRequestUser], async (req, res, next) => {
     try {

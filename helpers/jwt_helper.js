@@ -36,7 +36,7 @@ const validToken = (req, res, next) => {
     try {
         const cookies = req.cookies
     
-        if(!cookies.jwt) throw new Error('invalid_token')
+        if(!cookies.jwt) throw new Error('no_token')
     
         const user_decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESHTOKEN_SECRET, 'invalid_token')
         req.user_decoded = user_decoded.user

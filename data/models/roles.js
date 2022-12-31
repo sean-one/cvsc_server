@@ -23,7 +23,8 @@ function findUserBusinessRole(business_id, user_id) {
             [
                 'roles.id',
                 'roles.business_id',
-                'roles.role_type'
+                'roles.role_type',
+                'roles.active_role'
             ]
         )
         .first()
