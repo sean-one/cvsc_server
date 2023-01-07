@@ -138,7 +138,7 @@ exports.seed = function(knex) {
         {
           id: '29bada5f-f362-4b25-8320-f01d580b6d27',
           business_name: 'hanks grow',
-          business_avatar: 'https://coachellavalleysmokers-images.s3.amazonaws.com/f022c1fb66679f0b467d6d42f3374b9b5a6a914ff4b75154a86dc140a84f4ba3',
+          business_avatar: '0674300f4f301cbf90aa8e012e79ae53d2140cc7d03a3d6a5e6c89da303ce8ef',
           business_description: 'Quisque ornare augue vel nibh blandit mollis. Praesent tellus turpis, luctus quis luctus at, eleifend condimentum leo. Fusce nulla magna, varius eget porta sit amet, vulputate porta turpis. Nulla commodo dolor elit, quis ultrices nisl feugiat at. Aenean venenatis cursus venenatis',
           business_type: 'brand',
           business_request_open: true,
@@ -151,7 +151,7 @@ exports.seed = function(knex) {
         {
           id: 'af87fc85-f800-4868-bf52-43996b16d4f0',
           business_name: 'brads lounge',
-          business_avatar: 'https://coachellavalleysmokers-images.s3.amazonaws.com/aa09ebd2628c159b5e3c1cba8bc87c192dc3c24e6b69893474fa469860bec06b',
+          business_avatar: '0df4dceedcf3d75705264a47fcec040dc285c643f2ce66181bfcfc2f6ce82dc7',
           business_description: 'Phasellus dolor ex, interdum a libero eleifend, maximus lobortis justo. Vivamus sed diam sem. Nam eleifend pharetra ultricies. In tristique nibh metus, vitae venenatis felis egestas eget. Donec arcu urna, volutpat quis euismod in, convallis quis sem. Integer fermentum nisi quis ante viverra, sit amet blandit turpis iaculis.',
           business_type: 'venue',
           business_request_open: true,

@@ -7,7 +7,7 @@ const { uploadImageS3Url, deleteImageS3 } = require('../s3');
 const db = require('../data/models/business');
 
 const businessErrors = require('../error_messages/businessErrors');
-const { validToken, businessAdmin } = require('../helpers/jwt_helper')
+const { validToken, businessEditRole, businessAdmin } = require('../helpers/jwt_helper')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -114,7 +114,7 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
 })
 
 // useUpdateBusinessMutation - updateBusiness - useBusinessApi
-router.put('/update/:business_id', [upload.single('business_avatar'), validToken, businessAdmin], async (req, res, next) => {
+router.put('/update/:business_id', [upload.single('business_avatar'), validToken, businessEditRole], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;
@@ -122,7 +122,7 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
         const { business_avatar } = await db.findBusinessById(business_id)
 
         // if there is an image to update resize, save and delete previous
-        if(req.file) {
+        if(req.file && req.business_role === '789') {
             // resize the image
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
 
@@ -135,8 +135,12 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
 
             business_update['business_avatar'] = image_key
         }
+
+        if(req.business_role === '456' && business_update['business_type']) {
+            delete business_update['business_type']
+        }
     
-        const updated_business = await db.updateBusiness(business_id, business_update)
+        const updated_business = await db.updateBusiness(business_id, business_update, req.business_role)
         
         res.status(201).json(updated_business)
         

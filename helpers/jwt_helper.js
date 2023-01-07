@@ -167,6 +167,7 @@ const roleRequestUser = async (req, res, next) => {
 // confirm user making change to business is business_admin
 const businessAdmin = async (req, res, next) => {
     try {
+        console.log(req.body)
         const user_id = req.user_decoded
         const { business_id } = req.params
         if(!user_id || !business_id) throw new Error('invalid_request')
@@ -184,6 +185,37 @@ const businessAdmin = async (req, res, next) => {
 
     } catch (error) {
         console.log(error)
+        next({
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type,
+        })
+    }
+}
+
+const businessEditRole = async (req, res, next) => {
+    try {
+        console.log(req.body)
+        const user_id = req.user_decoded
+        const { business_id } = req.params
+        if(!user_id || !business_id) throw new Error('invalid_request')
+
+        // get user role for business
+        const { role_type } = await db.findUserBusinessRole(business_id, user_id)
+
+        if(!role_type) throw new Error('invalid_user')
+
+        if(role_type === '456') {
+            req.business_role = role_type
+            next()
+        } else if(role_type === '789') {
+            req.business_role = role_type
+            next()
+        } else {
+            throw new Error('invalid_user')
+        }
+    }
+    catch (error) {
         next({
             status: tokenErrors[error.message]?.status,
             message: tokenErrors[error.message]?.message,
@@ -242,5 +274,6 @@ module.exports = {
     validateRoleManagement,
     roleRequestUser,
     businessAdmin,
+    businessEditRole,
     eventCreator,
 }

@@ -47,7 +47,7 @@ async function findUserRoles(user_id) {
         .orderBy('roles.role_type', 'desc')
 }
 
-// used in jwt_helper - inside validateRoleManagement & roleRequestUser
+// jwt_helper - inside validateRoleManagement & roleRequestUser
 async function findRoleById(request_id) {
     const role_request = await db('roles')
         .where({ 'roles.id': request_id })
