@@ -175,6 +175,7 @@ async function updateBusiness(business_id, changes, business_role) {
             
             // if changes.location_id is not there then none of the following steps should be needed
             if(changes?.location_id && business_role === '789') {
+                console.log('inside first changes')
                 // google api with address returning geocode information
                 const geoCode = await googleMapsClient.geocode(
                     {
@@ -193,21 +194,24 @@ async function updateBusiness(business_id, changes, business_role) {
                 }
 
                 if(changes.location_id === 'new_location') {
+                    console.log('new location')
                     location['venue_id'] = business_id
                     location['venue_name'] = business_name
                     await db('locations').transacting(trx).insert(location)
                 } else {
+                    console.log('update location')
                     // insert location information
                     await db('locations').transacting(trx).where({ id: changes.location_id }).update(location)
                 }
-
-                delete changes['street_address']
-                delete changes['city']
-                delete changes['state']
-                delete changes['zip']
-                delete changes['location_id']
             }
+
+            delete changes['street_address']
+            delete changes['city']
+            delete changes['state']
+            delete changes['zip']
+            delete changes['location_id']
             
+            console.log('skipped location stuff')
 
             if(Object.keys(changes).length > 0) {
                 await db('businesses').where({ id: business_id }).update(changes)
