@@ -17,7 +17,7 @@ router.post('/local', passport.authenticate('local', {
     const user = req.user
     const user_roles = await rolesDB.findUserRoles(user.id)
     const filter_inactive = user_roles.filter(role => role.active_role)
-    user.account_type = filter_inactive[0]?.role_type || '100'
+    user.account_type = filter_inactive[0]?.role_type || process.env.BASIC_ACCOUNT
     
     res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
     
@@ -51,7 +51,7 @@ router.get('/refresh', async (req, res) => {
             // filter out all inactive role request
             const filter_inactive = user_roles.filter(role => role.active_role)
             // get highest role type in all active only roles
-            user_found.account_type = filter_inactive[0]?.role_type || '100'
+            user_found.account_type = filter_inactive[0]?.role_type || process.env.BASIC_ACCOUNT
            
             res.json({ user: user_found, roles: user_roles })
         }

@@ -119,7 +119,7 @@ async function addBusiness(business, location) {
                 .insert({
                     user_id: added_business[0].business_admin,
                     business_id: added_business[0].id,
-                    role_type: 789,
+                    role_type: process.env.ADMIN_ACCOUNT,
                     // REMOVE AND UPDATE TO FALSE TO START
                     active_role: true,
                     approved_by: added_business[0].business_admin
@@ -174,7 +174,7 @@ async function updateBusiness(business_id, changes, business_role) {
             const { business_name } = await db('businesses').where({ id: business_id }).first()
             
             // if changes.location_id is not there then none of the following steps should be needed
-            if(changes?.location_id && business_role === '789') {
+            if(changes?.location_id && business_role === process.env.ADMIN_ACCOUNT) {
                 console.log('inside first changes')
                 // google api with address returning geocode information
                 const geoCode = await googleMapsClient.geocode(
@@ -269,7 +269,7 @@ async function toggleActiveBusiness(business_id) {
         await db('roles')
             .transacting(trx)
             .where({ business_id: business_id })
-            .whereIn('roles.role_type', [123, 456])
+            .whereIn('roles.role_type', [process.env.CREATOR_ACCOUNT, process.env.MANAGER_ACCOUNT])
             .whereNotNull('roles.approved_by')
             .update({ active_role: !business.active_business })
         

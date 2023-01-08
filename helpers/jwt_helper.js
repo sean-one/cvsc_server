@@ -206,10 +206,10 @@ const businessEditRole = async (req, res, next) => {
 
         if(!role_type) throw new Error('invalid_user')
 
-        if(role_type === '456') {
+        if (role_type === process.env.MANAGER_ACCOUNT) {
             req.business_role = role_type
             next()
-        } else if(role_type === '789') {
+        } else if (role_type === process.env.ADMIN_ACCOUNT) {
             req.business_role = role_type
             next()
         } else {

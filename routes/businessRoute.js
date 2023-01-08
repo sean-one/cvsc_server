@@ -122,7 +122,7 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
         const { business_avatar } = await db.findBusinessById(business_id)
 
         // if there is an image to update resize, save and delete previous
-        if(req.file && req.business_role === '789') {
+        if(req.file && req.business_role === process.env.ADMIN_ACCOUNT) {
             // resize the image
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
 
@@ -136,7 +136,7 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
             business_update['business_avatar'] = image_key
         }
 
-        if(req.business_role === '456' && business_update['business_type']) {
+        if(req.business_role === process.env.MANAGER_ACCOUNT && business_update['business_type']) {
             delete business_update['business_type']
         }
     

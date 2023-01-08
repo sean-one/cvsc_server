@@ -138,7 +138,7 @@ exports.seed = function(knex) {
         {
           id: '29bada5f-f362-4b25-8320-f01d580b6d27',
           business_name: 'hanks grow',
-          business_avatar: '0674300f4f301cbf90aa8e012e79ae53d2140cc7d03a3d6a5e6c89da303ce8ef',
+          business_avatar: 'c2744e150e26ac7df22f525dff127e632e168b9fdb10fb3a92de82605c7eaa28',
           business_description: 'Quisque ornare augue vel nibh blandit mollis. Praesent tellus turpis, luctus quis luctus at, eleifend condimentum leo. Fusce nulla magna, varius eget porta sit amet, vulputate porta turpis. Nulla commodo dolor elit, quis ultrices nisl feugiat at. Aenean venenatis cursus venenatis',
           business_type: 'brand',
           business_request_open: true,
@@ -151,7 +151,7 @@ exports.seed = function(knex) {
         {
           id: 'af87fc85-f800-4868-bf52-43996b16d4f0',
           business_name: 'brads lounge',
-          business_avatar: '0df4dceedcf3d75705264a47fcec040dc285c643f2ce66181bfcfc2f6ce82dc7',
+          business_avatar: 'c2744e150e26ac7df22f525dff127e632e168b9fdb10fb3a92de82605c7eaa28',
           business_description: 'Phasellus dolor ex, interdum a libero eleifend, maximus lobortis justo. Vivamus sed diam sem. Nam eleifend pharetra ultricies. In tristique nibh metus, vitae venenatis felis egestas eget. Donec arcu urna, volutpat quis euismod in, convallis quis sem. Integer fermentum nisi quis ante viverra, sit amet blandit turpis iaculis.',
           business_type: 'venue',
           business_request_open: true,

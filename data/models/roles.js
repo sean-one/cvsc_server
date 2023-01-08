@@ -72,7 +72,7 @@ async function findRolesPendingManagement(user_id) {
     let business_ids = []
     const management_roles = await db('roles')
         .where({ user_id: user_id, active_role: true })
-        .whereNotIn('roles.role_type', [100,123])
+        .whereNotIn('roles.role_type', [process.env.BASIC_ACCOUNT,process.env.CREATOR_ACCOUNT])
         .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [
@@ -195,7 +195,7 @@ async function approveRoleRequest(request_id, management_id) {
 async function upgradeCreatorRole(request_id, management_id) {
     await db('roles')
         .where({ id: request_id })
-        .update({ role_type: 456, approved_by: management_id})
+        .update({ role_type: process.env.MANAGER_ACCOUNT, approved_by: management_id})
     
     return await db('roles')
         .where({ 'roles.id': request_id })
@@ -218,7 +218,7 @@ async function upgradeCreatorRole(request_id, management_id) {
 async function downgradeManagerRole(role_id, admin_id) {
     await db('roles')
         .where({ id: role_id })
-        .update({ role_type: 123, approved_by: admin_id})
+        .update({ role_type: process.env.CREATOR_ACCOUNT, approved_by: admin_id})
     
     return await db('roles')
         .where({ 'roles.id': role_id })

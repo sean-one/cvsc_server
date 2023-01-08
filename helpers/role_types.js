@@ -1,9 +1,9 @@
 
 const role_types = {
-    '100': 'basic',
-    '123': 'creator',
-    '456': 'manager',
-    '789': 'admin'
+    [process.env.BASIC_ACCOUNT]: 'basic',
+    [process.env.CREATOR_ACCOUNT]: 'creator',
+    [process.env.MANAGER_ACCOUNT]: 'manager',
+    [process.env.ADMIN_ACCOUNT]: 'admin'
 }
 
 module.exports = {

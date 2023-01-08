@@ -60,7 +60,7 @@ async function findById(id) {
     if (account_type.length > 0) {
         user.account_type = account_type[0].role_type
     } else {
-        user.account_type = '100'
+        user.account_type = process.env.BASIC_ACCOUNT
     }
     
     return { user: user, roles: account_type }
