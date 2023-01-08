@@ -168,7 +168,6 @@ async function addBusiness(business, location) {
 
 // .put('/business/update/:business_id) - updates existing business
 async function updateBusiness(business_id, changes, business_role) {
-    console.log(typeof business_role)
     try {
         return await db.transaction(async trx => {
             const { business_name } = await db('businesses').where({ id: business_id }).first()
@@ -211,8 +210,6 @@ async function updateBusiness(business_id, changes, business_role) {
             delete changes['zip']
             delete changes['location_id']
             
-            console.log('skipped location stuff')
-
             if(Object.keys(changes).length > 0) {
                 await db('businesses').where({ id: business_id }).update(changes)
             }

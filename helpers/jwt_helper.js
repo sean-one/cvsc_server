@@ -196,7 +196,6 @@ const businessAdmin = async (req, res, next) => {
 // checks for business management role and adds role_type to req object
 const businessEditRole = async (req, res, next) => {
     try {
-        console.log(req.body)
         const user_id = req.user_decoded
         const { business_id } = req.params
         if(!user_id || !business_id) throw new Error('invalid_request')
