@@ -193,6 +193,7 @@ const businessAdmin = async (req, res, next) => {
     }
 }
 
+// checks for business management role and adds role_type to req object
 const businessEditRole = async (req, res, next) => {
     try {
         console.log(req.body)
