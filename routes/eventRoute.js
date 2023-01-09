@@ -22,7 +22,7 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
-//! updated endpoint
+// useEventsApi - createEvent
 router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation], async (req, res, next) => {
     try {
         const new_event = req.body
@@ -31,17 +31,18 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation
         new_event.created_by = req.user_decoded
         
         if(!req.file) throw new Error('missing_image')
-        const { event_id } = await db.createEvent(new_event)
-
+        
         // resize the image
         req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
         
         // upload the image to s3
         const image_key = await uploadImageS3Url(req.file)
-
+        
         if(!image_key) throw new Error('upload_error')
-
-        const event = await db.updateImage(event_id, image_key)
+        new_event['eventmedia'] = image_key
+        
+        const event = await db.createEvent(new_event)
+        // const event = await db.updateImage(event_id, image_key)
 
         res.status(201).json(event)
 

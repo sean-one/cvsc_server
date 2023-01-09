@@ -75,8 +75,7 @@ async function findById(eventId) {
 }
 
 
-
-//! eventRoute - .post('/')
+// eventRoute - .post('/')
 async function createEvent(event) {
     return await db('events').insert(event, ['id'])
         .then(eventId => {
