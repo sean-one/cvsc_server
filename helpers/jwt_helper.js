@@ -167,7 +167,6 @@ const roleRequestUser = async (req, res, next) => {
 // confirm user making change to business is business_admin
 const businessAdmin = async (req, res, next) => {
     try {
-        console.log(req.body)
         const user_id = req.user_decoded
         const { business_id } = req.params
         if(!user_id || !business_id) throw new Error('invalid_request')
