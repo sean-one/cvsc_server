@@ -66,6 +66,7 @@ passport.use(
         passReqToCallback: true
     },
         async (req, username, password, done) => {
+            console.log('using local strategy')
             try {
                 const requested_from = req.headers.referer.substring(req.headers.referer.lastIndexOf('/') + 1, req.headers.referer.length)
                 
