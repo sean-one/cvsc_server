@@ -22,7 +22,7 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
-// useEventsApi - createEvent
+// useEventsApi - createEvent - useCreateEventMutation
 router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation], async (req, res, next) => {
     try {
         const new_event = req.body
@@ -61,23 +61,21 @@ router.get('/:event_id', async (req, res, next) => {
         const { event_id } = req.params
         const selected_event = await db.findById(event_id)
 
-        console.log(selected_event)
-
         res.status(200).json(selected_event)
     } catch (error) {
         console.log(error)
     }
 });
 
-//! updated endpoint
+// useEventsApi - updateEvent - useUpdateEventMutation
 router.post('/update/:event_id', [upload.single('eventmedia'), validToken, eventCreator], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
         const event_updates = req.body;
-        const { eventmedia } = await db.findById(event_id)
         
         if(req.file) {
+            const { eventmedia } = await db.findById(event_id)
             // resize the image
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
 
@@ -121,12 +119,12 @@ router.put('/remove_business/:event_id', async (req, res, next) => {
     }
 })
 
-//! updated endpoint
+// useEventsApi - removeEvent - useRemoveEventMutation
 router.delete('/remove/:event_id', [validToken, eventCreator], async (req, res) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
-        const { eventmedia } = await db.findById(event_id)
+        const { eventmedia, eventname } = await db.findById(event_id)
 
         const deletedEvent = await db.removeEvent(event_id)
 
@@ -134,7 +132,7 @@ router.delete('/remove/:event_id', [validToken, eventCreator], async (req, res) 
             // check for image hosted on s3 and delete if found
             if(!check_link.test(eventmedia)) await deleteImageS3(eventmedia)
 
-            res.status(204).json();
+            res.status(204).json(eventname);
         } else {
             console.log(deletedEvent)
             res.status(400).json({ message: 'invalid credentials' })

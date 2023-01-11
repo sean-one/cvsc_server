@@ -181,6 +181,7 @@ router.get('/user/:user_id', [validToken], async (req, res, next) => {
     }
 })
 
+//! useUserBusinessRoleQuery - getUserBusinessRole - useRoleApi
 router.get('/user_role/:business_id', [validToken], async (req, res, next) => {
     try {
         const { business_id } = req.params

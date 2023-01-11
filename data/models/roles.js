@@ -72,7 +72,7 @@ async function findRolesPendingManagement(user_id) {
     let business_ids = []
     const management_roles = await db('roles')
         .where({ user_id: user_id, active_role: true })
-        .whereNotIn('roles.role_type', [process.env.BASIC_ACCOUNT,process.env.CREATOR_ACCOUNT])
+        .whereNotIn('roles.role_type', [process.env.BASIC_ACCOUNT, process.env.CREATOR_ACCOUNT])
         .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [
@@ -89,7 +89,7 @@ async function findRolesPendingManagement(user_id) {
         }
     })
     
-    console.log(business_ids)
+
     return await db('roles')
         // .where('roles.active_role', false)
         .whereIn('roles.business_id', business_ids)
