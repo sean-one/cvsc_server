@@ -104,12 +104,13 @@ router.post('/update/:event_id', [upload.single('eventmedia'), validToken, event
     }
 });
 
+// useEventsApi - removeBusiness - useRemoveEventBusinessMutation
 router.put('/remove_business/:event_id', async (req, res, next) => {
     try {
         const { event_id } = req.params
         const business_info = req.body
 
-        const removed = await db.removeBusiness(event_id, business_info.business_type)
+        const removed = await db.removeEventBusiness(event_id, business_info.business_type)
 
         console.log('business removed')
         console.log(removed)
@@ -143,18 +144,10 @@ router.delete('/remove/:event_id', [validToken, eventCreator], async (req, res) 
     }
 })
 
+//! useEventsApi - getAllUserEvents - useUserEventsQuery
 router.get('/user/:user_id', (req, res) => {
     const { user_id } = req.params;
-    db.findByCreator(user_id)
-        .then(events => {
-            res.status(200).json(events);
-        })
-        .catch(err => res.status(500).json(err));
-})
-
-router.get('/business/:business_id', (req, res) => {
-    const { business_id } = req.params;
-    db.findByBusiness(business_id)
+    db.findUserEvents(user_id)
         .then(events => {
             res.status(200).json(events);
         })
@@ -167,18 +160,6 @@ router.get('/inactive/user', (req, res) => {
             res.status(200).json(events);
         })
         .catch(err => res.status(500).json(err));
-})
-
-router.put('/business/remove/:event_id', (req, res) => {
-    const { event_id } = req.params
-    db.removeBusiness(event_id, req.body.business_type)
-        .then(event => {
-            res.status(201).json(event)
-        })
-        .catch(err => {
-            console.log(err)
-            res.status(500).json(err)
-        });
 })
 
 
