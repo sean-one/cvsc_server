@@ -231,7 +231,6 @@ async function removeEventBusiness(event_id, business_type) {
             .where({ id: event_id })
             .update({
                 venue_id: null,
-                venue_name: null,
                 active_event: false
             })
 
@@ -240,7 +239,6 @@ async function removeEventBusiness(event_id, business_type) {
             .where({ id: event_id })
             .update({
                 brand_id: null,
-                brand_name: null,
                 active_event: false
             })
 

@@ -5,7 +5,7 @@ const sharp = require('sharp');
 const { deleteImageS3, uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
-const { validToken, validateEventCreation, eventCreator } = require('../helpers/jwt_helper');
+const { validToken, validateEventCreation, eventCreator, eventManager } = require('../helpers/jwt_helper');
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -105,18 +105,22 @@ router.post('/update/:event_id', [upload.single('eventmedia'), validToken, event
 });
 
 // useEventsApi - removeBusiness - useRemoveEventBusinessMutation
-router.put('/remove_business/:event_id', async (req, res, next) => {
+router.put('/remove_business/:event_id', [ validToken, eventManager ], async (req, res, next) => {
     try {
         const { event_id } = req.params
-        const business_info = req.body
+        const { event_updates } = req.body
 
-        const removed = await db.removeEventBusiness(event_id, business_info.business_type)
+        await db.removeEventBusiness(event_id, event_updates.business_type)
+        
+        res.status(202).json({ success: true })
 
-        console.log('business removed')
-        console.log(removed)
-        res.status(201).json(removed)
     } catch (error) {
         console.log(error)
+        next({
+            status: eventErrors[error.message]?.status,
+            type: eventErrors[error.message]?.type,
+            message: eventErrors[error.message]?.message,
+        })
     }
 })
 

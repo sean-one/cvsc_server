@@ -265,6 +265,33 @@ const eventCreator = async (req, res, next) => {
     }
 }
 
+const eventManager = async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+        const { event_updates } = req.body
+
+        if (!user_id || !event_updates.business_id) throw new Error('invalid_request')
+
+        const user_role = await db.findUserBusinessRole(event_updates.business_id, user_id)
+        if(!user_role) throw new Error('invalid_request')
+
+        if(user_role.role_type >= process.env.MANAGER_ACCOUNT) {
+            next()
+        } else {
+            throw new Error('invalid_user')
+        }
+
+    } catch (error) {
+        console.log(error)
+        next({
+            status: tokenErrors[error.message]?.status,
+            type: tokenErrors[error.message]?.type,
+            message: tokenErrors[error.message]?.message,
+        })
+    }
+
+}
+
 module.exports = {
     createAccessToken,
     createRefreshToken,
@@ -275,4 +302,5 @@ module.exports = {
     businessAdmin,
     businessEditRole,
     eventCreator,
+    eventManager,
 }
