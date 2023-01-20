@@ -44,7 +44,6 @@ const generateUploadURL = async () => {
 }
 
 const uploadImageS3Url = async (imageFile) => {
-    console.log('inside image upload')
     const rawBytes = await randomBytes(32)
     const imageName = `${rawBytes.toString('hex')}`
 
@@ -59,7 +58,6 @@ const uploadImageS3Url = async (imageFile) => {
 
     await s3.send(command)
 
-    console.log(imageName)
     return imageName;
 }
 
