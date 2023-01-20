@@ -74,6 +74,7 @@ router.post('/update/:event_id', [upload.single('eventmedia'), validToken, event
         const { event_id } = req.params
         const event_updates = req.body;
         
+        console.log(event_updates)
         if(req.file) {
             const { eventmedia } = await db.findById(event_id)
             // resize the image
