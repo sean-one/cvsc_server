@@ -1,27 +1,17 @@
 const express = require('express');
+const multer = require('multer');
+const sharp = require('sharp')
 
 const db = require('../data/models/user')
+const userErrors = require('../error_messages/userErrors');
+const { validToken } = require('../helpers/jwt_helper')
+const { uploadImageS3Url } = require('../s3');
+
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 
 const router = express.Router();
 
-
-// not use in the app yet
-router.get('/', (req, res) => {
-    db.find()
-        .then(users => {
-            res.status(200).json(users);
-        })
-        .catch(err => res.status(500).json(err));
-});
-
-router.get('/:id', async ( req, res) => {
-    const { id } = req.params
-    await db.findById(id)
-        .then(response => {
-            res.status(200).json(response)
-        })
-        .catch(err => console.log(err))
-})
 
 router.get('/get_profile', (req, res) => {
     console.log(Object.keys(req))
@@ -31,24 +21,44 @@ router.get('/get_profile', (req, res) => {
     return res.status(200).json(req.user);
 })
 
-router.post('/updateAvatar', async (req, res) => {
+router.post('/update_user', [ upload.single('avatar'), validToken ], async (req, res, next) => {
     try {
-        const avatarLink = req.body
-        const { user_id } = req.decodedToken
-        await db.updateAvatar(user_id, avatarLink)
-            .then(response => {
-                res.status(200).json(response)
-            })
-            .catch(err => console.log(err))
+        const user_id = req.user_decoded
+        const user_changes = req.body
+
+        if(!user_id) throw new Error('invalid_user')
+
+        if(req.file) {
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+            const image_key = await uploadImageS3Url(req.file)
+
+            if(!image_key) throw new Error('upload_error')
+            user_changes['avatar'] = image_key
+        }
+
+        const user_details = await db.updateUser(user_id, user_changes)
+
+        console.log(user_details)
+        
+        res.status(201).json(user_details)
+        
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
+        
     }
+
 })
 
-router.delete('/remove/:id', async (req, res, next) => {
+//!
+router.delete('/remove/:user_id', async (req, res, next) => {
     try {
-        const id = req.params
-        const deletedUser = await db.remove(id)
+        const user_id = req.params
+        const deletedUser = await db.removeUser(id)
         if (deletedUser >= 1) {
             res.status(204).json();
         } else {

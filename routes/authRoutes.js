@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken')
 const router = express.Router();
 
 const { createAccessToken } = require('../helpers/jwt_helper');
-const { role_types } = require('../helpers/role_types');
 const rolesDB = require('../data/models/roles');
 const userDB = require('../data/models/user');
 
@@ -66,34 +65,6 @@ router.get('/google/redirect', passport.authenticate("google", {
     failureRedirect: '/auth/login/failed',
     session: true
 }))
-
-// router.get('/user_profile', async (req, res) => {
-//     if (req.isAuthenticated()) {
-//         console.log('singed in')
-//         console.log(`user: ${req.user.id}`)
-//     } else {
-//         console.log('not signed in')
-//         console.log(`user: ${req.user.id}`)
-//     }
-//     try {
-//         const profile = req.user
-//         if(profile === undefined) throw new Error('no user')
-
-//         const user_roles = await rolesDB.findUserAccountType(req.user.id)
-        
-//         if (user_roles.length > 0) {
-//             profile.roles = user_roles
-//             profile.account_type = role_types[user_roles[0].role_type]
-//         } else {
-//             profile.roles = []
-//             profile.account_type = 'basic'
-//         }
-        
-//         res.status(200).json(profile)
-//     } catch(error) {
-//         console.log(error)
-//     }
-// })
 
 router.get('/login/failed', (req, res) => {
     res.status(401).redirect(`${process.env.FRONTEND_CLIENT}/login`)

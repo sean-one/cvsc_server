@@ -22,7 +22,7 @@ passport.serializeUser(async (user, done) => {
 })
 
 passport.deserializeUser(async (id, done) => {
-    const user = await dbUser.findById(id)
+    const user = await dbUser.findUserById(id)
 
     done(null, user)
 })
