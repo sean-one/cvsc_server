@@ -17,7 +17,6 @@ exports.up = function (knex) {
         users
             .string('avatar')
             .defaultTo(null)
-            // .defaultTo("https://coachellavalleysmokers-images.s3.amazonaws.com/default_user_icon.png")
 
         users
             .string('email')

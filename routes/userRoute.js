@@ -4,8 +4,9 @@ const sharp = require('sharp')
 
 const db = require('../data/models/user')
 const userErrors = require('../error_messages/userErrors');
+const { hashPassword } = require('../helpers/bcrypt_helper');
 const { validToken } = require('../helpers/jwt_helper')
-const { uploadImageS3Url } = require('../s3');
+const { uploadImageS3Url, deleteImageS3 } = require('../s3');
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -23,23 +24,38 @@ router.get('/get_profile', (req, res) => {
 
 router.post('/update_user', [ upload.single('avatar'), validToken ], async (req, res, next) => {
     try {
+        const check_link = /^(http|https)/g
         const user_id = req.user_decoded
         const user_changes = req.body
-
+        const { user } = await db.findUserById(user_id)
+        
         if(!user_id) throw new Error('invalid_user')
+
+        if(user_changes?.password) {
+            const hash = await hashPassword(user_changes.password)
+            user_changes['password'] = hash
+        }
 
         if(req.file) {
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
             const image_key = await uploadImageS3Url(req.file)
 
             if(!image_key) throw new Error('upload_error')
+
+            console.log(user.avatar)
+            if(!check_link.test(user.avatar) && user.avatar !== null) {
+                await deleteImageS3(user.avatar)
+            }
+
             user_changes['avatar'] = image_key
+        } else {
+            delete user_changes['avatar']
         }
+
+        if(Object.keys(user_changes).length === 0) throw new Error('empty_object')
 
         const user_details = await db.updateUser(user_id, user_changes)
 
-        console.log(user_details)
-        
         res.status(201).json(user_details)
         
     } catch (error) {

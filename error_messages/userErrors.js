@@ -8,6 +8,10 @@ const userErrors = {
         message: 'image upload error',
         type: 'avatar'
     },
+    empty_object: {
+        status: 400,
+        message: 'no changes found',
+    },
 }
 
 module.exports = userErrors;

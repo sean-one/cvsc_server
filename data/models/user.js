@@ -52,7 +52,7 @@ async function findByRefresh(token) {
         .first()
 }
 
-//! passport-config - deserialize user --- updateUser
+//! passport-config - deserialize user --- userRoute - '.post(/update_user)'
 async function findUserById(id) {
     const user = await db('users').where({ 'users.id': id }).select(['users.id', 'users.username', 'users.avatar', 'users.email',]).first()
     const account_type = await db('roles').where({ 'roles.user_id': id, 'roles.active_role': true }).select(['roles.business_id', 'roles.role_type']).orderBy('role_type', 'desc')
