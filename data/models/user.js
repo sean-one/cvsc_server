@@ -1,4 +1,5 @@
 const db = require('../dbConfig');
+const { uploadImageS3Url, deleteImageS3 } = require('../../s3');
 
 module.exports = {
     createUser,
@@ -103,8 +104,48 @@ async function updateUser(user_id, updates) {
     return findUserById(user_id)
 }
 
-//! userRoute - '/users/remove/:user_id'
-function removeUser(user_id) {
-    // this needs to remove the contact at the contact_id too
-    return db('users').where({ id: user_id }).del();
+// userRoute - '/users/remove/:user_id'
+async function removeUser(user_id) {
+    try {
+        const check_link = /^(http|https)/g
+        let keys_to_delete = []
+        
+        // collect images from businesses created
+        const { business_avatars } = await db('businesses')
+            .where({ 'businesses.business_admin': user_id })
+            .select([ db.raw('ARRAY_AGG(businesses.business_avatar) as business_avatars') ])
+            .first()
+        if(business_avatars !== null) { keys_to_delete = [ ...keys_to_delete, ...business_avatars ] }
+        
+        // collect images from created events
+        const { eventmedia_keys } = await db('events')
+            .where({ 'events.created_by': user_id })
+            .select([ db.raw('ARRAY_AGG(events.eventmedia) as eventmedia_keys') ])
+            .first()
+        if(eventmedia_keys !== null) { keys_to_delete = [ ...keys_to_delete, ...eventmedia_keys ] }
+
+        // collect image from user account
+        const { avatar } = await db('users')
+            .where({ 'users.id': user_id })
+            .select([ 'users.avatar' ])
+            .first()
+        if(avatar !== undefined) { keys_to_delete = [ ...keys_to_delete, avatar ] }
+        
+        // deletes user - cascades event creator, business admin, business roles
+        const deleted_user = await db('users').where({ id: user_id }).del();
+        
+        if(keys_to_delete.length !== 0) {
+            keys_to_delete.forEach(async image_key => {
+                if(!check_link.test(image_key) && image_key !== null) {
+                    await deleteImageS3(image_key)
+                }
+            })
+        }
+
+        return deleted_user
+
+    } catch (error) {
+       console.log(error)
+       throw error
+    }
 }

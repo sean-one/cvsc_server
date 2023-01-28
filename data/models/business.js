@@ -4,6 +4,7 @@ const googleMapsClient = require('../../helpers/geocoder');
 module.exports = {
     find,
     findBusinessById,
+    getBusinessAvatarsByAdmin,
     addBusiness,
     updateBusiness,
     toggleActiveBusiness,
@@ -73,6 +74,16 @@ function findBusinessById(business_id) {
             ]
         )
         .first();
+}
+
+// .delete('/users/remove_user') - an array of business_avatar keys from business to be deleted per admin user being deleted
+async function getBusinessAvatarsByAdmin(user_admin) {
+    return await db('businesses')
+        .where({ 'businesses.business_admin': user_admin })
+        .select([
+            db.raw('ARRAY_AGG(businesses.business_avatar) as business_avatars')
+            // 'businesses.business_avatar'
+        ]) 
 }
 
 // .post('/business/create) - creates a new business

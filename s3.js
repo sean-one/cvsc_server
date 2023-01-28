@@ -62,7 +62,7 @@ const uploadImageS3Url = async (imageFile) => {
 }
 
 const deleteImageS3 = async(image_key) => {
-    console.log('deleting image from s3')
+    // console.log('deleting image from s3')
     try {
         const imageParams = {
             Bucket: bucketName,
@@ -72,9 +72,10 @@ const deleteImageS3 = async(image_key) => {
         const command = new DeleteObjectCommand(imageParams)
     
         // if successful returns $metadata.httpStatusCode of 204
-        const deleted = await s3.send(command)
+        // const deleted = await s3.send(command)
+        await s3.send(command)
 
-        console.log(deleted)
+        // console.log(deleted)
         return
 
     } catch (error) {
