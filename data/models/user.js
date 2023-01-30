@@ -1,5 +1,5 @@
 const db = require('../dbConfig');
-const { uploadImageS3Url, deleteImageS3 } = require('../../s3');
+const { deleteImageS3 } = require('../../s3');
 
 module.exports = {
     createUser,

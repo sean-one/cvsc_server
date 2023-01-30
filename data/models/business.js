@@ -1,5 +1,6 @@
 const db = require('../dbConfig');
 const googleMapsClient = require('../../helpers/geocoder');
+const { deleteImageS3 } = require('../../s3');
 
 module.exports = {
     find,
@@ -8,7 +9,7 @@ module.exports = {
     updateBusiness,
     toggleActiveBusiness,
     toggleBusinessRequest,
-    remove
+    removeBusiness
 };
 
 function find() {
@@ -353,10 +354,23 @@ async function toggleBusinessRequest(business_id) {
             .first()
 }
 
-async function remove(business_id) {
+// .delete('/business/remove/:business_id') - removes business account, roles, removes from events and marks inactive
+async function removeBusiness(business_id) {
     try {
+        const { business_avatar } = await db('businesses')
+            .where({ id: business_id })
+            .select([ 'businesses.business_avatar' ])
+            .first()
+
+        console.log(business_avatar)
         return await db.transaction(async trx => {
             
+            await db('events')
+                .transacting(trx)
+                .where({ venue_id: business_id })
+                .orWhere({ brand_id: business_id })
+                .update({ active_event: false })
+
             // delete location for business to be deleted
             await db('locations')
                 .transacting(trx)
@@ -369,20 +383,12 @@ async function remove(business_id) {
                 .where({ business_id: business_id})
                 .del()
             
-            // delete all upcoming events with business
-            await db('events')
-                .transacting(trx)
-                .where({ brand_id: business_id })
-                .orWhere({ venue_id: business_id })
-                .del()
-            
             // delete from the businesses table
             return await db('businesses')
                 .transacting(trx)
                 .where({ id: business_id })
                 .del()
 
-            //! need to delete business avatar from s3 bucket
         })
     } catch (error) {
         throw error
