@@ -138,6 +138,7 @@ exports.seed = function(knex) {
           active_role: true,
           approved_by: '2c906eeb-c7f7-4534-ae06-20f601b42224'
         },
+        // hank - hanks grow
         {
           id: '0a1175a0-84f9-496c-8d98-f1204398f8e8',
           user_id: '7dfbf74b-418e-4ee2-a2d2-425a11b62337',
@@ -146,6 +147,7 @@ exports.seed = function(knex) {
           active_role: true,
           approved_by: '7dfbf74b-418e-4ee2-a2d2-425a11b62337'
         },
+        // brad - brads lounge
         {
           id: 'fb202aaf-7ee5-44de-8e30-3670019a58a0',
           user_id: 'c0154ccc-3686-45d2-a598-5d375f0a1a25',
@@ -154,6 +156,7 @@ exports.seed = function(knex) {
           active_role: true,
           approved_by: 'c0154ccc-3686-45d2-a598-5d375f0a1a25'
         },
+        // brad - hanks grow
         {
           id: '5e7acbac-c24d-421c-9d61-f0736642de64',
           user_id: 'c0154ccc-3686-45d2-a598-5d375f0a1a25',
@@ -162,6 +165,7 @@ exports.seed = function(knex) {
           active_role: false,
           approved_by: null
         },
+        // janet - hanks grow
         {
           id: '0ea408d3-88cf-4c4d-8689-61ac21ae6383',
           user_id: '218e312c-e67c-497e-9c3a-f69abf28f2bc',
@@ -170,6 +174,7 @@ exports.seed = function(knex) {
           active_role: true,
           approved_by: '7dfbf74b-418e-4ee2-a2d2-425a11b62337'
         },
+        // seanone - hanks grow
         {
           id: '3bf6f6fd-7a26-4539-b7ec-afac810b0f72',
           user_id: '2c906eeb-c7f7-4534-ae06-20f601b42224',
@@ -177,7 +182,17 @@ exports.seed = function(knex) {
           role_type: process.env.MANAGER_ACCOUNT,
           active_role: true,
           approved_by: '7dfbf74b-418e-4ee2-a2d2-425a11b62337'
-        }
+        },
+        // seanone - brads lounge
+        {
+          id: 'dcc8a940-9a14-4b68-88e7-05de3bbdecbb',
+          user_id: '2c906eeb-c7f7-4534-ae06-20f601b42224',
+          business_id: 'af87fc85-f800-4868-bf52-43996b16d4f0',
+          role_type: process.env.CREATOR_ACCOUNT,
+          active_role: true,
+          approved_by: 'c0154ccc-3686-45d2-a598-5d375f0a1a25'
+        },
+        
         ]);
     });
 };

@@ -15,14 +15,6 @@ const upload = multer({ storage: storage })
 const router = express.Router();
 
 
-router.get('/get_profile', (req, res) => {
-    console.log(Object.keys(req))
-    console.log(req.session)
-    console.log(`user inside /users/get_profile: ${req.user}`)
-    if (req.user === undefined) { return res.status(400).json() }
-    return res.status(200).json(req.user);
-})
-
 // user.account - update_user
 router.post('/update_user', [ upload.single('avatar'), validToken ], async (req, res, next) => {
     try {

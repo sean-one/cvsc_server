@@ -172,6 +172,18 @@ exports.seed = function(knex) {
           details: 'Non non sint reprehenderit mollit. Cillum et elit non labore do aute nisi occaecat mollit officia ipsum eiusmod pariatur. Laborum sint tempor labore elit quis irure aliquip enim voluptate.',
           brand_id: '8faeb07f-7d0d-43fe-bc9f-64e55e4c91ac',
           created_by: '218e312c-e67c-497e-9c3a-f69abf28f2bc',
+        },
+        {
+          id: '9a1fbcbe-9a0c-4406-9f80-d9108f4d3a54',
+          eventname: 'stiiizy at brads lounge',
+          eventdate: '01/30/23',
+          eventstart: 2100,
+          eventend: 2300,
+          eventmedia: 'https://picsum.photos/id/269/500',
+          venue_id: 'af87fc85-f800-4868-bf52-43996b16d4f0',
+          details: 'Non non sint reprehenderit mollit. Cillum et elit non labore do aute nisi occaecat mollit officia ipsum eiusmod pariatur. Laborum sint tempor labore elit quis irure aliquip enim voluptate.',
+          brand_id: 'b09f358c-6926-47bb-b8fc-20788b92ae16',
+          created_by: '2c906eeb-c7f7-4534-ae06-20f601b42224',
         }
       ]);
     });

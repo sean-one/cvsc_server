@@ -109,13 +109,18 @@ async function removeUser(user_id) {
     try {
         const check_link = /^(http|https)/g
         let keys_to_delete = []
+        let admin_businesses = []
         
         // collect images from businesses created
-        const { business_avatars } = await db('businesses')
+        const { business_ids, business_avatars } = await db('businesses')
             .where({ 'businesses.business_admin': user_id })
-            .select([ db.raw('ARRAY_AGG(businesses.business_avatar) as business_avatars') ])
+            .select([
+                db.raw('ARRAY_AGG(businesses.id) as business_ids'),
+                db.raw('ARRAY_AGG(businesses.business_avatar) as business_avatars')
+            ])
             .first()
         if(business_avatars !== null) { keys_to_delete = [ ...keys_to_delete, ...business_avatars ] }
+        if(business_ids !== null) { admin_businesses = [ ...business_ids ] }
         
         // collect images from created events
         const { eventmedia_keys } = await db('events')
@@ -131,9 +136,20 @@ async function removeUser(user_id) {
             .first()
         if(avatar !== undefined) { keys_to_delete = [ ...keys_to_delete, avatar ] }
         
+        // mark businesses with business ids as inactive
+        if(admin_businesses.length !== 0) {
+            admin_businesses.forEach(async business_id => {
+                await db('events')
+                    .where({ venue_id: business_id })
+                    .orWhere({ brand_id: business_id })
+                    .update({ active_event: false })
+            })
+        }
+
         // deletes user - cascades event creator, business admin, business roles
         const deleted_user = await db('users').where({ id: user_id }).del();
         
+        // remove all images for user created business, created events & profile image
         if(keys_to_delete.length !== 0) {
             keys_to_delete.forEach(async image_key => {
                 if(!check_link.test(image_key) && image_key !== null) {

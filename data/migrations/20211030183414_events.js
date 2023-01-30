@@ -30,8 +30,7 @@ exports.up = async function (knex) {
             .unsigned()
             .references('id')
             .inTable('businesses')
-            // .notNullable()
-            .onDelete('cascade')
+            .onDelete('set null')
 
         events.text('details', 'longtext')
 
@@ -40,6 +39,7 @@ exports.up = async function (knex) {
             .unsigned()
             .references('id')
             .inTable('businesses')
+            .onDelete('set null')
 
         events
             .uuid('created_by')
