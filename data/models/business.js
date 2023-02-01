@@ -357,13 +357,13 @@ async function toggleBusinessRequest(business_id) {
 // .delete('/business/remove/:business_id') - removes business account, roles, removes from events and marks inactive
 async function removeBusiness(business_id) {
     try {
+        const check_link = /^(http|https)/g
         const { business_avatar } = await db('businesses')
             .where({ id: business_id })
             .select([ 'businesses.business_avatar' ])
             .first()
 
-        console.log(business_avatar)
-        return await db.transaction(async trx => {
+        const deleted_business = await db.transaction(async trx => {
             
             await db('events')
                 .transacting(trx)
@@ -390,6 +390,15 @@ async function removeBusiness(business_id) {
                 .del()
 
         })
+
+        if(deleted_business >= 1) {
+            if(!check_link.test(business_avatar) && business_avatar !== null) {
+                await deleteImageS3(business_avatar)
+            }
+        }
+
+        return deleted_business
+
     } catch (error) {
         throw error
     }
