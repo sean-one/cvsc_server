@@ -23,6 +23,9 @@ router.post('/update_user', [ upload.single('avatar'), validToken ], async (req,
         const user_changes = req.body
         const { user } = await db.findUserById(user_id)
         
+        console.log('req.file')
+        console.log(req.file)
+        
         if(!user_id) throw new Error('invalid_user')
 
         if(user_changes?.password) {
