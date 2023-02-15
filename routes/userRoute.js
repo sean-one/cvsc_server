@@ -25,6 +25,7 @@ router.post('/update_user', [ upload.single('avatar'), validToken ], async (req,
         
         console.log('req.file')
         console.log(req.file)
+        console.log(req.body)
         
         if(!user_id) throw new Error('invalid_user')
 
