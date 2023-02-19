@@ -21,7 +21,6 @@ router.post('/local', passport.authenticate('local', {
     res.cookie('jwt', user.refreshToken)
     // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
     
-    console.log(user.refreshToken)
     delete user['refreshToken']
 
     res.status(200).json({ user: user, roles: user_roles })
