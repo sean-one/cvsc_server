@@ -21,7 +21,8 @@ const tokenErrors = {
     },
     invalid_user: {
         status: 400,
-        message: 'invalid user rights'
+        message: 'invalid user rights',
+        type: 'role_rights'
     },
     // inside eventCreator when eventDB.findById fired - error
     TypeError: {
