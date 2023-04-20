@@ -67,6 +67,7 @@ passport.use(
     },
         async (req, username, password, done) => {
             try {
+                // check if request is from 'register' or 'login' page
                 const requested_from = req.headers.referer.substring(req.headers.referer.lastIndexOf('/') + 1, req.headers.referer.length)
                 
                 if (requested_from === 'login') {
@@ -94,7 +95,7 @@ passport.use(
                     const hash = await hashPassword(password)
                     
                     // create new user object to inser
-                    const new_user = { username: username, password: hash }
+                    const new_user = { username: username, password: hash, email: req.body.email }
 
                     // insert new user
                     const created_user = await dbUser.createUser(new_user)
