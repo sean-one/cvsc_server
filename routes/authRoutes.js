@@ -1,12 +1,71 @@
 const express = require('express');
+const multer = require('multer');
+const sharp = require('sharp');
 const passport = require('passport');
 const jwt = require('jsonwebtoken')
 
 const router = express.Router();
 
-const { createAccessToken } = require('../helpers/jwt_helper');
+const { createAccessToken, createRefreshToken } = require('../helpers/jwt_helper');
+const { uploadImageS3Url } = require('../s3');
+const { hashPassword } = require('../helpers/bcrypt_helper');
 const rolesDB = require('../data/models/roles');
 const userDB = require('../data/models/user');
+
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
+
+router.post('/register', upload.single('avatar'), async (req, res, next) => {
+    console.log('inside /register endpoint')
+    try {
+        // make sure all required fields are present
+        if(!req.body.username || !req.body.password || !req.body.email) {
+            throw new Error('incomplete registration')
+        }
+    
+        const new_user = req.body
+    
+        // check for attached image, upload to s3 bucket or delete the field so that db will add default
+        if(req.file) {
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+    
+            const avatar_key = await uploadImageS3Url(req.file)
+    
+            new_user['avatar'] = avatar_key
+    
+        } else { delete new_user['avatar'] }
+    
+        const hash = await hashPassword(new_user.password)
+    
+        new_user.password = hash
+    
+        const created_user = await userDB.createUser(new_user)
+
+        req.login(new_user, { session: false }, async (error) => {
+            if(error) {
+                return next(error);
+            }
+
+            
+            const user = created_user[0]
+            
+            const accessToken = createAccessToken(user.id)
+            user.accessToken = accessToken
+
+            const refreshToken = createRefreshToken(user.id)
+            await userDB.addRefreshToken(user.id, refreshToken)
+
+            user.account_type = process.env.BASIC_ACCOUNT
+
+            res.cookie('jwt', refreshToken)
+
+            res.status(200).json({ user: user, roles: [] })
+        })
+
+    } catch (error) {
+        console.log(error)
+    }
+})
 
 router.post('/local', passport.authenticate('local', {
     failureRedirect: '/auth/login/failed',

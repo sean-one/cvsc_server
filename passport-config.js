@@ -66,46 +66,29 @@ passport.use(
         passReqToCallback: true
     },
         async (req, username, password, done) => {
+            console.log(`username: ${username}`)
+            console.log(`password: ${password}`)
             try {
-                // check if request is from 'register' or 'login' page
-                const requested_from = req.headers.referer.substring(req.headers.referer.lastIndexOf('/') + 1, req.headers.referer.length)
+                if(!username || !password) { throw new Error('incomplete_input') }
                 
-                if (requested_from === 'login') {
-                    if(!username || !password) { throw new Error('incomplete_input') }
-                    
-                    // get user from database
-                    const check_user = await dbUser.findByUsername(username)
-                    
-                    // if no user is found then return error
-                    if (check_user === undefined) {
-                        throw new Error('invalid_credentials')
-                    }
-
-                    // if a user is found, verify the user passowrd
-                    const password_verify = await comparePassword(password, check_user.password)
-                    if (!password_verify) { throw new Error('invalid_credentials') }
-
-                    // remove encrypted password from retur
-                    delete check_user['password']
-                    
-                    done(null, check_user)
-                } else if (requested_from === 'register') {
-                    
-                    // hash inputed password
-                    const hash = await hashPassword(password)
-                    
-                    // create new user object to inser
-                    const new_user = { username: username, password: hash, email: req.body.email }
-
-                    // insert new user
-                    const created_user = await dbUser.createUser(new_user)
-
-                    done(null, created_user[0])
-                } else {
-                    throw new Error('invalid_origin')
+                // get user from database
+                const check_user = await dbUser.findByUsername(username)
+                
+                // if no user is found then return error
+                if (check_user === undefined) {
+                    throw new Error('invalid_credentials')
                 }
+
+                // if a user is found, verify the user passowrd
+                const password_verify = await comparePassword(password, check_user.password)
+                if (!password_verify) { throw new Error('invalid_credentials') }
+
+                // remove encrypted password from retur
+                delete check_user['password']
+                
+                done(null, check_user)
+
             } catch (error) {
-                console.log('passport-config')
                 console.log(error.message)
                 // duplicated username error
                 if (error.constraint === 'users_username_unique') { return done({
