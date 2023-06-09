@@ -5,7 +5,7 @@ const authErrors = {
         type: 'username'
     },
     duplicate_email: {
-        status: 400,
+        status: 409,
         message: 'email already registered',
         type: 'email'
     },
@@ -16,7 +16,8 @@ const authErrors = {
     },
     incomplete_input: {
         status: 400,
-        message: 'please fill all required inputs'
+        message: 'please fill all required inputs',
+        type: 'credentials'
     },
     invalid_credentials: {
         status: 400,

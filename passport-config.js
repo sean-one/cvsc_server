@@ -66,8 +66,6 @@ passport.use(
         passReqToCallback: true
     },
         async (req, username, password, done) => {
-            console.log(`username: ${username}`)
-            console.log(`password: ${password}`)
             try {
                 if(!username || !password) { throw new Error('incomplete_input') }
                 

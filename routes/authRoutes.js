@@ -76,7 +76,7 @@ router.post('/register', upload.single('avatar'), async (req, res, next) => {
     }
 })
 
-router.post('/local', passport.authenticate('local', {
+router.post('/login', passport.authenticate('local', {
     failureRedirect: '/auth/login/failed',
     failWithError: true,
     session: true
