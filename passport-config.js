@@ -6,7 +6,7 @@ const dbUser = require('./data/models/user');
 // const dbRoles = require('./data/models/roles');
 // const dbEvents = require('./data/models/event');
 
-const { hashPassword, comparePassword } = require('./helpers/bcrypt_helper');
+const { comparePassword } = require('./helpers/bcrypt_helper');
 const { createAccessToken, createRefreshToken } = require('./helpers/jwt_helper');
 const authErrors = require('./error_messages/authErrors');
 

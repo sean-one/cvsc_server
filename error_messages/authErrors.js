@@ -1,13 +1,18 @@
 const authErrors = {
     duplicate_username: {
-        status: 400,
-        message: 'username already registered',
+        status: 409,
+        message: 'username unavailable',
         type: 'username'
     },
     duplicate_email: {
         status: 400,
         message: 'email already registered',
         type: 'email'
+    },
+    invalid_username: {
+        status: 422,
+        message: 'invalid username format',
+        type: 'username'
     },
     incomplete_input: {
         status: 400,

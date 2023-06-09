@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 
 const router = express.Router();
 
+const authErrors = require('../error_messages/authErrors');
 const { createAccessToken, createRefreshToken } = require('../helpers/jwt_helper');
 const { uploadImageS3Url } = require('../s3');
 const { hashPassword } = require('../helpers/bcrypt_helper');
@@ -16,37 +17,40 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
 router.post('/register', upload.single('avatar'), async (req, res, next) => {
-    console.log('inside /register endpoint')
     try {
+        
         // make sure all required fields are present
-        if(!req.body.username || !req.body.password || !req.body.email) {
-            throw new Error('incomplete registration')
-        }
+        if(!req.body.username || !req.body.password || !req.body.email) { throw new Error('incomplete_input') }
+        
+        // check username format - only allow alphanumeric and *, _, -, ., $, !, @ (non repeating)
+        const alphanumeric = /^[a-zA-Z0-9*@_.\-!$]+$/;
+        const repeatingspecial = /^(?!.*([*@_.\-!$])\1)[a-zA-Z0-9*@_.\-!$]+$/;
+        if(!alphanumeric.test(req.body.username) || !repeatingspecial.test(req.body.username)) { throw new Error('invalid_username') }
     
-        const new_user = req.body
+        // confirm usename does not already exist in db
+        const user_list = await userDB.findByUsername(req.body.username)
+        if(user_list !== undefined) { throw new Error('duplicate_username') }
+        
+        // create new user
+        const new_user = { username: req.body.username, email: req.body.email }
     
         // check for attached image, upload to s3 bucket or delete the field so that db will add default
-        if(req.file) {
+        if(req.file) {   
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
-    
             const avatar_key = await uploadImageS3Url(req.file)
-    
             new_user['avatar'] = avatar_key
+        }
     
-        } else { delete new_user['avatar'] }
-    
-        const hash = await hashPassword(new_user.password)
-    
+        // hash and update password
+        const hash = await hashPassword(req.body.password)
         new_user.password = hash
     
+        //  create the new user in the database
         const created_user = await userDB.createUser(new_user)
 
         req.login(new_user, { session: false }, async (error) => {
-            if(error) {
-                return next(error);
-            }
-
-            
+            if(error) { return next(error); }
+ 
             const user = created_user[0]
             
             const accessToken = createAccessToken(user.id)
@@ -59,11 +63,16 @@ router.post('/register', upload.single('avatar'), async (req, res, next) => {
 
             res.cookie('jwt', refreshToken)
 
-            res.status(200).json({ user: user, roles: [] })
+            res.status(201).json({ user: user, roles: [] })
         })
 
     } catch (error) {
-        console.log(error)
+        // console.log(error)
+        next({
+            status: authErrors[error.message]?.status,
+            message: authErrors[error.message]?.message,
+            type: authErrors[error.message]?.type,
+        })
     }
 })
 
