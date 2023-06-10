@@ -87,25 +87,12 @@ passport.use(
                 done(null, check_user)
 
             } catch (error) {
-                console.log(error.message)
-                // duplicated username error
-                if (error.constraint === 'users_username_unique') { return done({
-                    status: authErrors['duplicate_username']?.status,
-                    message: authErrors['duplicate_username']?.message,
-                    type: authErrors['duplicate_username']?.type,
-                    }, false)
-                }
-                // extra information added to new user object
-                if(error.code === '42703') { return done({ 
-                    status: 400,
-                    message: 'invalid inputs and or fields',
-                    type: 'invalid_input'}, false)
-                }
-                
-                // username or email missing from new user object
-                if(error.code === '23502') { return done({ status: 400, message: `${error.column} is a required field`, type: `${error.column}` }, false) }
-                
-                return done({ status: authErrors[error.message]?.status, message: authErrors[error.message]?.message, type: authErrors[error.message]?.type }, false)
+
+                return done({
+                    status: authErrors[error.message]?.status,
+                    message: authErrors[error.message]?.message,
+                    type: authErrors[error.message]?.type
+                }, false)
             }
         }
     )
