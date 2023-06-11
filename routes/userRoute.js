@@ -3,7 +3,6 @@ const multer = require('multer');
 const sharp = require('sharp')
 
 const db = require('../data/models/user');
-const dbBusiness = require('../data/models/business');
 const userErrors = require('../error_messages/userErrors');
 const { hashPassword } = require('../helpers/bcrypt_helper');
 const { validToken } = require('../helpers/jwt_helper')
@@ -78,35 +77,27 @@ router.post('/update', [ upload.single('avatar'), validToken ], async (req, res,
 })
 
 // user.account - delete_account
-router.delete('/remove_user', [ validToken ], async (req, res, next) => {
+router.delete('/delete', [ validToken ], async (req, res, next) => {
     try {
         const user_id = req.user_decoded
+        if(!user_id) throw new Error('invalid_user')
 
         const deletedUser = await db.removeUser(user_id)
         
         if (deletedUser >= 1) {
-            
             res.status(204).json();
 
         } else {
-
-            const error = new Error('invalid id');
-            error.message = 'not found';
-            error.status = 404;
-            throw error;
-
+            throw  new Error('delete_failed');
         }
 
     } catch (error) {
-
-        if (error.errors) {
-
-            res.status(400).json({ message: 'bad request', path: error.path, error: `${error.params.path} failed validation` });
-
-        } else {
-
-            next(error)
-        }
+        
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
 
     }
 })

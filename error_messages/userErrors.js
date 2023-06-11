@@ -23,6 +23,11 @@ const userErrors = {
         message: 'no changes found',
         type: 'input'
     },
+    delete_failed: {
+        status: 500,
+        message: 'user delete failed',
+        type: 'server'
+    }
 }
 
 module.exports = userErrors;
