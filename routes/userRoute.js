@@ -16,7 +16,7 @@ const router = express.Router();
 
 
 // user.account - update_user
-router.post('/update_user', [ upload.single('avatar'), validToken ], async (req, res, next) => {
+router.post('/update', [ upload.single('avatar'), validToken ], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const user_id = req.user_decoded
@@ -25,24 +25,36 @@ router.post('/update_user', [ upload.single('avatar'), validToken ], async (req,
         
         if(!user_id) throw new Error('invalid_user')
 
+        // validate email formatting
+        if(user_changes?.email) {
+            const emailFormat = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if(!emailFormat.test(user_changes.email)) { throw new Error('invalid_email_format') }
+        }
+
         if(user_changes?.password) {
+            // valid password formatting
+            const passwordneeds = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#$%^&*()_+-=,./?;:'"[\]{}|\\]).{8,}$/;
+            if(!passwordneeds.test(user_changes.password)) { throw new Error('invalid_password_format') }
+
+            // hash and save password
             const hash = await hashPassword(user_changes.password)
             user_changes['password'] = hash
         }
 
+        // check for user avatar image update if none delete avatar field
         if(req.file) {
-            console.log('inside req.file')
-            console.log(req.file)
+            // optimize image for upload
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
             const image_key = await uploadImageS3Url(req.file)
 
             if(!image_key) throw new Error('upload_error')
 
-            console.log(user.avatar)
+            // check if previous link was s3 bucket, if so remove previous image from bucket
             if(!check_link.test(user.avatar) && user.avatar !== null) {
                 await deleteImageS3(user.avatar)
             }
 
+            // update avatar image key for upload
             user_changes['avatar'] = image_key
         } else {
             delete user_changes['avatar']
@@ -55,7 +67,6 @@ router.post('/update_user', [ upload.single('avatar'), validToken ], async (req,
         res.status(201).json(user_details)
         
     } catch (error) {
-        console.log(error.message)
         next({
             status: userErrors[error.message]?.status,
             message: userErrors[error.message]?.message,

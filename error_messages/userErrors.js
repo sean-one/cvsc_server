@@ -3,6 +3,16 @@ const userErrors = {
         status: 400,
         message: 'invalid user',
     },
+    invalid_password_format: {
+        status: 400,
+        message: 'invalid password formatting',
+        type: 'credentials'
+    },
+    invalid_email_format: {
+        status: 400,
+        message: 'invalid email formatting',
+        type: 'email'
+    },
     upload_error: {
         status: 400,
         message: 'image upload error',
@@ -11,6 +21,7 @@ const userErrors = {
     empty_object: {
         status: 400,
         message: 'no changes found',
+        type: 'input'
     },
 }
 
