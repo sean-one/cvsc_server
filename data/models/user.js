@@ -148,7 +148,7 @@ async function removeUser(user_id) {
             })
         }
 
-        // deletes user - cascades event creator, business admin, business roles
+        // deletes user - CASCADES event creator, business admin, business roles
         const deleted_user = await db('users').where({ 'users.id': user_id }).del();
         
         // remove all images for user created business, created events & profile image
@@ -163,7 +163,6 @@ async function removeUser(user_id) {
         return deleted_user
 
     } catch (error) {
-       console.log(error)
        throw error
     }
 }
