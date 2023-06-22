@@ -121,12 +121,11 @@ async function addBusiness(business, location) {
                     user_id: added_business[0].business_admin,
                     business_id: added_business[0].id,
                     role_type: process.env.ADMIN_ACCOUNT,
-                    // REMOVE AND UPDATE TO FALSE TO START
                     active_role: true,
                     approved_by: added_business[0].business_admin
                 }, [ 'id' ])
 
-            // return the newly created business with contact and location if created
+            // return the newly created business with contact and location if available
             return db('businesses')
                 .transacting(trx)
                 .where({ 'businesses.id': added_business[0].id})
@@ -154,6 +153,7 @@ async function addBusiness(business, location) {
                         'locations.location_state',
                         'locations.zip_code',
                         'locations.formatted',
+                        'roles.id as admin_role_id',
                         'roles.active_role',
                         'roles.role_type',
                     ]

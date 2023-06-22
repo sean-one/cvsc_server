@@ -48,7 +48,7 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
         const new_business = req.body
 
         // check if business location is attached
-        if(new_business.business_location !== 'false') {
+        if(new_business.business_location !== 'false' || new_business.street_address ) {
             business_location = {
                 'venue_name': new_business.business_name,
                 'street_address': new_business.street_address,
@@ -65,21 +65,13 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
         delete new_business['zip']
         delete new_business['business_location']
 
-        // remove any empty contact information
-        if(!new_business.business_instagram) delete new_business['business_instagram']
-        if(!new_business.business_facebook) delete new_business['business_facebook']
-        if(!new_business.business_website) delete new_business['business_website']
-        if(!new_business.business_phone) delete new_business['business_phone']
-        if(!new_business.business_twitter) delete new_business['business_twitter']
+        console.log(new_business)
+        console.log(business_location)
         
-        // check for file - if found upload and return image key
+        // if file present resize the image and upload to s3 returning an image key
         if(req.file) {
-            // resize the image
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
-            
-            // upload the image to s3
             const image_key = await uploadImageS3Url(req.file)
-            
             new_business['business_avatar'] = image_key
         }
 
@@ -87,7 +79,6 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
         new_business['business_admin'] = req.user_decoded
         new_business['active_business'] = true
         
-        console.log(business_location)
         const created_business = await db.addBusiness(new_business, business_location)
         
         res.status(201).json(created_business);
