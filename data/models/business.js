@@ -5,6 +5,7 @@ const { deleteImageS3 } = require('../../s3');
 module.exports = {
     find,
     findBusinessById,
+    checkBusinessName,
     addBusiness,
     updateBusiness,
     toggleActiveBusiness,
@@ -76,8 +77,22 @@ function findBusinessById(business_id) {
         .first();
 }
 
+// .post('/business/create') - checks if business name is already in use
+function checkBusinessName(business_name) {
+    return db('businesses')
+        .where(db.raw('LOWER(business_name) ILIKE ?', business_name.toLowerCase()))
+        .select([ 'businesses.id' ])
+        .first()
+}
+
 // .post('/business/create) - creates a new business
 async function addBusiness(business, location) {
+    console.log('=================== business =========================')
+    console.log(business)
+    console.log('======================================================')
+    console.log('=================== location =========================')
+    console.log(location)
+    console.log('======================================================')
     try {
         
         return await db.transaction(async trx => {
@@ -90,11 +105,7 @@ async function addBusiness(business, location) {
             // check for location and save if submitted
             if (location !== undefined) {
                 // google api with address returning geocode information
-                const geoCode = await googleMapsClient.geocode(
-                    {
-                        address: `${location.street_address}, ${location.city}, ${location.state} ${location.zip}`
-                    }
-                ).asPromise();
+                const geoCode = await googleMapsClient.geocode({ address: location.business_address }).asPromise();
                 
                 // save return from geocode and newly added business information
                 location = {
@@ -161,7 +172,7 @@ async function addBusiness(business, location) {
                 .first()
         })
     } catch (error) {
-        console.log(error)
+        console.log('error inside addBusiness')
         throw error
     }
 

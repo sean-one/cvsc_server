@@ -43,40 +43,56 @@ router.get('/single/:business_id', async (req, res, next) => {
 
 // useCreateBusinessMutation - createBusiness - useBusinessApi
 router.post('/create', [upload.single('business_avatar'), validToken ], async (req, res, next) => {
+    let image_key
     try {
         let business_location
         const new_business = req.body
 
+        console.log(new_business)
+
+        // check user admin
+        if (!req.user_decoded) {
+            throw new Error('missing_admin')
+        } else {
+            // save requesting user as business admin
+            new_business['business_admin'] = req.user_decoded
+        }
+
+        // be sure all required inputs are submitted
+        if (!new_business.business_name || !new_business.business_type || !new_business.business_description || !new_business.business_email) {
+            throw new Error('missing_incomplete')
+        }
+        
+        // confirm address is include for business venue
+        if (new_business.business_type === 'both' || new_business.business_type === 'venue') {
+            if (!new_business.address) {
+                throw new Error('missing_location')
+            }
+        }
+
+        // check that business name is not already in database
+        const business_unique = await db.checkBusinessName(new_business.business_name)
+        if(business_unique !== undefined) {
+            throw new Error('businesses_business_name_unique')
+        }
+
         // check if business location is attached
-        if(new_business.business_location !== 'false' || new_business.street_address ) {
+        if (new_business.address !== undefined ) {
             business_location = {
-                'venue_name': new_business.business_name,
-                'street_address': new_business.street_address,
-                'city': new_business.city,
-                'state': new_business.state,
-                'zip': new_business.zip
+                'business_address': new_business.address
             }
         }
         
-        // remove address elements
-        delete new_business['street_address']
-        delete new_business['city']
-        delete new_business['state']
-        delete new_business['zip']
-        delete new_business['business_location']
-
-        console.log(new_business)
-        console.log(business_location)
-        
-        // if file present resize the image and upload to s3 returning an image key
+        // if file present resize the image and upload to s3 returning an image key or return error due to missing image
         if(req.file) {
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
-            const image_key = await uploadImageS3Url(req.file)
+            image_key = await uploadImageS3Url(req.file)
             new_business['business_avatar'] = image_key
+        } else {
+            throw new Error('missing_image')
         }
 
-        // add business creator as business admin
-        new_business['business_admin'] = req.user_decoded
+        // set business as active
         new_business['active_business'] = true
         
         const created_business = await db.addBusiness(new_business, business_location)
@@ -84,8 +100,13 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
         res.status(201).json(created_business);
 
     } catch (err) {
+        console.log('============= businessRoute catch ==============')
         console.log(err)
+        console.log('================================================')
+        // errors returned from created_business database call - invalid input errors
         if (err.constraint) {
+            // error return from database after image creation, remove image from s3
+            if(image_key) { await deleteImageS3(image_key) }
             
             next({
                 status: businessErrors[err.constraint]?.status,
@@ -97,7 +118,8 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
             
             next({
                 status: businessErrors[err.message]?.status,
-                message: businessErrors[err.message]?.message
+                message: businessErrors[err.message]?.message,
+                type: businessErrors[err.message]?.type
             })
 
         }

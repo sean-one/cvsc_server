@@ -8,7 +8,7 @@ const businessErrors = {
         message: 'duplicate address not valid'
     },
     businesses_business_name_unique: {
-        status: 400,
+        status: 409,
         message: 'business name already registered',
         type: 'business_name'
     },
@@ -28,7 +28,30 @@ const businessErrors = {
         status: 400,
         message: 'business must have a valid address'
     },
-    
+    // .post('/create')
+    missing_image: {
+        status: 400,
+        message: 'business branding logo required',
+        type: 'business_avatar'
+    },
+    // .post('/create')
+    missing_incomplete: {
+        status: 400,
+        message: 'missing and/or invalid inputs',
+        type: 'server'
+    },
+    // .post('/create')
+    missing_location: {
+        status: 400,
+        message: 'missing location address',
+        type: 'server'
+    },
+    // .post('/create')
+    missing_admin: {
+        status: 401,
+        message: 'missing business admin',
+        type: 'server'
+    }
 }
 
 module.exports = businessErrors;
