@@ -42,7 +42,6 @@ exports.up = function (knex) {
         locations
             .string('place_id')
             .notNullable()
-            .unique()
     })
 
 };

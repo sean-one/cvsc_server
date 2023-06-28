@@ -87,12 +87,6 @@ function checkBusinessName(business_name) {
 
 // .post('/business/create) - creates a new business
 async function addBusiness(business, location) {
-    console.log('=================== business =========================')
-    console.log(business)
-    console.log('======================================================')
-    console.log('=================== location =========================')
-    console.log(location)
-    console.log('======================================================')
     try {
         
         return await db.transaction(async trx => {

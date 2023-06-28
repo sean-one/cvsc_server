@@ -34,6 +34,11 @@ const businessErrors = {
         message: 'business branding logo required',
         type: 'business_avatar'
     },
+    invalid_business_type: {
+        status: 400,
+        message: 'invalid business type submitted',
+        type: 'business_type'
+    },
     // .post('/create')
     missing_incomplete: {
         status: 400,
