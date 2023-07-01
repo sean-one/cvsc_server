@@ -9,6 +9,7 @@ module.exports = {
     findUserById,
     findByGoogleId,
     findByUsername,
+    checkUsernameDuplicate,
     updateUser,
     removeUser,
 };
@@ -94,6 +95,14 @@ function findByUsername(username) {
                 'users.password'
             ]
         )
+        .first()
+}
+
+// check for username duplicate and retur username if found
+function checkUsernameDuplicate(username) {
+    return db('users')
+        .where(db.raw('LOWER(username) ILIKE ?', username.toLowerCase()))
+        .select([ 'users.username' ])
         .first()
 }
 
