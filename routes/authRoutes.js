@@ -13,23 +13,25 @@ const { hashPassword } = require('../helpers/bcrypt_helper');
 const rolesDB = require('../data/models/roles');
 const userDB = require('../data/models/user');
 
+const { registerUserValidator, result } = require('../helpers/validators')
+
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
-router.post('/register', upload.single('avatar'), async (req, res, next) => {
+router.post('/register', upload.single('avatar'), registerUserValidator, result, async (req, res, next) => {
     try {
         
         // make sure all required fields are present
-        if(!req.body.username || !req.body.password || !req.body.email) { throw new Error('incomplete_input') }
+        // if(!req.body.username || !req.body.password || !req.body.email) { throw new Error('incomplete_input') }
         
         // check username format - only allow alphanumeric and *, _, -, ., $, !, @ (non repeating)
-        const alphanumeric = /^[a-zA-Z0-9*@_.\-!$]+$/;
-        const repeatingspecial = /^(?!.*([*@_.\-!$])\1)[a-zA-Z0-9*@_.\-!$]+$/;
-        if(!alphanumeric.test(req.body.username) || !repeatingspecial.test(req.body.username)) { throw new Error('invalid_username') }
+        // const alphanumeric = /^[a-zA-Z0-9*@_.\-!$]+$/;
+        // const repeatingspecial = /^(?!.*([*@_.\-!$])\1)[a-zA-Z0-9*@_.\-!$]+$/;
+        // if(!alphanumeric.test(req.body.username) || !repeatingspecial.test(req.body.username)) { throw new Error('invalid_username') }
     
         // confirm usename does not already exist in db
-        const user_list = await userDB.findByUsername(req.body.username)
-        if(user_list !== undefined) { throw new Error('duplicate_username') }
+        // const user_list = await userDB.findByUsername(req.body.username)
+        // if(user_list !== undefined) { throw new Error('duplicate_username') }
         
         // create new user
         const new_user = { username: req.body.username, email: req.body.email }
@@ -67,7 +69,8 @@ router.post('/register', upload.single('avatar'), async (req, res, next) => {
         })
 
     } catch (error) {
-        // console.log(error)
+        console.log('inside register catch')
+        console.log(error)
         next({
             status: authErrors[error.message]?.status,
             message: authErrors[error.message]?.message,
