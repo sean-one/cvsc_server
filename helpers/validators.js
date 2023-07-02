@@ -1,5 +1,5 @@
 const { check, validationResult } = require('express-validator');
-const userDB = require('../data/models/user')
+const userDB = require('../data/models/user');
 
 // CUSTOM VALIDATIONS
 const isUsernameValid = (value) => {
@@ -42,7 +42,7 @@ const validatePassword = (value) => {
     return true
 };
 
-const validateUserAvatarFile = (req, res, next) => {
+const validateImageFile = async (req, res, next) => {
     const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
     if(!req.file) {
 
@@ -113,7 +113,7 @@ const result = (req, res, next) => {
 
 module.exports = {
     registerUserValidator,
-    validateUserAvatarFile,
+    validateImageFile,
     loginUserValidator,
     updateUserValidator,
     result

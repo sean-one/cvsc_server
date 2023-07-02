@@ -13,12 +13,12 @@ const { hashPassword } = require('../helpers/bcrypt_helper');
 const rolesDB = require('../data/models/roles');
 const userDB = require('../data/models/user');
 
-const { loginUserValidator, registerUserValidator, result, validateUserAvatarFile } = require('../helpers/validators')
+const { loginUserValidator, registerUserValidator, result, validateImageFile } = require('../helpers/validators')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
-router.post('/register', [upload.single('avatar'), registerUserValidator, validateUserAvatarFile, result], async (req, res, next) => {
+router.post('/register', [upload.single('avatar'), registerUserValidator, validateImageFile, result], async (req, res, next) => {
     try {
         
         // create new user

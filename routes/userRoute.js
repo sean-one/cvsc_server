@@ -8,7 +8,7 @@ const { hashPassword } = require('../helpers/bcrypt_helper');
 const { validToken } = require('../helpers/jwt_helper')
 const { uploadImageS3Url, deleteImageS3 } = require('../s3');
 
-const { result, updateUserValidator, validateUserAvatarFile } = require('../helpers/validators')
+const { result, updateUserValidator, validateImageFile } = require('../helpers/validators')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -17,7 +17,7 @@ const router = express.Router();
 
 
 // user.account - update_user
-router.post('/update', [ upload.single('avatar'), validToken, updateUserValidator, validateUserAvatarFile, result ], async (req, res, next) => {
+router.post('/update', [ upload.single('avatar'), validToken, updateUserValidator, validateImageFile, result ], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const user_id = req.user_decoded
@@ -39,7 +39,7 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
         // check for user avatar image update if none delete avatar field
         if(req.file) {
             // optimize image for upload
-            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).toBuffer()
             const image_key = await uploadImageS3Url(req.file)
 
             if(!image_key) throw new Error('upload_error')
