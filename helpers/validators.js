@@ -1,7 +1,7 @@
 const { check, validationResult } = require('express-validator');
 const userDB = require('../data/models/user')
 
-
+// CUSTOM VALIDATIONS
 const isUsernameValid = (value) => {
     if (!/^[a-zA-Z0-9*_\-.$!@]+$/.test(value)) {
         throw new Error('Username can only contain letters, numbers, *, _, -, ., $, !, @');
@@ -28,9 +28,17 @@ const isUsernameUnique = async (value) => {
     const found = await userDB.checkUsernameDuplicate(value)
 
     if(found !== undefined) {
-        throw new Error('username already in use')
+        throw new Error('username already in use (duplicate)')
     }
     
+    return true
+};
+
+const validatePassword = (value) => {
+    if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#$%^&*()_+-=,./?;:'"[\]{}|\\]).{8,}$/.test(value)) {
+        throw new Error('password must contain at least one uppercase letter, lowercase letter & number with (optional) special character')
+    }
+
     return true
 };
 
@@ -48,17 +56,43 @@ const validateUserAvatarFile = (req, res, next) => {
         next()
     }
 
-}
+};
 
 
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
-        .isLength({ min: 3, max: 20 }).withMessage('username length must be between 3 and 20 charactors')
+        .isLength({ min: 3, max: 20 }).withMessage('username length must be between 3 and 20 characters')
         .custom(isUsernameValid)
         .custom(isUsernameUnique)
         .escape(),
-    check('password').trim().not().isEmpty().withMessage('password is required').escape(),
-    check('email').trim().not().isEmpty().withMessage('email is required').isEmail().escape(),
+    check('password').trim().not().isEmpty().withMessage('password is required')
+        .isLength({ min: 8, max: 50}).withMessage('password length may only be between 8 and 50 characters')
+        .custom(validatePassword)
+        .escape(),
+    check('email').trim().not().isEmpty().withMessage('email is required')
+        .isEmail().withMessage('invalid email format')
+        .escape(),
+]
+
+const loginUserValidator = [
+    check('username').trim().not().isEmpty().withMessage('username is required')
+        .isLength({ min: 3, max: 20 }).withMessage('username length must be between 3 and 20 characters')
+        .custom(isUsernameValid)
+        .escape(),
+    check('password').trim().not().isEmpty().withMessage('password is required')
+        .isLength({ min: 8, max: 50 }).withMessage('password length may only be between 8 and 50 characters')
+        .custom(validatePassword)
+        .escape(),
+]
+
+const updateUserValidator = [
+    check('password').trim().optional()
+        .isLength({ min: 8, max: 50 }).withMessage('password length may only be between 8 and 50 characters')
+        .custom(validatePassword)
+        .escape(),
+    check('email').trim().optional()
+        .isEmail().withMessage('invalid email format')
+        .escape(),
 ]
 
 const result = (req, res, next) => {
@@ -67,7 +101,11 @@ const result = (req, res, next) => {
 
     if(hasError) {
         const error = result.array()[0]
-        return res.status(400).json({ message: error.msg })
+        next({
+            status: 400,
+            message: error.msg,
+            type: error.path
+        })
     }
 
     next()
@@ -76,5 +114,7 @@ const result = (req, res, next) => {
 module.exports = {
     registerUserValidator,
     validateUserAvatarFile,
+    loginUserValidator,
+    updateUserValidator,
     result
 }

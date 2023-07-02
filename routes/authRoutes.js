@@ -13,7 +13,7 @@ const { hashPassword } = require('../helpers/bcrypt_helper');
 const rolesDB = require('../data/models/roles');
 const userDB = require('../data/models/user');
 
-const { registerUserValidator, result, validateUserAvatarFile } = require('../helpers/validators')
+const { loginUserValidator, registerUserValidator, result, validateUserAvatarFile } = require('../helpers/validators')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -57,8 +57,7 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
         })
 
     } catch (error) {
-        console.log('inside register catch')
-        console.log(error)
+        // console.log(error)
         next({
             status: authErrors[error.message]?.status,
             message: authErrors[error.message]?.message,
@@ -67,11 +66,12 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
     }
 })
 
-router.post('/login', passport.authenticate('local', {
+router.post('/login', loginUserValidator, result, passport.authenticate('local', {
     failureRedirect: '/auth/login/failed',
     failWithError: true,
     session: true
 }), async (req, res) => {
+    
     const user = req.user
     const user_roles = await rolesDB.findUserRoles(user.id)
     const filter_inactive = user_roles.filter(role => role.active_role)

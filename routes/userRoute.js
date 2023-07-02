@@ -8,6 +8,8 @@ const { hashPassword } = require('../helpers/bcrypt_helper');
 const { validToken } = require('../helpers/jwt_helper')
 const { uploadImageS3Url, deleteImageS3 } = require('../s3');
 
+const { result, updateUserValidator, validateUserAvatarFile } = require('../helpers/validators')
+
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
@@ -15,29 +17,23 @@ const router = express.Router();
 
 
 // user.account - update_user
-router.post('/update', [ upload.single('avatar'), validToken ], async (req, res, next) => {
+router.post('/update', [ upload.single('avatar'), validToken, updateUserValidator, validateUserAvatarFile, result ], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const user_id = req.user_decoded
-        const user_changes = req.body
+        const user_changes = {}
         const { user } = await db.findUserById(user_id)
         
         if(!user_id) throw new Error('invalid_user')
 
-        // validate email formatting
-        if(user_changes?.email) {
-            const emailFormat = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            if(!emailFormat.test(user_changes.email)) { throw new Error('invalid_email_format') }
+        if(req.body?.email) {
+            user_changes.email = req.body.email
         }
 
-        if(user_changes?.password) {
-            // valid password formatting
-            const passwordneeds = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#$%^&*()_+-=,./?;:'"[\]{}|\\]).{8,}$/;
-            if(!passwordneeds.test(user_changes.password)) { throw new Error('invalid_password_format') }
-
+        if(req.body?.password) {
             // hash and save password
             const hash = await hashPassword(user_changes.password)
-            user_changes['password'] = hash
+            user_changes.password = hash
         }
 
         // check for user avatar image update if none delete avatar field
@@ -54,9 +50,7 @@ router.post('/update', [ upload.single('avatar'), validToken ], async (req, res,
             }
 
             // update avatar image key for upload
-            user_changes['avatar'] = image_key
-        } else {
-            delete user_changes['avatar']
+            user_changes.avatar = image_key
         }
 
         if(Object.keys(user_changes).length === 0) throw new Error('empty_object')
