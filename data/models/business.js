@@ -87,6 +87,8 @@ function checkBusinessName(business_name) {
 
 // .post('/business/create) - creates a new business
 async function addBusiness(business, location) {
+    // console.log(business)
+    // console.log(location)
     try {
         
         return await db.transaction(async trx => {
@@ -167,6 +169,7 @@ async function addBusiness(business, location) {
         })
     } catch (error) {
         console.log('error inside addBusiness')
+        console.log(error)
         throw error
     }
 

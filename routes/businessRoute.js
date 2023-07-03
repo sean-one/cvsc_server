@@ -8,7 +8,8 @@ const db = require('../data/models/business');
 
 const businessErrors = require('../error_messages/businessErrors');
 const { validToken, businessEditRole, businessAdmin } = require('../helpers/jwt_helper');
-const { AbortIncompleteMultipartUploadFilterSensitiveLog } = require('@aws-sdk/client-s3');
+
+const { newBusinessValidator, result, validateImageFile } = require('../helpers/validators.js')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -43,13 +44,24 @@ router.get('/single/:business_id', async (req, res, next) => {
 });
 
 // useCreateBusinessMutation - createBusiness - useBusinessApi
-router.post('/create', [upload.single('business_avatar'), validToken ], async (req, res, next) => {
+router.post('/create', [upload.single('business_avatar'), validToken, newBusinessValidator, validateImageFile, result ], async (req, res, next) => {
     let image_key
     try {
         let business_location
-        const new_business = req.body
+        const new_business = {
+            business_name: req.body.business_name,
+            business_description: req.body.business_description,
+            business_type: req.body.business_type,
+            address: req.body.address,
+            business_email: req.body.business_email,
+            business_phone: req.body.business_phone,
+            business_instagram: req.body.business_instagram,
+            business_twitter: req.body.business_twitter,
+            business_facebook: req.body.business_facebook,
+            business_website: req.body.business_website
+        }
 
-        // check user admin
+        // check and add user admin
         if (!req.user_decoded) {
             throw new Error('missing_admin')
         } else {
@@ -57,36 +69,18 @@ router.post('/create', [upload.single('business_avatar'), validToken ], async (r
             new_business['business_admin'] = req.user_decoded
         }
 
-        // be sure all required inputs are submitted
-        if (!new_business.business_name || !new_business.business_type || !new_business.business_description || !new_business.business_email) {
-            throw new Error('missing_incomplete')
-        }
-        
-        // confirm address is include for business venue
-        if (new_business.business_type === 'both' || new_business.business_type === 'venue') {
-            if (!new_business.address) {
-                throw new Error('missing_location')
-            }
-        }
-
-        // check that business name is not already in database
-        const business_unique = await db.checkBusinessName(new_business.business_name)
-        if(business_unique !== undefined) {
-            throw new Error('businesses_business_name_unique')
-        }
-
         // check if business location is attached
-        if (new_business.address !== undefined ) {
+        if (new_business.address !== undefined) {
             business_location = {
                 'business_address': new_business.address
             }
-
-            delete new_business.address
         }
+
+        delete new_business.address
         
         // if file present resize the image and upload to s3 returning an image key or return error due to missing image
         if(req.file) {
-            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).toBuffer()
             image_key = await uploadImageS3Url(req.file)
             new_business['business_avatar'] = image_key
         } else {

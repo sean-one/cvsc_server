@@ -1,5 +1,6 @@
 const { check, validationResult } = require('express-validator');
 const userDB = require('../data/models/user');
+const businessDB = require('../data/models/business');
 
 // CUSTOM VALIDATIONS
 const isUsernameValid = (value) => {
@@ -58,6 +59,16 @@ const validateImageFile = async (req, res, next) => {
 
 };
 
+const isBusinessNameUnique = async (value) => {
+    const found = await businessDB.checkBusinessName(value)
+
+    if(found !== undefined) {
+        throw new Error('business name already in use (duplicate)')
+    }
+
+    return true
+}
+
 
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
@@ -95,6 +106,25 @@ const updateUserValidator = [
         .escape(),
 ]
 
+const newBusinessValidator = [
+    check('business_name').trim().not().isEmpty().withMessage('business name is required')
+        .isLength({ min: 4, max: 25 }).withMessage('business name must be between 4 and 25 characters')
+        .custom(isBusinessNameUnique)
+        .escape(),
+    check('business_description').trim().not().isEmpty().withMessage('business description is required').escape(),
+    check('business_type').trim().not().isEmpty().withMessage('business type required')
+        .isIn(['brand','venue','both']).withMessage('invalid business type').escape(),
+    check('address').if((value, { req }) => req.body['business_type'] !== 'brand')
+        .notEmpty().withMessage('business address is required').escape(),
+    check('business_email').trim().optional().isEmail().escape(),
+    check('business_phone').trim().optional()
+        .matches(/^\d{10}$/).withMessage('phone number must be 10 digits').escape(),
+    check('business_instagram').trim().optional().escape(),
+    check('business_twitter').trim().optional().escape(),
+    check('business_facebook').trim().optional().escape(),
+    check('business_website').trim().optional().isURL(),
+]
+
 const result = (req, res, next) => {
     const result = validationResult(req);
     const hasError = !result.isEmpty();
@@ -112,6 +142,7 @@ const result = (req, res, next) => {
 }
 
 module.exports = {
+    newBusinessValidator,
     registerUserValidator,
     validateImageFile,
     loginUserValidator,
