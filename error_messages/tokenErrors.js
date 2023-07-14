@@ -24,6 +24,16 @@ const tokenErrors = {
         message: 'invalid user rights',
         type: 'role_rights'
     },
+    invalid_role: {
+        status: 401,
+        message: 'user does not have sufficient role rights',
+        type: 'credentials'
+    },
+    missing_role: {
+        status: 401,
+        message: 'user does not have sufficient role rights',
+        type: 'credentials'
+    },
     // inside eventCreator when eventDB.findById fired - error
     TypeError: {
         status: 400,
@@ -35,7 +45,7 @@ const tokenErrors = {
     },
     invalid_request : {
         status: 404,
-        message: 'invalid request'
+        message: 'request is incorrectly formatted'
     },
     event_not_found: {
         status: 404,

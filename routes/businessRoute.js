@@ -7,9 +7,9 @@ const { uploadImageS3Url, deleteImageS3 } = require('../s3');
 const db = require('../data/models/business');
 
 const businessErrors = require('../error_messages/businessErrors');
-const { validToken, businessEditRole, businessAdmin } = require('../helpers/jwt_helper');
+const { checkBusinessManagement, validToken, businessEditRole, businessAdmin } = require('../helpers/jwt_helper');
 
-const { newBusinessValidator, result, validateImageFile } = require('../helpers/validators.js')
+const { newBusinessValidator, result, updateBusinessValidator, validateImageAdmin, validateImageFile } = require('../helpers/validators.js')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -119,49 +119,73 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
 })
 
 // useUpdateBusinessMutation - updateBusiness - useBusinessApi
-router.put('/update/:business_id', [upload.single('business_avatar'), validToken, businessEditRole], async (req, res, next) => {
+router.put('/update/:business_id', [upload.single('business_avatar'), validToken, checkBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;
+        const current_business = await db.findBusinessById(business_id)
         
         // if only the image is being updated this object will be empty
-        const business_update = req.body;
-        
-        const { business_avatar } = await db.findBusinessById(business_id)
-        
-        console.log(business_update)
-        // const updated_business = await db.updateBusiness(business_id, business_update, req.business_role)
+        function createUpdateObject(originalObject, keysToInclude) {
+            const update_details = {};
+
+            for (const key of keysToInclude) {
+                if (key in originalObject) {
+                    update_details[key] = originalObject[key];
+                }
+            }
+
+            return update_details;
+        }
+        // include only these fields, any additional fields will be left behind
+        const fieldsToInclude = [
+            'business_description',
+            'business_type',
+            'address',
+            'business_email',
+            'business_phone',
+            'business_instagram',
+            'business_twitter',
+            'business_facebook',
+            'business_website'
+        ];
+
+        const business_update = createUpdateObject(req.body, fieldsToInclude);
+
+        // if attempting to change from business type other then brand, an address must be attached or already on the business
+        if(business_update?.business_type !== 'brand' && (!current_business?.location_id && !business_update?.address)) {
+            throw new Error('business_address_required')
+        }
         
         // if there is an image to update resize, save and delete previous
-        // if(req.file && req.business_role === process.env.ADMIN_ACCOUNT) {
-        //     // resize the image
-        //     req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
-
-        //     // upload the image to s3
-        //     const image_key = await uploadImageS3Url(req.file)
+        if(req.file && req.business_role === process.env.ADMIN_ACCOUNT) {
+            // get current image for delete
+            const { business_avatar } = await db.findBusinessById(business_id)
+            // resize the image
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).toBuffer()
             
-        //     if(!check_link.test(business_avatar)) {
-        //         await deleteImageS3(business_avatar)
-        //     }
+            // upload the image to s3
+            const image_key = await uploadImageS3Url(req.file)
+            
+            if(!check_link.test(business_avatar)) {
+                await deleteImageS3(business_avatar)
+            }
+            
+            business_update['business_avatar'] = image_key
+        }
 
-        //     business_update['business_avatar'] = image_key
-        // }
-
-        // if(req.business_role === process.env.MANAGER_ACCOUNT && business_update['business_type']) {
-        //     delete business_update['business_type']
-        // }
-    
+        const updated_business = await db.updateBusiness(business_id, business_update, req.user_decoded)
         
-        // res.status(201).json(updated_business)
+        res.status(201).json(updated_business)
         
     } catch (error) {
         console.log(error)
         if (error.message) {
 
             next({
-                status: businessErrors[err.message]?.status,
-                message: businessErrors[err.message]?.message,
-                type: businessErrors[err.message]?.type
+                status: businessErrors[error.message]?.status,
+                message: businessErrors[error.message]?.message,
+                type: businessErrors[error.message]?.type
             })
 
         }

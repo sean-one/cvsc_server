@@ -8,7 +8,8 @@ module.exports = {
     updateImage,
     updateEvent,
     removeEventBusiness,
-    removeEvent
+    removeEvent,
+    removeBusinessByType
 };
 
 //! main calendar event call
@@ -226,6 +227,31 @@ function removeEvent(event_id) {
         .where({ id: event_id })
         .first()
         .del()
+}
+
+// when a business adjust its business type between brand and venue,
+// business is removed from upcoming events that do not match new business type
+async function removeBusinessByType(business_id, business_type) {
+    if(business_type === 'venue') {
+        return await db('events')
+            .where({ venue_id: business_id })
+            .update({
+                venue_id: null,
+                active_event: false
+            })
+
+    } else if(business_type === 'brand') {
+        return await db('events')
+            .where({ brand_id: business_id })
+            .update({
+                brand_id: null,
+                active_event: false
+            })
+
+    } else {
+        console.log('error inside the events model for remove business')
+        return
+    }
 }
 
 // remove business from event and mark active_event to false

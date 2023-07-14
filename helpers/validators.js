@@ -2,6 +2,14 @@ const { check, validationResult } = require('express-validator');
 const userDB = require('../data/models/user');
 const businessDB = require('../data/models/business');
 
+
+// CUSTOM REGEX PATTERNS
+const addressPattern = /^\d+\s+(?:[A-Za-z\s]+\s*,\s*)?(?:(?:Unit|Suite|Ste|#)\s+\d+|#\d+)\s*,\s*[A-Za-z]{2}\s+\d{5}(?:-\d{4})?$/;
+const phonePattern = /^\d{10}$/;
+const instagramPattern = /^[a-zA-Z0-9._]{1,30}$/;
+const twitterPattern = /^[a-zA-Z0-9_]{1,15}$/;
+const facebookPattern = /^[a-zA-Z0-9._-]{5,}$/;
+
 // CUSTOM VALIDATIONS
 const isUsernameValid = (value) => {
     if (!/^[a-zA-Z0-9*_\-.$!@]+$/.test(value)) {
@@ -59,11 +67,36 @@ const validateImageFile = async (req, res, next) => {
 
 };
 
+const validateImageAdmin = async (req, res, next) => {
+    const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
+    if(!req.file) { next() }
+
+    else if(req.file && req.business_role !== process.env.ADMIN_ACCOUNT) {
+        return res.status(400).json({ message: 'invalid business role rights' })
+    }
+
+    else {
+        const fileExtension = req.file?.mimetype.split('/')[1];
+        if(!exceptedFileTypes.includes(fileExtension)) {
+            return res.status(400).json({ message: 'only .png, .jpg, .jpeg & .webp file types' })
+        }
+        next()
+    }
+}
+
 const isBusinessNameUnique = async (value) => {
     const found = await businessDB.checkBusinessName(value)
 
     if(found !== undefined) {
         throw new Error('business name already in use (duplicate)')
+    }
+
+    return true
+};
+
+const isBusinessAdmin = async (value, { req }) => {
+    if(req.business_role !== process.env.ADMIN_ACCOUNT && value) {
+        throw new Error('invalid business role rights')
     }
 
     return true
@@ -113,15 +146,61 @@ const newBusinessValidator = [
         .escape(),
     check('business_description').trim().not().isEmpty().withMessage('business description is required').escape(),
     check('business_type').trim().not().isEmpty().withMessage('business type required')
-        .isIn(['brand','venue','both']).withMessage('invalid business type').escape(),
+        .isIn(['brand','venue','both']).withMessage('invalid business type')
+        .escape(),
     check('address').if((value, { req }) => req.body['business_type'] !== 'brand')
-        .notEmpty().withMessage('business address is required').escape(),
+        .notEmpty().withMessage('business address is required')
+        .matches(addressPattern).withMessage('address format invalid (i.e. 420 Smoke Road Suite 710, Green Fields, CA 00420)')
+        .escape(),
     check('business_email').trim().optional().isEmail().escape(),
     check('business_phone').trim().optional()
-        .matches(/^\d{10}$/).withMessage('phone number must be 10 digits').escape(),
-    check('business_instagram').trim().optional().escape(),
-    check('business_twitter').trim().optional().escape(),
-    check('business_facebook').trim().optional().escape(),
+        .matches(phonePattern).withMessage('phone number must be 10 digits')
+        .escape(),
+    check('business_instagram').trim().optional()
+        .isLength({ min: 1, max: 30 })
+        .withMessage('instagram must be between 1 and 30 characters')
+        .matches(instagramPattern).withMessage('instagram may only contain letters, numbers and underscores( _ )')
+        .escape(),
+    check('business_twitter').trim().optional()
+        .isLength({ min: 1, max: 15 }).withMessage('twitter must be between 1 and 15 characters')
+        .matches(twitterPattern).withMessage('twitter may only contain letters, numbers and underscores( _ )')
+        .escape(),
+    check('business_facebook').trim().optional()
+        .isLength({ min: 5 }).withMessage('facebook must be at least 5 characters')
+        .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )')
+        .escape(),
+    check('business_website').trim().optional().isURL(),
+]
+
+const updateBusinessValidator = [
+    check('business_description').trim().optional().escape(),
+    check('business_type').trim().optional()
+        .custom(isBusinessAdmin)
+        .isIn(['brand','venue','both']).withMessage('invalid business type')
+        .escape(),
+    check('address').trim().optional()
+        .custom(isBusinessAdmin)
+        .matches(addressPattern).withMessage('address format invalid (i.e. 420 Smoke Road Suite 710, Green Fields, CA 00420)')
+        .escape(),
+    check('business_email').trim().optional()
+        .custom(isBusinessAdmin)
+        .isEmail().escape(),
+    check('business_phone').trim().optional()
+        .matches(phonePattern).withMessage('phone number must be 10 digits')
+        .escape(),
+    check('business_instagram').trim().optional()
+        .isLength({ min: 1, max: 30 })
+        .withMessage('instagram must be between 1 and 30 characters')
+        .matches(instagramPattern).withMessage('instagram may only contain letters, numbers and underscores( _ )')
+        .escape(),
+    check('business_twitter').trim().optional()
+        .isLength({ min: 1, max: 15 }).withMessage('twitter must be between 1 and 15 characters')
+        .matches(twitterPattern).withMessage('twitter may only contain letters, numbers and underscores( _ )')
+        .escape(),
+    check('business_facebook').trim().optional()
+        .isLength({ min: 5 }).withMessage('facebook must be at least 5 characters')
+        .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )')
+        .escape(),
     check('business_website').trim().optional().isURL(),
 ]
 
@@ -142,10 +221,12 @@ const result = (req, res, next) => {
 }
 
 module.exports = {
+    loginUserValidator,
     newBusinessValidator,
     registerUserValidator,
     validateImageFile,
-    loginUserValidator,
+    validateImageAdmin,
+    updateBusinessValidator,
     updateUserValidator,
     result
 }

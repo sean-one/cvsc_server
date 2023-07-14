@@ -87,8 +87,6 @@ function checkBusinessName(business_name) {
 
 // .post('/business/create) - creates a new business
 async function addBusiness(business, location) {
-    // console.log(business)
-    // console.log(location)
     try {
         
         return await db.transaction(async trx => {
@@ -168,56 +166,55 @@ async function addBusiness(business, location) {
                 .first()
         })
     } catch (error) {
-        console.log('error inside addBusiness')
-        console.log(error)
         throw error
     }
 
 }
 
 // .put('/business/update/:business_id) - updates existing business
-async function updateBusiness(business_id, changes, business_role) {
+async function updateBusiness(business_id, changes, user_id) {
     try {
         return await db.transaction(async trx => {
+            const { role_type } = await db('roles').where({ business_id: business_id, user_id: user_id }).first()
             const { business_name } = await db('businesses').where({ id: business_id }).first()
+            const { location_id } = await db('locations').where({ venue_id: business_id }).first()
             
-            // if changes.location_id is not there then none of the following steps should be needed
-            if(changes?.location_id && business_role === process.env.ADMIN_ACCOUNT) {
-                console.log('inside first changes')
-                // google api with address returning geocode information
-                const geoCode = await googleMapsClient.geocode(
-                    {
-                        address: `${changes?.street_address}, ${changes?.city}, ${changes?.state} ${changes?.zip}`
+            
+            if(role_type === process.env.ADMIN_ACCOUNT) {
+                
+                if(changes?.business_type && changes?.business_type === 'venue' || changes?.business_type === 'both' && (!changes?.address && !location_id)) {
+                    throw new Error('missing_location')
+                }
+
+                // if changes.location_id is not there then none of the following steps should be needed
+                if(changes?.address) {
+                    // google api with address returning geocode information
+                    const geoCode = await googleMapsClient.geocode({ address: changes.address }).asPromise();
+                    
+                    // save return from geocode and newly added business information
+                    location = {
+                        street_address: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
+                        location_city: geoCode.json.results[0].address_components[2].long_name,
+                        location_state: geoCode.json.results[0].address_components[4].short_name,
+                        zip_code: geoCode.json.results[0].address_components[6].short_name,
+                        formatted: geoCode.json.results[0].formatted_address,
+                        place_id: geoCode.json.results[0].place_id
                     }
-                ).asPromise();
-
-                // save return from geocode and newly added business information
-                location = {
-                    street_address: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
-                    location_city: geoCode.json.results[0].address_components[2].long_name,
-                    location_state: geoCode.json.results[0].address_components[4].short_name,
-                    zip_code: geoCode.json.results[0].address_components[6].short_name,
-                    formatted: geoCode.json.results[0].formatted_address,
-                    place_id: geoCode.json.results[0].place_id
+                    
+                    if(location_id === undefined) {
+                        location['venue_id'] = business_id
+                        location['venue_name'] = business_name
+                        await db('locations').transacting(trx).insert(location)
+                    } else {
+                        // insert location information
+                        await db('locations').transacting(trx).where({ id: location_id }).update(location)
+                    }
                 }
-
-                if(changes.location_id === 'new_location') {
-                    console.log('new location')
-                    location['venue_id'] = business_id
-                    location['venue_name'] = business_name
-                    await db('locations').transacting(trx).insert(location)
-                } else {
-                    console.log('update location')
-                    // insert location information
-                    await db('locations').transacting(trx).where({ id: changes.location_id }).update(location)
-                }
+                
+            } else {
+                delete changes.address
+                delete changes.business_type
             }
-
-            delete changes['street_address']
-            delete changes['city']
-            delete changes['state']
-            delete changes['zip']
-            delete changes['location_id']
             
             if(Object.keys(changes).length > 0) {
                 await db('businesses').where({ id: business_id }).update(changes)

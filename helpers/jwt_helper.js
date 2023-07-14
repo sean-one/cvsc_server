@@ -32,7 +32,6 @@ const createRefreshToken = (user_id) => {
 }
 
 const validToken = (req, res, next) => {
-    console.log('inside validtoken')
     try {
         const cookies = req.cookies
     
@@ -43,8 +42,6 @@ const validToken = (req, res, next) => {
         
         next()
     } catch (error) {
-        console.log('error in token validation')
-        // console.log(error.name)
         if(error?.name === 'TokenExpiredError') {
             next({
                 status: tokenErrors[error.name]?.status,
@@ -200,21 +197,49 @@ const businessEditRole = async (req, res, next) => {
         if(!user_id || !business_id) throw new Error('invalid_request')
 
         // get user role for business
-        const { role_type } = await db.findUserBusinessRole(business_id, user_id)
+        const business_role = await db.findUserBusinessRole(business_id, user_id)
+        if(business_role === undefined) throw new Error('invalid_user')
 
-        if(!role_type) throw new Error('invalid_user')
-
-        if (role_type === process.env.MANAGER_ACCOUNT) {
-            req.business_role = role_type
+        if (business_role.role_type === process.env.MANAGER_ACCOUNT) {
+            req.business_role = business_role.role_type
             next()
-        } else if (role_type === process.env.ADMIN_ACCOUNT) {
-            req.business_role = role_type
+        } else if (business_role.role_type === process.env.ADMIN_ACCOUNT) {
+            req.business_role = business_role.role_type
             next()
         } else {
             throw new Error('invalid_user')
         }
     }
     catch (error) {
+        console.log('error at businessEditRole jwt_helper')
+        console.log(error)
+        next({
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type,
+        })
+    }
+}
+
+const checkBusinessManagement = async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+        const { business_id } = req.params
+        if(!user_id || !business_id) throw new Error('invalid_request')
+
+        const user_business_role = await db.findUserBusinessRole(business_id, user_id)
+        if((user_business_role === undefined) || (user_business_role?.active_role === false)) {
+            throw new Error('missing_role')
+        }
+
+        if(user_business_role?.role_type >= process.env.MANAGER_ACCOUNT) {
+            req.business_role = user_business_role.role_type
+            next()
+        } else {
+            throw new Error('invalid_role')
+        }
+    } catch (error) {
+        console.log(error)
         next({
             status: tokenErrors[error.message]?.status,
             message: tokenErrors[error.message]?.message,
@@ -301,6 +326,7 @@ module.exports = {
     roleRequestUser,
     businessAdmin,
     businessEditRole,
+    checkBusinessManagement,
     eventCreator,
     eventManager,
 }
