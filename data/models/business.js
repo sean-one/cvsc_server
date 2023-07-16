@@ -181,6 +181,7 @@ async function updateBusiness(business_id, changes, user_id) {
             
             
             if(role_type === process.env.ADMIN_ACCOUNT) {
+                console.log('inside admin changes')
                 
                 if(changes?.business_type && changes?.business_type === 'venue' || changes?.business_type === 'both' && (!changes?.address && !location_id)) {
                     throw new Error('missing_location')
@@ -190,7 +191,8 @@ async function updateBusiness(business_id, changes, user_id) {
                 if(changes?.address) {
                     // google api with address returning geocode information
                     const geoCode = await googleMapsClient.geocode({ address: changes.address }).asPromise();
-                    
+                    console.log('geoCode')
+                    console.log(geoCode.json.results)
                     // save return from geocode and newly added business information
                     location = {
                         street_address: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
@@ -248,7 +250,7 @@ async function updateBusiness(business_id, changes, user_id) {
                 .first()
         })  
     } catch (error) {
-        // console.log(error)
+        console.log(error)
         throw error
     }
 }
