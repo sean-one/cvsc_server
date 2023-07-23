@@ -87,6 +87,7 @@ function checkBusinessName(business_name) {
 
 // .post('/business/create) - creates a new business
 async function addBusiness(business, location) {
+    console.log('INSIDE ADDBUSINESS')
     try {
         
         return await db.transaction(async trx => {
@@ -99,8 +100,9 @@ async function addBusiness(business, location) {
             // check for location and save if submitted
             if (location !== undefined) {
                 // google api with address returning geocode information
-                const geoCode = await googleMapsClient.geocode({ placeId: location.place_id }).asPromise();
+                const geoCode = await googleMapsClient.geocode({ 'place_id': location.place_id }).asPromise();
                 
+                console.log(geoCode)
                 // save return from geocode and newly added business information
                 location = {
                     venue_name: added_business[0].business_name,

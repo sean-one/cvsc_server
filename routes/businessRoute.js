@@ -68,7 +68,6 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
             // save requesting user as business admin
             new_business['business_admin'] = req.user_decoded
         }
-
         // check if business location is attached
         if (new_business.address !== undefined) {
             business_location = { 'place_id': new_business.address }
@@ -93,6 +92,7 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
         res.status(201).json(created_business);
 
     } catch (err) {
+        console.log(err)
         // errors returned from created_business database call - invalid input errors
         if (err.constraint) {
             // error return from database after image creation, remove image from s3

@@ -4,8 +4,7 @@ const businessDB = require('../data/models/business');
 
 
 // CUSTOM REGEX PATTERNS
-// const addressPattern = /^\d+\s+(?:[A-Za-z\s]+\s*,\s*)?(?:(?:Unit|Suite|Ste|#)\s+\d+|#\d+)\s*,\s*[A-Za-z]{2}\s+\d{5}(?:-\d{4})?$/;
-const usStreetAddressFormat = /^\d+\s+[A-Za-z0-9\s]+\s*(?:[,\/]?\s*(?:Unit|Suite|Ste|Lot|Apt|#)?\s*[A-Za-z0-9-]+)?\s*,\s*[A-Za-z\s.'-]+\s*,\s*[A-Za-z]{2}\s+\d{5}$/;
+const googlePlaceIdFormat = /^[\w-]+$/;
 const phonePattern = /^\d{10}$/;
 const instagramPattern = /^[a-zA-Z0-9._]{1,30}$/;
 const twitterPattern = /^[a-zA-Z0-9_]{1,15}$/;
@@ -151,7 +150,7 @@ const newBusinessValidator = [
         .escape(),
     check('address').if((value, { req }) => req.body['business_type'] !== 'brand')
         .notEmpty().withMessage('business address is required')
-        .matches(usStreetAddressFormat).withMessage('address format invalid (i.e. 420 Smoke Road Suite 710, Green Fields, CA 00420)')
+        .matches(googlePlaceIdFormat).withMessage('invalid google place id format')
         .escape(),
     check('business_email').trim().optional().isEmail().escape(),
     check('business_phone').trim().optional()
@@ -181,7 +180,7 @@ const updateBusinessValidator = [
         .escape(),
     check('address').trim().optional()
         .custom(isBusinessAdmin)
-        .matches(usStreetAddressFormat).withMessage('address format invalid (i.e. 420 Smoke Road Suite 710, Green Fields, CA 00420)')
+        .matches(googlePlaceIdFormat).withMessage('invalid google places id format')
         .escape(),
     check('business_email').trim().optional()
         .custom(isBusinessAdmin)
