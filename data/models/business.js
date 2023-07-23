@@ -99,7 +99,7 @@ async function addBusiness(business, location) {
             // check for location and save if submitted
             if (location !== undefined) {
                 // google api with address returning geocode information
-                const geoCode = await googleMapsClient.geocode({ address: location.business_address }).asPromise();
+                const geoCode = await googleMapsClient.geocode({ placeId: location.place_id }).asPromise();
                 
                 // save return from geocode and newly added business information
                 location = {
@@ -110,7 +110,7 @@ async function addBusiness(business, location) {
                     location_state: geoCode.json.results[0].address_components[4].short_name,
                     zip_code: geoCode.json.results[0].address_components[6].short_name,
                     formatted: geoCode.json.results[0].formatted_address,
-                    place_id: geoCode.json.results[0].place_id
+                    // place_id: geoCode.json.results[0].place_id
                 }
 
                 // insert location information

@@ -71,9 +71,7 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
 
         // check if business location is attached
         if (new_business.address !== undefined) {
-            business_location = {
-                'business_address': new_business.address
-            }
+            business_location = { 'place_id': new_business.address }
         }
 
         delete new_business.address
