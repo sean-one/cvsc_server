@@ -16,7 +16,6 @@ const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoute');
 const eventRouter = require('./routes/eventRoute');
 const businessRouter = require('./routes/businessRoute');
-const locationRouter = require('./routes/locationRoute');
 const roleRouter = require('./routes/roleRoute');
 const s3Router = require('./routes/s3Route');
 const errorHandler = require('./helpers/errorHandler');
@@ -64,7 +63,6 @@ app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
 app.use('/business', businessRouter);
-app.use('/locations', locationRouter);
 app.use('/roles', roleRouter);
 app.use('/s3', s3Router);
 

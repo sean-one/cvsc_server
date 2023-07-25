@@ -14,12 +14,14 @@ const upload = multer({ storage: storage })
 const router = express.Router();
 
 //! updated endpoint - needs error handling
-router.get('/', (req, res) => {
-    db.find()
-        .then(events => {
-            res.status(200).json(events);
-        })
-        .catch(err => res.status(500).json(err));
+router.get('/', async (req, res) => {
+    try {
+        const events = await db.find()
+            
+        res.status(200).json(events);
+    } catch (error) {
+        res.status(500).json(error)
+    }
 });
 
 // useEventsApi - createEvent - useCreateEventMutation

@@ -148,7 +148,7 @@ const newBusinessValidator = [
     check('business_type').trim().not().isEmpty().withMessage('business type required')
         .isIn(['brand','venue','both']).withMessage('invalid business type')
         .escape(),
-    check('address').if((value, { req }) => req.body['business_type'] !== 'brand')
+    check('place_id').if((value, { req }) => req.body['business_type'] !== 'brand')
         .notEmpty().withMessage('business address is required')
         .matches(googlePlaceIdFormat).withMessage('invalid google place id format')
         .escape(),
@@ -178,7 +178,7 @@ const updateBusinessValidator = [
         .custom(isBusinessAdmin)
         .isIn(['brand','venue','both']).withMessage('invalid business type')
         .escape(),
-    check('address').trim().optional()
+    check('place_id').trim().optional()
         .custom(isBusinessAdmin)
         .matches(googlePlaceIdFormat).withMessage('invalid google places id format')
         .escape(),

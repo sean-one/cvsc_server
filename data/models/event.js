@@ -18,8 +18,8 @@ function find() {
         .where('events.eventdate', '>=', new Date())
         // remove inactive events from event list return
         .andWhere({ active_event: true })
-        .join('locations', 'events.venue_id', '=', 'locations.venue_id')
-        .join('businesses', 'events.brand_id', '=', 'businesses.id')
+        .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
+        .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
         .join('users', 'events.created_by', '=', 'users.id')
         .select(
             [
@@ -30,14 +30,15 @@ function find() {
                 'events.eventend',
                 'events.eventmedia',
                 'events.details',
-                'events.venue_id',
                 'events.active_event',
-                'locations.venue_name',
-                'locations.street_address',
-                'locations.location_city',
-                'locations.formatted',
-                'events.brand_id',
-                'businesses.business_name as brand_name',
+
+                'venue.id as venue_id',
+                'venue.business_name as venue_name',
+                'venue.formatted_address as venue_location',
+                
+                'brand.id as brand_id',
+                'brand.business_name as brand_name',
+
                 'events.created_by',
                 'users.username as event_creator'
             ]
@@ -49,8 +50,8 @@ function find() {
 async function findById(eventId) {
     return await db('events')
         .where({ 'events.id': eventId })
-        .leftJoin('locations', 'events.venue_id', '=', 'locations.venue_id')
-        .leftJoin('businesses', 'events.brand_id', '=', 'businesses.id')
+        .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
+        .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
         .select(
             [
                 'events.id as event_id',
@@ -60,14 +61,15 @@ async function findById(eventId) {
                 'events.eventend',
                 'events.eventmedia',
                 'events.details',
-                'events.venue_id',
                 'events.active_event',
-                'locations.venue_name',
-                'locations.street_address',
-                'locations.location_city',
-                'locations.formatted',
-                'events.brand_id',
-                'businesses.business_name as brand_name',
+                
+                'venue.id as venue_id',
+                'venue.business_name as venue_name',
+                'venue.formatted_address as venue_location',
+                
+                'brand.id as brand_id',
+                'brand.business_name as brand_name',
+
                 'events.created_by'
             ]
         )
@@ -82,8 +84,8 @@ async function createEvent(event) {
             const id = eventId[0].id;
             return db('events')
                 .where('events.id', id)
-                .join('locations', 'events.venue_id', '=', 'locations.venue_id')
-                .join('businesses', 'events.brand_id', '=', 'businesses.id')
+                .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
+                .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
                 .select(
                     [
                         'events.id as event_id',
@@ -93,14 +95,15 @@ async function createEvent(event) {
                         'events.eventend',
                         'events.eventmedia',
                         'events.details',
-                        'events.venue_id',
                         'events.active_event',
-                        'locations.venue_name',
-                        'locations.street_address',
-                        'locations.location_city',
-                        'locations.formatted',
-                        'events.brand_id',
-                        'businesses.business_name as brand_name',
+
+                        'venue.id as venue_id',
+                        'venue.business_name as venue_name',
+                        'venue.formatted_address as venue_location',
+                        
+                        'brand.id as brand_id',
+                        'brand.business_name as brand_name',
+
                         'events.created_by'
                     ]
                 )
@@ -134,8 +137,8 @@ async function updateImage(event_id, image_update) {
         
         return db('events')
             .where('events.id', event_id)
-            .join('locations', 'events.venue_id', '=', 'locations.venue_id')
-            .join('businesses', 'events.brand_id', '=', 'businesses.id')
+            .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
+            .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
             .select(
                 [
                     'events.id as event_id',
@@ -145,14 +148,15 @@ async function updateImage(event_id, image_update) {
                     'events.eventend',
                     'events.eventmedia',
                     'events.details',
-                    'events.venue_id',
                     'events.active_event',
-                    'locations.venue_name',
-                    'locations.street_address',
-                    'locations.location_city',
-                    'locations.formatted',
-                    'events.brand_id',
-                    'businesses.business_name as brand_name',
+
+                    'venue.id as venue_id',
+                    'venue.business_name as venue_name',
+                    'venue.formatted_address as venue_location',
+
+                    'brand.id as brand_id',
+                    'brand.business_name as brand_name',
+
                     'events.created_by'
                 ]
             )
@@ -176,8 +180,8 @@ async function updateEvent(event_id, eventChanges) {
 
         return db('events')
             .where('events.id', id)
-            .join('locations', 'events.venue_id', '=', 'locations.venue_id')
-            .join('businesses', 'events.brand_id', '=', 'businesses.id')
+            .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
+            .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
             .select(
                 [
                     'events.id as event_id',
@@ -187,14 +191,15 @@ async function updateEvent(event_id, eventChanges) {
                     'events.eventend',
                     'events.eventmedia',
                     'events.details',
-                    'events.venue_id',
                     'events.active_event',
-                    'locations.venue_name',
-                    'locations.street_address',
-                    'locations.location_city',
-                    'locations.formatted',
-                    'events.brand_id',
-                    'businesses.business_name as brand_name',
+
+                    'venue.id as venue_id',
+                    'venue.business_name as venue_name',
+                    'venue.formatted_address as venue_location',
+
+                    'brand.id as brand_id',
+                    'brand.business_name as brand_name',
+
                     'events.created_by'
                 ]
             )
@@ -284,8 +289,8 @@ function findUserEvents(user) {
     return db('events')
         .where({ created_by: user })
         .andWhere('events.eventdate', '>=', new Date())
-        .leftJoin('locations', 'events.venue_id', '=', 'locations.venue_id')
-        .leftJoin('businesses', 'events.brand_id', '=', 'businesses.id')
+        .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
+        .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
         .select(
             [
                 'events.id as event_id',
@@ -295,14 +300,15 @@ function findUserEvents(user) {
                 'events.eventend',
                 'events.eventmedia',
                 'events.details',
-                'events.venue_id',
                 'events.active_event',
-                'locations.venue_name',
-                'locations.street_address',
-                'locations.location_city',
-                'locations.formatted',
-                'events.brand_id',
-                'businesses.business_name as brand_name',
+
+                'venue.id as venue_id',
+                'venue.business_name as venue_name',
+                'venue.formatted_address as venue_location',
+
+                'brand.id as brand_id',
+                'brand.business_name as brand_name',
+
                 'events.created_by'
             ]
         )

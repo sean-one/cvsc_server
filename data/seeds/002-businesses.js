@@ -70,6 +70,9 @@ exports.seed = function(knex) {
           business_request_open: true,
           active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
+          formatted_address: "353 S Palm Canyon Dr, Palm Springs, CA 92262, USA",
+          place_id: "EjEzNTMgUyBQYWxtIENhbnlvbiBEciwgUGFsbSBTcHJpbmdzLCBDQSA5MjI2MiwgVVNBIhsSGQoUChIJH2RTUqYb24ARJ6fbb5cp5jgQ4QI"
+          
         },
         {
           id: '37de2ceb-0b11-47a3-bb43-9e0a6dadc789',
@@ -82,6 +85,8 @@ exports.seed = function(knex) {
           business_request_open: true,
           active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
+          formatted_address: "690 Garnet Ave, Palm Springs, CA 92262, USA",
+          place_id: "ChIJdWLItvsY24ARW4eKd066M2A"
         },
         {
           id: '7d416c48-e007-4eb1-9641-8b5ac54de5ff',
@@ -95,6 +100,8 @@ exports.seed = function(knex) {
           business_request_open: true,
           active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
+          formatted_address: "12106 Palm Dr, Desert Hot Springs, CA 92240, USA",
+          place_id: "ChIJdWEAWeUh24ARxjQrMNew_A0"
         },
         {
           id: 'eac5ff8f-a9f9-430a-ab35-537686a5b0aa',
@@ -108,6 +115,8 @@ exports.seed = function(knex) {
           business_request_open: true,
           active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
+          formatted_address: "68860 Ramon Rd #2, Cathedral City, CA 92234, USA",
+          place_id: "EjA2ODg2MCBSYW1vbiBSZCAjMiwgQ2F0aGVkcmFsIENpdHksIENBIDkyMjM0LCBVU0EiHRobChYKFAoSCc_S_8gYHduAET0OmgvPYae9EgEy"
         },
         {
           id: 'cf5bb409-85c9-43dc-acac-4d6444b1658f',
@@ -122,6 +131,8 @@ exports.seed = function(knex) {
           business_request_open: true,
           active_business: true,
           business_admin: '2c906eeb-c7f7-4534-ae06-20f601b42224',
+          formatted_address: "75048 Gerald Ford Dr #101, Palm Desert, CA 92211, USA",
+          place_id: "ChIJg0Uo_PP82oARobd0smOx-M8"
         },
         {
           id: '31399650-c64c-4558-8e0e-f10b5382f474',
@@ -162,6 +173,8 @@ exports.seed = function(knex) {
           business_instagram: 'brads_lounge',
           business_website: 'https://www.bradslounge.com',
           business_twitter: 'bradslounge',
+          formatted_address: '1321 N Gene Autry Trail, Palm Springs, CA 92262, USA',
+          place_id: 'ChIJB9dB5XMc24ARNdiuQFz-OzE'
         }
       ]);
     });

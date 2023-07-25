@@ -5,6 +5,7 @@ const sharp = require('sharp');
 
 const { uploadImageS3Url, deleteImageS3 } = require('../s3');
 const db = require('../data/models/business');
+const { updatedGoogleMapsClient } = require('../helpers/geocoder');
 
 const businessErrors = require('../error_messages/businessErrors');
 const { checkBusinessManagement, validToken, businessEditRole, businessAdmin } = require('../helpers/jwt_helper');
@@ -52,7 +53,7 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
             business_name: req.body.business_name,
             business_description: req.body.business_description,
             business_type: req.body.business_type,
-            address: req.body.address,
+            place_id: req.body.place_id,
             business_email: req.body.business_email,
             business_phone: req.body.business_phone,
             business_instagram: req.body.business_instagram,
@@ -69,12 +70,14 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
             new_business['business_admin'] = req.user_decoded
         }
         // check if business location is attached
-        if (new_business.address !== undefined) {
-            business_location = { 'place_id': new_business.address }
+        if (new_business.place_id) {
+            const geocode = await updatedGoogleMapsClient.geocode({ params: { place_id: new_business.place_id, key: process.env.GEOCODER_API_KEY }, timeout: 1000 })
+            
+            new_business.formatted_address = geocode.data.results[0].formatted_address
+        } else {
+            delete new_business.place_id
         }
 
-        delete new_business.address
-        
         // if file present resize the image and upload to s3 returning an image key or return error due to missing image
         if(req.file) {
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).toBuffer()
@@ -87,7 +90,7 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
         // set business as active
         new_business['active_business'] = true
         
-        const created_business = await db.addBusiness(new_business, business_location)
+        const created_business = await db.addBusiness(new_business)
         
         res.status(201).json(created_business);
 

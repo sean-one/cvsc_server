@@ -1,5 +1,6 @@
 const db = require('../dbConfig');
-const googleMapsClient = require('../../helpers/geocoder');
+// const googleMapsClient = require('../../helpers/geocoder');
+// const { Client } = require('@googlemaps/google-maps-services-js');
 const { deleteImageS3 } = require('../../s3');
 
 module.exports = {
@@ -16,12 +17,13 @@ module.exports = {
 function find() {
     return db('businesses')
         // .where({ active_bus  iness: true })
-        .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .leftJoin('users', 'businesses.business_admin', '=', 'users.id')
         .select(
             [
                 'businesses.id',
                 'businesses.business_name',
+                'businesses.formatted_address',
+                'businesses.place_id',
                 'businesses.business_avatar',
                 'businesses.business_description',
                 'businesses.business_type',
@@ -35,12 +37,6 @@ function find() {
                 'businesses.business_facebook',
                 'businesses.business_website',
                 'businesses.business_twitter',
-                'locations.id as location_id',
-                'locations.street_address',
-                'locations.location_city',
-                'locations.location_state',
-                'locations.zip_code',
-                'locations.formatted'
             ]
         )
 }
@@ -49,11 +45,12 @@ function find() {
 function findBusinessById(business_id) {
     return db('businesses')
         .where({ 'businesses.id': business_id })
-        .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
         .select(
             [
                 'businesses.id',
                 'businesses.business_name',
+                'businesses.formatted_address',
+                'businesses.place_id',
                 'businesses.business_avatar',
                 'businesses.business_description',
                 'businesses.business_type',
@@ -66,12 +63,6 @@ function findBusinessById(business_id) {
                 'businesses.business_facebook',
                 'businesses.business_website',
                 'businesses.business_twitter',
-                'locations.id as location_id',
-                'locations.street_address',
-                'locations.location_city',
-                'locations.location_state',
-                'locations.zip_code',
-                'locations.formatted'
             ]
         )
         .first();
@@ -86,40 +77,15 @@ function checkBusinessName(business_name) {
 }
 
 // .post('/business/create) - creates a new business
-async function addBusiness(business, location) {
-    console.log('INSIDE ADDBUSINESS')
+async function addBusiness(business) {
     try {
         
         return await db.transaction(async trx => {
-
+            
             // insert new business into database
             const added_business = await db('businesses')
                 .transacting(trx)
                 .insert(business, ['id', 'business_name', 'business_admin', 'business_type'])
-            
-            // check for location and save if submitted
-            if (location !== undefined) {
-                // google api with address returning geocode information
-                const geoCode = await googleMapsClient.geocode({ 'place_id': location.place_id }).asPromise();
-                
-                console.log(geoCode)
-                // save return from geocode and newly added business information
-                location = {
-                    venue_name: added_business[0].business_name,
-                    venue_id: added_business[0].id,
-                    street_address: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
-                    location_city: geoCode.json.results[0].address_components[2].long_name,
-                    location_state: geoCode.json.results[0].address_components[4].short_name,
-                    zip_code: geoCode.json.results[0].address_components[6].short_name,
-                    formatted: geoCode.json.results[0].formatted_address,
-                    // place_id: geoCode.json.results[0].place_id
-                }
-
-                // insert location information
-                await db('locations')
-                    .transacting(trx)
-                    .insert(location)
-            }
             
             // create a business_admin role for the user requesting the new business
             await db('roles')
@@ -136,12 +102,13 @@ async function addBusiness(business, location) {
             return db('businesses')
                 .transacting(trx)
                 .where({ 'businesses.id': added_business[0].id})
-                .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
                 .join('roles', 'businesses.id', '=', 'roles.business_id')
                 .select(
                     [
                         'businesses.id',
                         'businesses.business_name',
+                        'businesses.formatted_address',
+                        'businesses.place_id',
                         'businesses.business_avatar',
                         'businesses.business_description',
                         'businesses.business_type',
@@ -154,12 +121,6 @@ async function addBusiness(business, location) {
                         'businesses.business_facebook',
                         'businesses.business_website',
                         'businesses.business_twitter',
-                        'locations.id as location_id',
-                        'locations.street_address',
-                        'locations.location_city',
-                        'locations.location_state',
-                        'locations.zip_code',
-                        'locations.formatted',
                         'roles.id as admin_role_id',
                         'roles.active_role',
                         'roles.role_type',
@@ -179,7 +140,7 @@ async function updateBusiness(business_id, changes, user_id) {
         return await db.transaction(async trx => {
             const { role_type } = await db('roles').where({ business_id: business_id, user_id: user_id }).first()
             const { business_name } = await db('businesses').where({ id: business_id }).first()
-            const { location_id } = await db('locations').where({ venue_id: business_id }).first()
+            // const { location_id } = await db('locations').where({ venue_id: business_id }).first()
             
             
             if(role_type === process.env.ADMIN_ACCOUNT) {
@@ -190,30 +151,30 @@ async function updateBusiness(business_id, changes, user_id) {
                 }
 
                 // if changes.location_id is not there then none of the following steps should be needed
-                if(changes?.address) {
-                    // google api with address returning geocode information
-                    const geoCode = await googleMapsClient.geocode({ address: changes.address }).asPromise();
-                    console.log('geoCode')
-                    console.log(geoCode.json.results)
-                    // save return from geocode and newly added business information
-                    location = {
-                        street_address: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
-                        location_city: geoCode.json.results[0].address_components[2].long_name,
-                        location_state: geoCode.json.results[0].address_components[4].short_name,
-                        zip_code: geoCode.json.results[0].address_components[6].short_name,
-                        formatted: geoCode.json.results[0].formatted_address,
-                        place_id: geoCode.json.results[0].place_id
-                    }
+                // if(changes?.address) {
+                //     // google api with address returning geocode information
+                //     const geoCode = await googleMapsClient.geocode({ address: changes.address }).asPromise();
+                //     console.log('geoCode')
+                //     console.log(geoCode.json.results)
+                //     // save return from geocode and newly added business information
+                //     location = {
+                //         street_address: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
+                //         location_city: geoCode.json.results[0].address_components[2].long_name,
+                //         location_state: geoCode.json.results[0].address_components[4].short_name,
+                //         zip_code: geoCode.json.results[0].address_components[6].short_name,
+                //         formatted: geoCode.json.results[0].formatted_address,
+                //         place_id: geoCode.json.results[0].place_id
+                //     }
                     
-                    if(location_id === undefined) {
-                        location['venue_id'] = business_id
-                        location['venue_name'] = business_name
-                        await db('locations').transacting(trx).insert(location)
-                    } else {
-                        // insert location information
-                        await db('locations').transacting(trx).where({ id: location_id }).update(location)
-                    }
-                }
+                //     if(location_id === undefined) {
+                //         location['venue_id'] = business_id
+                //         location['venue_name'] = business_name
+                //         await db('locations').transacting(trx).insert(location)
+                //     } else {
+                //         // insert location information
+                //         await db('locations').transacting(trx).where({ id: location_id }).update(location)
+                //     }
+                // }
                 
             } else {
                 delete changes.address
@@ -226,10 +187,11 @@ async function updateBusiness(business_id, changes, user_id) {
 
             return db('businesses')
                 .where({ 'businesses.id': business_id})
-                .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
                 .select([
                     'businesses.id',
                     'businesses.business_name',
+                    'businesses.formatted_address',
+                    'businesses.place_id',
                     'businesses.business_avatar',
                     'businesses.business_description',
                     'businesses.business_type',
@@ -242,12 +204,6 @@ async function updateBusiness(business_id, changes, user_id) {
                     'businesses.business_facebook',
                     'businesses.business_website',
                     'businesses.business_twitter',
-                    'locations.id as location_id',
-                    'locations.street_address',
-                    'locations.location_city',
-                    'locations.location_state',
-                    'locations.zip_code',
-                    'locations.formatted'
                 ])
                 .first()
         })  
@@ -290,10 +246,10 @@ async function toggleActiveBusiness(business_id) {
         return await db('businesses')
             .transacting(trx)
             .where({ 'businesses.id': business_id })
-            .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
             .select([
                 'businesses.id',
                 'businesses.business_name',
+                'businesses.formatted_address',
                 'businesses.business_avatar',
                 'businesses.business_description',
                 'businesses.business_type',
@@ -306,12 +262,6 @@ async function toggleActiveBusiness(business_id) {
                 'businesses.business_facebook',
                 'businesses.business_website',
                 'businesses.business_twitter',
-                'locations.id as location_id',
-                'locations.street_address',
-                'locations.location_city',
-                'locations.location_state',
-                'locations.zip_code',
-                'locations.formatted'
             ])
             .first()
     })
@@ -335,11 +285,11 @@ async function toggleBusinessRequest(business_id) {
     
     return await db('businesses')
             .where({ 'businesses.id': business_id })
-            .leftJoin('locations', 'businesses.id', '=', 'locations.venue_id')
             .select(
                 [
                     'businesses.id',
                     'businesses.business_name',
+                    'businesses.formatted_address',
                     'businesses.business_avatar',
                     'businesses.business_description',
                     'businesses.business_type',
@@ -352,12 +302,6 @@ async function toggleBusinessRequest(business_id) {
                     'businesses.business_facebook',
                     'businesses.business_website',
                     'businesses.business_twitter',
-                    'locations.id as location_id',
-                    'locations.street_address',
-                    'locations.location_city',
-                    'locations.location_state',
-                    'locations.zip_code',
-                    'locations.formatted'
                 ]
             )
             .first()
@@ -379,12 +323,6 @@ async function removeBusiness(business_id) {
                 .where({ venue_id: business_id })
                 .orWhere({ brand_id: business_id })
                 .update({ active_event: false })
-
-            // delete location for business to be deleted
-            await db('locations')
-                .transacting(trx)
-                .where({ venue_id: business_id })
-                .del()
 
             // delete all from roles
             await db('roles')
