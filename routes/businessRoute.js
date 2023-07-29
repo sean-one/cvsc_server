@@ -142,7 +142,8 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
         const fieldsToInclude = [
             'business_description',
             'business_type',
-            'address',
+            'formatted_address',
+            'place_id',
             'business_email',
             'business_phone',
             'business_instagram',
@@ -154,7 +155,7 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
         const business_update = createUpdateObject(req.body, fieldsToInclude);
 
         // if attempting to change from business type other then brand, an address must be attached or already on the business
-        if(business_update?.business_type !== 'brand' && (!current_business?.location_id && !business_update?.address)) {
+        if(business_update?.business_type !== 'brand' && (!current_business?.place_id && !business_update?.place_id)) {
             throw new Error('business_address_required')
         }
         

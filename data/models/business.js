@@ -137,76 +137,42 @@ async function addBusiness(business) {
 // .put('/business/update/:business_id) - updates existing business
 async function updateBusiness(business_id, changes, user_id) {
     try {
-        return await db.transaction(async trx => {
-            const { role_type } = await db('roles').where({ business_id: business_id, user_id: user_id }).first()
-            const { business_name } = await db('businesses').where({ id: business_id }).first()
-            // const { location_id } = await db('locations').where({ venue_id: business_id }).first()
-            
-            
-            if(role_type === process.env.ADMIN_ACCOUNT) {
-                console.log('inside admin changes')
-                
-                if(changes?.business_type && changes?.business_type === 'venue' || changes?.business_type === 'both' && (!changes?.address && !location_id)) {
-                    throw new Error('missing_location')
-                }
-
-                // if changes.location_id is not there then none of the following steps should be needed
-                // if(changes?.address) {
-                //     // google api with address returning geocode information
-                //     const geoCode = await googleMapsClient.geocode({ address: changes.address }).asPromise();
-                //     console.log('geoCode')
-                //     console.log(geoCode.json.results)
-                //     // save return from geocode and newly added business information
-                //     location = {
-                //         street_address: `${geoCode.json.results[0].address_components[0].short_name} ${geoCode.json.results[0].address_components[1].long_name}`,
-                //         location_city: geoCode.json.results[0].address_components[2].long_name,
-                //         location_state: geoCode.json.results[0].address_components[4].short_name,
-                //         zip_code: geoCode.json.results[0].address_components[6].short_name,
-                //         formatted: geoCode.json.results[0].formatted_address,
-                //         place_id: geoCode.json.results[0].place_id
-                //     }
-                    
-                //     if(location_id === undefined) {
-                //         location['venue_id'] = business_id
-                //         location['venue_name'] = business_name
-                //         await db('locations').transacting(trx).insert(location)
-                //     } else {
-                //         // insert location information
-                //         await db('locations').transacting(trx).where({ id: location_id }).update(location)
-                //     }
-                // }
-                
-            } else {
-                delete changes.address
-                delete changes.business_type
+        const { role_type } = await db('roles').where({ business_id: business_id, user_id: user_id }).first()
+        const { place_id } = await db('businesses').where({ id: business_id }).first()
+        
+        
+        if(role_type === process.env.ADMIN_ACCOUNT) {
+            if(changes?.business_type && changes?.business_type === 'venue' || changes?.business_type === 'both' && (!changes?.place_id && !place_id)) {
+                throw new Error('missing_location')
             }
             
-            if(Object.keys(changes).length > 0) {
-                await db('businesses').where({ id: business_id }).update(changes)
-            }
+        }
+        
+        if(Object.keys(changes).length > 0) {
+            await db('businesses').where({ id: business_id }).update(changes)
+        }
 
-            return db('businesses')
-                .where({ 'businesses.id': business_id})
-                .select([
-                    'businesses.id',
-                    'businesses.business_name',
-                    'businesses.formatted_address',
-                    'businesses.place_id',
-                    'businesses.business_avatar',
-                    'businesses.business_description',
-                    'businesses.business_type',
-                    'businesses.business_request_open',
-                    'businesses.active_business',
-                    'businesses.business_admin',
-                    'businesses.business_email',
-                    'businesses.business_phone',
-                    'businesses.business_instagram',
-                    'businesses.business_facebook',
-                    'businesses.business_website',
-                    'businesses.business_twitter',
-                ])
-                .first()
-        })  
+        return db('businesses')
+            .where({ 'businesses.id': business_id})
+            .select([
+                'businesses.id',
+                'businesses.business_name',
+                'businesses.formatted_address',
+                'businesses.place_id',
+                'businesses.business_avatar',
+                'businesses.business_description',
+                'businesses.business_type',
+                'businesses.business_request_open',
+                'businesses.active_business',
+                'businesses.business_admin',
+                'businesses.business_email',
+                'businesses.business_phone',
+                'businesses.business_instagram',
+                'businesses.business_facebook',
+                'businesses.business_website',
+                'businesses.business_twitter',
+            ])
+            .first()
     } catch (error) {
         console.log(error)
         throw error
