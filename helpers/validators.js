@@ -44,6 +44,14 @@ const isUsernameUnique = async (value) => {
 };
 
 const validatePassword = (value) => {
+    if(value.length < 8) {
+        return 'password is too short - must be at least 8 characters'
+    }
+
+    if(value.length >= 49) {
+        return 'password is too long - must be under 50 characters'
+    }
+    
     if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#$%^&*()_+-=,./?;:'"[\]{}|\\]).{8,}$/.test(value)) {
         throw new Error('password must contain at least one uppercase letter, lowercase letter & number with (optional) special character')
     }

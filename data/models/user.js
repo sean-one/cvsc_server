@@ -7,6 +7,7 @@ module.exports = {
     removeRefreshToken,
     findByRefresh,
     findUserById,
+    getUserAccount,
     findByGoogleId,
     findByUsername,
     checkUsernameDuplicate,
@@ -54,8 +55,21 @@ async function findByRefresh(token) {
         .first()
 }
 
-//! passport-config - deserialize user --- userRoute - '.post(/users/update)'
+// userRoute - '.post(/users/update)'
 async function findUserById(id) {
+    return await db('users')
+        .where({ 'users.id': id })
+        .select([
+            'users.id',
+            'users.username',
+            'users.avatar',
+            'users.email'
+        ])
+        .first()
+}
+
+// passport-config - deserialize user
+async function getUserAccount(id) {
     const user = await db('users').where({ 'users.id': id }).select(['users.id', 'users.username', 'users.avatar', 'users.email',]).first()
     const account_type = await db('roles').where({ 'roles.user_id': id, 'roles.active_role': true }).select(['roles.business_id', 'roles.role_type']).orderBy('role_type', 'desc')
 
@@ -110,7 +124,7 @@ function checkUsernameDuplicate(username) {
 async function updateUser(user_id, updates) {
     await db('users').where({ id: user_id }).update(updates)
 
-    return findUserById(user_id)
+    return getUserAccount(user_id)
 }
 
 // userRoute - '/users/delete'
