@@ -6,7 +6,7 @@ const { deleteImageS3, uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
 const { validToken, validateEventCreation, eventCreator, eventManager } = require('../helpers/jwt_helper');
-const { newEventValidator, validateImageFile, result } = require('../helpers/validators');
+const { newEventValidator, updateEventValidator, validateImageFile, result } = require('../helpers/validators');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
@@ -70,13 +70,38 @@ router.get('/:event_id', async (req, res, next) => {
 });
 
 // useEventsApi - updateEvent - useUpdateEventMutation
-router.post('/update/:event_id', [upload.single('eventmedia'), validToken, eventCreator], async (req, res, next) => {
+router.post('/update/:event_id', [upload.single('eventmedia'), validToken, eventCreator, updateEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
-        const event_updates = req.body;
+        // const event_updates = req.body;
         
-        console.log(event_updates)
+        // check for any additional fields and rmove them
+        function createUpdateObject(originalObject, keysToInclude) {
+            const update_details = {}
+
+            for (const key of keysToInclude) {
+                if(key in originalObject) {
+                    update_details[key] = originalObject[key];
+                }
+            }
+
+            return update_details
+        }
+
+        // only fields to include in update object
+        const fieldsToInclude = [
+            'eventname',
+            'eventdate',
+            'eventstart',
+            'eventend',
+            'venue_id',
+            'details',
+            'brand_id'
+        ]
+
+        const event_update = createUpdateObject(req.body, fieldsToInclude)
+
         if(req.file) {
             const { eventmedia } = await db.findById(event_id)
             // resize the image
@@ -90,15 +115,14 @@ router.post('/update/:event_id', [upload.single('eventmedia'), validToken, event
                 await deleteImageS3(eventmedia)
             }
 
-            event_updates['eventmedia'] = image_key
+            event_update['eventmedia'] = image_key
         }
 
-        const event_updated = await db.updateEvent(event_id, event_updates)
+        const event_updated = await db.updateEvent(event_id, event_update)
         
         res.status(201).json(event_updated)
+
     } catch (error) {
-        console.log('this is the error in event route')
-        console.log(error.message)
         next({
             status: eventErrors[error.message]?.status,
             message: eventErrors[error.message]?.message,

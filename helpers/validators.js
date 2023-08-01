@@ -312,6 +312,29 @@ const newEventValidator = [
         .escape(),
 ]
 
+const updateEventValidator =[
+    check('eventname').trim().optional()
+        .isLength({ min: 2, max: 50}).withMessage('event name must be at least 2 characters, and no more then 50')
+        .custom(isEventNameUnique)
+        .escape(),
+    check('eventdate').trim().optional()
+        .custom(isValidDate)
+        .escape(),
+    check('eventstart').trim().optional()
+        .custom(isValidTime)
+        .escape(),
+    check('eventend').trim().optional()
+        .custom(isValidTime)
+        .escape(),
+    check('venue_id').trim().optional()
+        .matches(uuidPattern).withMessage('venue not found')
+        .escape(),
+    check('details').trim().optional().escape(),
+    check('brand_id').trim().optional()
+        .matches(uuidPattern).withMessage('business not found')
+        .escape(),
+]
+
 const result = (req, res, next) => {
     const result = validationResult(req);
     const hasError = !result.isEmpty();
@@ -337,5 +360,6 @@ module.exports = {
     updateBusinessValidator,
     updateUserValidator,
     newEventValidator,
+    updateEventValidator,
     result
 }

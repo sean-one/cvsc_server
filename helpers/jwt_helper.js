@@ -264,14 +264,12 @@ const eventCreator = async (req, res, next) => {
         if(!created_by) throw new Error('invalid_request')
 
         // confirm user making changes to event is the creator of the event
-        if(created_by === user_id) {
-            console.log('valid event creator')
-            next()
-        } else {
+        if(created_by !== user_id) {
             throw new Error('invalid_user')
         }
+        
+        next()
     } catch (error) {
-        console.log('error in event creator token')
         // console.log(error)
         if(error.name === 'TypeError') {
             // when findById does not find an event a typeerror is thrown
