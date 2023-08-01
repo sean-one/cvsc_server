@@ -137,11 +137,32 @@ function isValidDate(value) {
     // Create a Date object and check if it represents a valid date
     const parsedDate = new Date(year, month - 1, day);
   
-    if(parsedDate.getFullYear() === year && parsedDate.getMonth() === month - 1 && parsedDate.getDate() === day) {
-        return true
-    } else {
+
+    const isValid =
+        parsedDate.getFullYear() === year &&
+        parsedDate.getMonth() === month - 1 &&
+        parsedDate.getDate() === day;
+
+    if (!isValid) {
         throw new Error('invalid date')
     }
+
+    // Check if the date is not in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (parsedDate < today) {
+        throw new Error('event date can not be in the past');
+    }
+
+    // Check if the date is within the next 60 days
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 60);
+    futureDate.setHours(0, 0, 0, 0);
+    if (parsedDate > futureDate) {
+        throw new Error('events may only be 60 days out')
+    }
+
+    return true
 }
 
 function isValidTime(value) {
