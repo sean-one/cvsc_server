@@ -19,7 +19,6 @@ const router = express.Router();
 // user.account - update_user
 router.post('/update', [ upload.single('avatar'), validToken, updateUserValidator, validateImageFile, result ], async (req, res, next) => {
     try {
-        console.log('past validations into function')
         const check_link = /^(http|https)/g
         const user_id = req.user_decoded
         const user_changes = {}
@@ -30,7 +29,6 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
         }
 
         if(req.body?.password) {
-            console.log('found a password')
             // hash and save password
             const hash = await hashPassword(req.body.password)
             console.log(hash)

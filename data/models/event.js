@@ -3,6 +3,7 @@ const db = require('../dbConfig');
 module.exports = {
     find,
     findById,
+    checkEventName,
     findUserEvents,
     createEvent,
     updateImage,
@@ -73,6 +74,14 @@ async function findById(eventId) {
                 'events.created_by'
             ]
         )
+        .first()
+}
+
+// .post('/events/create') - checks if event name is already in use
+async function checkEventName(eventname) {
+    return db('events')
+        .where(db.raw('LOWER(eventname) ILIKE ?', eventname.toLowerCase()))
+        .select([ 'events.id' ])
         .first()
 }
 

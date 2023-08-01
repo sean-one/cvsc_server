@@ -1,6 +1,7 @@
 const { check, validationResult } = require('express-validator');
 const userDB = require('../data/models/user');
 const businessDB = require('../data/models/business');
+const eventsDB = require('../data/models/event');
 
 
 // CUSTOM REGEX PATTERNS
@@ -9,6 +10,7 @@ const phonePattern = /^\d{10}$/;
 const instagramPattern = /^[a-zA-Z0-9._]{1,30}$/;
 const twitterPattern = /^[a-zA-Z0-9_]{1,15}$/;
 const facebookPattern = /^[a-zA-Z0-9._-]{5,}$/;
+const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 // CUSTOM VALIDATIONS
 const isUsernameValid = (value) => {
@@ -109,6 +111,60 @@ const isBusinessAdmin = async (value, { req }) => {
 
     return true
 }
+
+const isEventNameUnique = async (value) => {
+    const found = await eventsDB.checkEventName(value)
+
+    if(found !== undefined) {
+        throw new Error('event name already in use (duplicate)')
+    }
+
+    return true
+}
+
+function isValidDate(value) {
+    // date pater should be yyyy-m-d
+    const datePattern = /^\d{4}-\d{1,2}-\d{1,2}$/;
+  
+    // Check if the input matches the expected format "yyyy-m-d"
+    if (!datePattern.test(value)) {
+        throw new Error('event date format error')
+    }
+
+    // Extract year, month, and day from the input
+    const [year, month, day] = value.split('-').map(Number);
+  
+    // Create a Date object and check if it represents a valid date
+    const parsedDate = new Date(year, month - 1, day);
+  
+    if(parsedDate.getFullYear() === year && parsedDate.getMonth() === month - 1 && parsedDate.getDate() === day) {
+        return true
+    } else {
+        throw new Error('invalid date')
+    }
+}
+
+function isValidTime(value) {
+    const timePattern = /^\d{4}$/;
+
+    // Check if the input matches the expected format "HHmm"
+    if (!timePattern.test(value)) {
+        throw new Error('time format error')
+    }
+
+    // Extract hours and minutes from the input
+    const hours = parseInt(value.substring(0, 2));
+    const minutes = parseInt(value.substring(2));
+
+    // Check if the extracted values represent a valid time
+    if(Number.isInteger(hours) && Number.isInteger(minutes) && hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        return true;
+    } else {
+        throw new Error('invalid time')
+    }
+}
+
+
 
 
 const registerUserValidator = [
@@ -212,6 +268,29 @@ const updateBusinessValidator = [
     check('business_website').trim().optional().isURL(),
 ]
 
+const newEventValidator = [
+    check('eventname').trim().not().isEmpty().withMessage('eventname is required')
+        .isLength({ min: 2, max: 50}).withMessage('event name must be at least 2 characters, and no more then 50')
+        .custom(isEventNameUnique)
+        .escape(),
+    check('eventdate').trim().not().isEmpty().withMessage('event date is required')
+        .custom(isValidDate)
+        .escape(),
+    check('eventstart').trim().not().isEmpty().withMessage('event start time is required')
+        .custom(isValidTime)
+        .escape(),
+    check('eventend').trim().not().isEmpty().withMessage('event end time is required')
+        .custom(isValidTime)
+        .escape(),
+    check('venue_id').trim().not().isEmpty().withMessage('event location is required')
+        .matches(uuidPattern).withMessage('venue not found')
+        .escape(),
+    check('details').trim().not().isEmpty().withMessage('event details are required').escape(),
+    check('brand_id').trim().not().isEmpty().withMessage('event branding is required')
+        .matches(uuidPattern).withMessage('business not found')
+        .escape(),
+]
+
 const result = (req, res, next) => {
     const result = validationResult(req);
     const hasError = !result.isEmpty();
@@ -236,5 +315,6 @@ module.exports = {
     validateImageAdmin,
     updateBusinessValidator,
     updateUserValidator,
+    newEventValidator,
     result
 }
