@@ -3,7 +3,8 @@ const express = require('express');
 const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken, roleRequestUser, validateRoleManagement } = require('../helpers/jwt_helper')
+const { validToken, roleRequestUser, validateRoleManagement } = require('../helpers/jwt_helper');
+const { validateRoleRequest, result } = require('../helpers/validators');
 
 const router = express.Router();
 
@@ -47,16 +48,10 @@ router.get('/management/:user_id', [ validToken ], async (req, res, next) => {
 })
 
 // useCreateRoleMutation - createRoleRequest - useRolesApi
-router.post('/request/:business_id', [ validToken ], async (req, res, next) => {
+router.post('/request/:business_id', [ validToken, validateRoleRequest, result ], async (req, res, next) => {
     try {
         const { business_id } = req.params
     
-        const selected_business = await dbBusiness.findBusinessById(business_id)
-    
-        if(!selected_business) return res.sendStatus(404)
-
-        if(!selected_business.business_request_open) throw new Error('business_request_closed')
-
         const role_request = await db.createRoleRequest(business_id, req.user_decoded)
 
         if(role_request[0]?.business_id) return res.status(201).json(role_request[0])

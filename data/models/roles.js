@@ -7,6 +7,7 @@ module.exports = {
     findRolesPendingManagement,
     findRoleByBusiness,
     getUserBusinessRoles,
+    getAllUserRoles,
     approveRoleRequest,
     upgradeCreatorRole,
     downgradeManagerRole,
@@ -126,9 +127,9 @@ async function findRoleByBusiness(business_id) {
         )
 }
 
-// jwt_helper validateEventCreation - returns an array of business_id(s)
+// jwt_helper validateEventCreation - returns an array of ative roles business_id(s)
 async function getUserBusinessRoles(user_id) {
-    const user_roles = await db('roles')
+    return await db('roles')
         .where({ user_id: user_id, active_role: true })
         .select(
             [
@@ -137,11 +138,19 @@ async function getUserBusinessRoles(user_id) {
         )
         .groupBy('roles.user_id')
         .first()
-    if (user_roles == null) {
-        throw new Error('roles_not_found')
-    } else {
-        return user_roles
-    }
+}
+
+// validators - validateRoleRequest - returns an array of all roles business_ids active or not
+async function getAllUserRoles(user_id) {
+    return await db('roles')
+        .where({ user_id: user_id })
+        .select(
+            [
+                db.raw('ARRAY_AGG(roles.business_id) as business_ids')
+            ]
+        )
+        .groupBy('roles.user_id')
+        .first()
 }
 
 // useCreateRoleMutation - useRolesApi

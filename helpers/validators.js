@@ -2,6 +2,7 @@ const { check, validationResult } = require('express-validator');
 const userDB = require('../data/models/user');
 const businessDB = require('../data/models/business');
 const eventsDB = require('../data/models/event');
+const rolesDB = require('../data/models/roles');
 
 
 // CUSTOM REGEX PATTERNS
@@ -92,6 +93,40 @@ const validateImageAdmin = async (req, res, next) => {
         }
         next()
     }
+}
+
+const validateRoleRequest = async (req, res, next) => {
+    const { business_id } = req.params
+    const user_id = req.user_decoded
+    
+    // validate that the user_id is a uuid
+    if(!uuidPattern.test(user_id)) {
+        return res.status(400).json({ message: 'invalid user' })
+    }
+    
+    // validate that the business_id is a uuid
+    if(!uuidPattern.test(business_id)) {
+        return res.status(400).json({ message: 'invalid business identifier' })
+    }
+    
+    // validate that business_id is actual business
+    const requestedBusiness = await businessDB.findBusinessById(business_id)
+    if(!requestedBusiness) {
+        return res.status(400).json({ message: 'business not found' })
+    }
+    
+    // validate the business_request_open is true
+    if(!requestedBusiness.business_request_open) {
+        return res.status(400).json({ message: 'business request closed' })
+    }
+    
+    // confirm non duplicate
+    const userRolesBusinessIds = await rolesDB.getAllUserRoles(user_id)
+    if(userRolesBusinessIds?.business_ids.includes(business_id)) {
+        return res.status(400).json({ message: 'duplicate request not allowed' })
+    }
+
+    next()
 }
 
 const isBusinessNameUnique = async (value) => {
@@ -357,6 +392,7 @@ module.exports = {
     registerUserValidator,
     validateImageFile,
     validateImageAdmin,
+    validateRoleRequest,
     updateBusinessValidator,
     updateUserValidator,
     newEventValidator,
