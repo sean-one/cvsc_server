@@ -50,7 +50,7 @@ async function findUserRoles(user_id) {
 
 // jwt_helper - inside validateRoleManagement & roleRequestUser
 async function findRoleById(request_id) {
-    const role_request = await db('roles')
+    return await db('roles')
         .where({ 'roles.id': request_id })
         .select(
             [
@@ -60,12 +60,6 @@ async function findRoleById(request_id) {
             ]
         )
         .first()
-    if (role_request == null) {
-        console.log(role_request)
-        throw new Error('request_not_found')
-    } else {
-        return role_request;
-    }
 }
 
 // returns an array of pending role request based on accounts with manager and admin credentials
@@ -248,13 +242,7 @@ async function downgradeManagerRole(role_id, admin_id) {
 
 // useRemoveRoleMutation & useRemoveUserRoleMutation - useRolesApi
 async function removeRole(role_id) {
-    const deleted_count = await db('roles')
+    return await db('roles')
         .where({ id: role_id })
         .del()
-
-    if (deleted_count >= 1) {
-        return deleted_count;
-    } else {
-        throw new Error('delete_error')
-    }
 }

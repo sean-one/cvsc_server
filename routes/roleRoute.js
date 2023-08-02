@@ -4,7 +4,7 @@ const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
 const { validToken, roleRequestUser, validateRoleManagement } = require('../helpers/jwt_helper');
-const { validateRoleRequest, result } = require('../helpers/validators');
+const { validateRoleDelete, validateRoleRequest, result } = require('../helpers/validators');
 
 const router = express.Router();
 
@@ -145,7 +145,7 @@ router.delete('/remove/:role_id', [validToken, validateRoleManagement ], async (
         const { role_id } = req.params
 
         const deleted_role_count = await db.removeRole(role_id)
-
+        
         res.status(204).json(deleted_role_count)
 
     } catch (error) {
@@ -197,13 +197,13 @@ router.get('/user_role/:business_id', [validToken], async (req, res, next) => {
 })
 
 // useRemoveUserRoleMutation - removeUserRole - useRolesApi
-router.delete('/user_remove/:role_id', [validToken, roleRequestUser], async (req, res, next) => {
+router.delete('/user_remove/:role_id', [validToken, validateRoleDelete, result], async (req, res, next) => {
     try {
         const { role_id } = req.params
 
-        const deleted_role_count = await db.removeRole(role_id)
+        await db.removeRole(role_id)
 
-        res.status(204).json(deleted_role_count)
+        res.status(200).json({ success: true, message: 'role successfully deleted' })
 
     } catch (error) {
         next({

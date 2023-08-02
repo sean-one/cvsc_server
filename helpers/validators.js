@@ -129,6 +129,35 @@ const validateRoleRequest = async (req, res, next) => {
     next()
 }
 
+const validateRoleDelete = async (req, res, next) => {
+    const user_id = req.user_decoded
+    const { role_id } = req.params
+
+    // validate that user_id is a uuid
+    if(!uuidPattern.test(user_id)) {
+        return res.status(400).json({ message: 'invalid user' })
+    }
+
+    // validate that role_id is a uuid
+    if(!uuidPattern.test(role_id)) {
+        return res.status(400).json({ message: 'invalid role identifier' })
+    }
+
+    // validate that role with role_id exist
+    const currentRole = await rolesDB.findRoleById(role_id)
+    if(currentRole === undefined) {
+        return res.status(400).json({ message: 'role request not found'})
+    }
+
+    // validate role.user_id is user_decoded
+    if(user_id !== currentRole.user_id) {
+        return res.status(400).json({ message: 'invalid role rights' })
+    }
+    
+    next()
+
+}
+
 const isBusinessNameUnique = async (value) => {
     const found = await businessDB.checkBusinessName(value)
 
@@ -393,6 +422,7 @@ module.exports = {
     validateImageFile,
     validateImageAdmin,
     validateRoleRequest,
+    validateRoleDelete,
     updateBusinessValidator,
     updateUserValidator,
     newEventValidator,
