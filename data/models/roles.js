@@ -16,7 +16,7 @@ module.exports = {
 }
 
 
-// validateRoleManagement inside jwt_helper - finds business role for user
+//! validateRoleManagement validators.js - finds business role for user
 function findUserBusinessRole(business_id, user_id) {
     return db('roles')
         .where({ user_id: user_id, business_id: business_id, active_role: true })
@@ -49,6 +49,7 @@ async function findUserRoles(user_id) {
 }
 
 // jwt_helper - inside validateRoleManagement & roleRequestUser
+//! inside various validators.js functions
 async function findRoleById(request_id) {
     return await db('roles')
         .where({ 'roles.id': request_id })
@@ -240,7 +241,7 @@ async function downgradeManagerRole(role_id, admin_id) {
         .first()
 }
 
-// useRemoveRoleMutation & useRemoveUserRoleMutation - useRolesApi
+//! useRemoveRoleMutation & useRemoveUserRoleMutation - useRolesApi - REMOVE USER ROLE (SELF & MANAGEMENT)
 async function removeRole(role_id) {
     return await db('roles')
         .where({ id: role_id })

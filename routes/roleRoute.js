@@ -3,8 +3,8 @@ const express = require('express');
 const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken, roleRequestUser, validateRoleManagement } = require('../helpers/jwt_helper');
-const { validateRoleDelete, validateRoleRequest, result } = require('../helpers/validators');
+const { validToken, roleRequestUser } = require('../helpers/jwt_helper');
+const { validateRoleDelete, validateRoleManagement, validateRoleRequest, result } = require('../helpers/validators');
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ router.get('/business/:business_id', async (req, res) => {
     }
 })
 
-// usePendingBusinessRolesQuery - getBusinessPendingRoles - useRolesApi
+//! usePendingBusinessRolesQuery - getBusinessPendingRoles - useRolesApi - GET MANAGEMENT ROLE REQUEST
 router.get('/management/:user_id', [ validToken ], async (req, res, next) => {
     try {
         const user_id = req.user_decoded
@@ -47,7 +47,7 @@ router.get('/management/:user_id', [ validToken ], async (req, res, next) => {
 
 })
 
-// useCreateRoleMutation - createRoleRequest - useRolesApi
+//! useCreateRoleMutation - createRoleRequest - useRolesApi - CREATE NEW ROLE REQUEST
 router.post('/request/:business_id', [ validToken, validateRoleRequest, result ], async (req, res, next) => {
     try {
         const { business_id } = req.params
@@ -85,8 +85,8 @@ router.post('/request/:business_id', [ validToken, validateRoleRequest, result ]
 
 })
 
-// useApproveRoleMutation - approveRole - useRolesApi
-router.post('/approve/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
+//! useApproveRoleMutation - approveRole - useRolesApi - APPROVE ROLE
+router.post('/approve/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
     try {
         const { role_id } = req.params
         const management_id = await req.user_decoded
@@ -103,8 +103,8 @@ router.post('/approve/:role_id', [validToken, validateRoleManagement ], async (r
     }
 })
 
-// useUpgradeRoleMutation - upgradeRole - useRolesApi
-router.post('/upgrade/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
+// useUpgradeRoleMutation - upgradeRole - useRolesApi - had validateRoleManagement
+router.post('/upgrade/:role_id', [validToken ], async (req, res, next) => {
     try {
         const { role_id } = req.params
         const management_id = await req.user_decoded
@@ -121,8 +121,8 @@ router.post('/upgrade/:role_id', [validToken, validateRoleManagement ], async (r
     }
 })
 
-// useDowngradeRoleMutation - downgradeRole - useRolesApi
-router.post('/downgrade/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
+// useDowngradeRoleMutation - downgradeRole - useRolesApi - had validateRoleManagement
+router.post('/downgrade/:role_id', [validToken ], async (req, res, next) => {
     try {
         const { role_id } = req.params
         const admin_id = await req.user_decoded
@@ -139,14 +139,14 @@ router.post('/downgrade/:role_id', [validToken, validateRoleManagement ], async 
     }
 })
 
-// useRemoveRoleMutation - removeRole - useRolesApi
-router.delete('/remove/:role_id', [validToken, validateRoleManagement ], async (req, res, next) => {
+//! useRemoveRoleMutation - removeRole - useRolesApi - REMOVE ROLE REQUEST (MANAGEMENT)
+router.delete('/remove/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
     try {
         const { role_id } = req.params
 
-        const deleted_role_count = await db.removeRole(role_id)
+        await db.removeRole(role_id)
         
-        res.status(204).json(deleted_role_count)
+        res.status(200).json({ success: true, message: 'role successfully deleted' })
 
     } catch (error) {
         next({
@@ -196,7 +196,7 @@ router.get('/user_role/:business_id', [validToken], async (req, res, next) => {
     }
 })
 
-// useRemoveUserRoleMutation - removeUserRole - useRolesApi
+//! useRemoveUserRoleMutation - removeUserRole - useRolesApi - REMOVE USER ROLE (SELF)
 router.delete('/user_remove/:role_id', [validToken, validateRoleDelete, result], async (req, res, next) => {
     try {
         const { role_id } = req.params
