@@ -1,4 +1,4 @@
-const { check, validationResult } = require('express-validator');
+const { check, validationResult, oneOf } = require('express-validator');
 const userDB = require('../data/models/user');
 const businessDB = require('../data/models/business');
 const eventsDB = require('../data/models/event');
@@ -62,6 +62,99 @@ const validatePassword = (value) => {
     return true
 };
 
+const isBusinessNameUnique = async (value) => {
+    const found = await businessDB.checkBusinessName(value)
+    
+    if(found !== undefined) {
+        throw new Error('business name already in use (duplicate)')
+    }
+    
+    return true
+};
+
+const isBusinessAdmin = async (value, { req }) => {
+    if(req.business_role !== process.env.ADMIN_ACCOUNT && value) {
+        throw new Error('invalid business role rights')
+    }
+    
+    return true
+}
+
+const isEventNameUnique = async (value) => {
+    const found = await eventsDB.checkEventName(value)
+    
+    if(found !== undefined) {
+        throw new Error('event name already in use (duplicate)')
+    }
+    
+    return true
+}
+
+function isValidDate(value) {
+    // date pater should be yyyy-m-d
+    const datePattern = /^\d{4}-\d{1,2}-\d{1,2}$/;
+    
+    // Check if the input matches the expected format "yyyy-m-d"
+    if (!datePattern.test(value)) {
+        throw new Error('event date format error')
+    }
+    
+    // Extract year, month, and day from the input
+    const [year, month, day] = value.split('-').map(Number);
+    
+    // Create a Date object and check if it represents a valid date
+    const parsedDate = new Date(year, month - 1, day);
+    
+    
+    const isValid =
+    parsedDate.getFullYear() === year &&
+    parsedDate.getMonth() === month - 1 &&
+    parsedDate.getDate() === day;
+    
+    if (!isValid) {
+        throw new Error('invalid date')
+    }
+    
+    // Check if the date is not in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (parsedDate < today) {
+        throw new Error('event date can not be in the past');
+    }
+    
+    // Check if the date is within the next 60 days
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 60);
+    futureDate.setHours(0, 0, 0, 0);
+    if (parsedDate > futureDate) {
+        throw new Error('events may only be 60 days out')
+    }
+    
+    return true
+}
+
+function isValidTime(value) {
+    const timePattern = /^\d{4}$/;
+    
+    // Check if the input matches the expected format "HHmm"
+    if (!timePattern.test(value)) {
+        throw new Error('time format error')
+    }
+    
+    // Extract hours and minutes from the input
+    const hours = parseInt(value.substring(0, 2));
+    const minutes = parseInt(value.substring(2));
+    
+    // Check if the extracted values represent a valid time
+    if(Number.isInteger(hours) && Number.isInteger(minutes) && hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        return true;
+    } else {
+        throw new Error('invalid time')
+    }
+}
+
+
+// MIDDLEWARE VALIDATIONS
 const validateImageFile = async (req, res, next) => {
     const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
     if(!req.file) {
@@ -91,6 +184,20 @@ const validateImageAdmin = async (req, res, next) => {
         if(!exceptedFileTypes.includes(fileExtension)) {
             return res.status(400).json({ message: 'only .png, .jpg, .jpeg & .webp file types' })
         }
+        next()
+    }
+}
+
+const validateBusinessIdentifier = async (req, res, next) => {
+    console.log('inside validateBusinessID')
+    const { business_id } = req.params
+
+    console.log(business_id)
+    if(!uuidPattern.test(business_id)) {
+        console.log('failed uuid pattern test')
+        throw new Error('business_id_invalid')
+        // return res.status(400).json({ message: 'invalid business identifier' })
+    } else {
         next()
     }
 }
@@ -187,99 +294,27 @@ const validateRoleManagement = async (req, res, next) => {
     }
 }
 
-const isBusinessNameUnique = async (value) => {
-    const found = await businessDB.checkBusinessName(value)
 
-    if(found !== undefined) {
-        throw new Error('business name already in use (duplicate)')
-    }
-
-    return true
-};
-
-const isBusinessAdmin = async (value, { req }) => {
-    if(req.business_role !== process.env.ADMIN_ACCOUNT && value) {
-        throw new Error('invalid business role rights')
-    }
-
-    return true
-}
-
-const isEventNameUnique = async (value) => {
-    const found = await eventsDB.checkEventName(value)
-
-    if(found !== undefined) {
-        throw new Error('event name already in use (duplicate)')
-    }
-
-    return true
-}
-
-function isValidDate(value) {
-    // date pater should be yyyy-m-d
-    const datePattern = /^\d{4}-\d{1,2}-\d{1,2}$/;
-  
-    // Check if the input matches the expected format "yyyy-m-d"
-    if (!datePattern.test(value)) {
-        throw new Error('event date format error')
-    }
-
-    // Extract year, month, and day from the input
-    const [year, month, day] = value.split('-').map(Number);
-  
-    // Create a Date object and check if it represents a valid date
-    const parsedDate = new Date(year, month - 1, day);
-  
-
-    const isValid =
-        parsedDate.getFullYear() === year &&
-        parsedDate.getMonth() === month - 1 &&
-        parsedDate.getDate() === day;
-
-    if (!isValid) {
-        throw new Error('invalid date')
-    }
-
-    // Check if the date is not in the past
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (parsedDate < today) {
-        throw new Error('event date can not be in the past');
-    }
-
-    // Check if the date is within the next 60 days
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 60);
-    futureDate.setHours(0, 0, 0, 0);
-    if (parsedDate > futureDate) {
-        throw new Error('events may only be 60 days out')
-    }
-
-    return true
-}
-
-function isValidTime(value) {
-    const timePattern = /^\d{4}$/;
-
-    // Check if the input matches the expected format "HHmm"
-    if (!timePattern.test(value)) {
-        throw new Error('time format error')
-    }
-
-    // Extract hours and minutes from the input
-    const hours = parseInt(value.substring(0, 2));
-    const minutes = parseInt(value.substring(2));
-
-    // Check if the extracted values represent a valid time
-    if(Number.isInteger(hours) && Number.isInteger(minutes) && hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-        return true;
-    } else {
-        throw new Error('invalid time')
-    }
-}
-
-
-
+const uuidValidation = [
+    check('business_id').trim().optional()
+        .matches(uuidPattern).withMessage('invalid business identifier')
+        .escape(),
+    check('user_id').trim().optional()
+        .matches(uuidPattern).withMessage('invalid user identifier')
+        .escape(),
+    check('event_id').trim().optional()
+        .matches(uuidPattern).withMessage('invalid event identifier')
+        .escape(),
+    check('role_id').trim().optional()
+        .matches(uuidPattern).withMessage('invalid role identifier')
+        .escape(),
+    oneOf([
+        check('business_id').exists(),
+        check('user_id').exists(),
+        check('event_id').exists(),
+        check('role_id').exists(),
+    ], 'invalid / missing identifier')
+]
 
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
@@ -433,6 +468,7 @@ const result = (req, res, next) => {
     const hasError = !result.isEmpty();
 
     if(hasError) {
+        console.log('inside the result error')
         const error = result.array()[0]
         next({
             status: 400,
@@ -447,9 +483,11 @@ const result = (req, res, next) => {
 module.exports = {
     loginUserValidator,
     newBusinessValidator,
+    uuidValidation,
     registerUserValidator,
     validateImageFile,
     validateImageAdmin,
+    validateBusinessIdentifier,
     validateRoleRequest,
     validateRoleDelete,
     validateRoleManagement,

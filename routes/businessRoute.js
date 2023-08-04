@@ -10,7 +10,7 @@ const { updatedGoogleMapsClient } = require('../helpers/geocoder');
 const businessErrors = require('../error_messages/businessErrors');
 const { checkBusinessManagement, validToken, businessEditRole, businessAdmin } = require('../helpers/jwt_helper');
 
-const { newBusinessValidator, result, updateBusinessValidator, validateImageAdmin, validateImageFile } = require('../helpers/validators.js')
+const { newBusinessValidator, result, updateBusinessValidator, validateImageAdmin, validateImageFile, uuidValidation } = require('../helpers/validators.js')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -30,16 +30,26 @@ router.get('/', async (req, res) => {
     }
 });
 
-// useBusinessQuery - getBusiness - useBusinessApi
-router.get('/single/:business_id', async (req, res, next) => {
+//! useBusinessQuery - getBusiness - useBusinessApi - VIEW BUSINESS PAGE
+router.get('/single/:business_id', [ uuidValidation, result ], async (req, res, next) => {
     try {
         const { business_id } = req.params;
         const business = await db.findBusinessById(business_id)
+        
+        if(business === undefined) {
+            throw new Error('business_not_found')
+        }
 
         res.status(200).json(business);
 
     } catch (error) {
-        res.status(404).json({ message: 'business not found' });
+        console.log('inside route error')
+        console.log(error)
+        next({
+            status: businessErrors[error.message]?.status,
+            message: businessErrors[error.message]?.message,
+            type: businessErrors[error.message]?.type
+        })
 
     }
 });

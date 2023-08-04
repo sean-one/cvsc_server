@@ -1,4 +1,9 @@
 const businessErrors = {
+    business_not_found: {
+        status: 404,
+        message: 'unable to find business by id',
+        type: 'validation'
+    },
     contacts_email_unique: {
         status: 400,
         message: 'duplicate email not valid'
