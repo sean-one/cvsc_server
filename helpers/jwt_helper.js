@@ -94,69 +94,6 @@ const validateEventCreation = async (req, res, next) => {
     }
 }
 
-// confirms management role for making changes to business roles
-const validateRoleManagement = async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded
-        if(!user_id) throw new Error('invalid_user')
-
-        const { role_id } = req.params
-        if(!role_id) throw new Error('request_not_found')
-        
-        // get role id and search for the role returning the business_id & role_type
-        const { business_id, role_type} = await db.findRoleById(role_id)
-        if(!business_id || !role_type) throw new Error('request_not_found')
-        
-        // get the user/manager role for requested business
-        const manager_role = await db.findUserBusinessRole(business_id, user_id)
-        if(!manager_role) throw new Error('invalid_user')
-
-        // confirm the user/managers role is higher then requested role
-        if(manager_role.role_type > role_type) {
-            next()
-        } else {
-            throw new Error('invalid_user')
-        }
-    } catch (error) {
-
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type,
-        })
-    }
-}
-
-// confirms user making change is user on the role
-const roleRequestUser = async (req, res, next) => {
-    try {
-        const request_user = req.user_decoded
-        if(!request_user) throw new Error('invalid_user')
-
-        const { role_id } = req.params
-        if(!role_id) throw new Error('request_not_found')
-        
-        // get the user_from the role attempting to be changed
-        const { user_id } = await db.findRoleById(role_id)
-        if(!user_id) throw new Error('invalid_user')
-
-        // confirm that the user attempting to delete role is the user from the role
-        if(user_id === request_user) {
-            next()
-        } else {
-            throw new Error('invalid_user')
-        }
-    } catch (error) {
-
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type,
-        })
-    }
-}
-
-
 // =============================================
 //      BUSINESS VALIDATIONS
 // =============================================
@@ -188,66 +125,6 @@ const businessAdmin = async (req, res, next) => {
         })
     }
 }
-
-// checks for business management role and adds role_type to req object
-const businessEditRole = async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded
-        const { business_id } = req.params
-        if(!user_id || !business_id) throw new Error('invalid_request')
-
-        // get user role for business
-        const business_role = await db.findUserBusinessRole(business_id, user_id)
-        if(business_role === undefined) throw new Error('invalid_user')
-
-        if (business_role.role_type === process.env.MANAGER_ACCOUNT) {
-            req.business_role = business_role.role_type
-            next()
-        } else if (business_role.role_type === process.env.ADMIN_ACCOUNT) {
-            req.business_role = business_role.role_type
-            next()
-        } else {
-            throw new Error('invalid_user')
-        }
-    }
-    catch (error) {
-        console.log('error at businessEditRole jwt_helper')
-        console.log(error)
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type,
-        })
-    }
-}
-
-const checkBusinessManagement = async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded
-        const { business_id } = req.params
-        if(!user_id || !business_id) throw new Error('invalid_request')
-
-        const user_business_role = await db.findUserBusinessRole(business_id, user_id)
-        if((user_business_role === undefined) || (user_business_role?.active_role === false)) {
-            throw new Error('missing_role')
-        }
-
-        if(user_business_role?.role_type >= process.env.MANAGER_ACCOUNT) {
-            req.business_role = user_business_role.role_type
-            next()
-        } else {
-            throw new Error('invalid_role')
-        }
-    } catch (error) {
-        console.log(error)
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type,
-        })
-    }
-}
-
 
 // =============================================
 //      EVENT VALIDATIONS

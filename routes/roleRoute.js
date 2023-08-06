@@ -1,10 +1,9 @@
 const express = require('express');
 
 const db = require('../data/models/roles');
-const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken, roleRequestUser } = require('../helpers/jwt_helper');
-const { validateRoleDelete, validateRoleManagement, validateRoleRequest, uuidValidation, result } = require('../helpers/validators');
+const { validToken } = require('../helpers/jwt_helper');
+const { validateRoleDelete, validateRoleManagement, validateRoleRequest, result } = require('../helpers/validators');
 
 const router = express.Router();
 
@@ -176,7 +175,7 @@ router.get('/user/:user_id', [validToken], async (req, res, next) => {
     }
 })
 
-//! useUserBusinessRoleQuery - getUserBusinessRole - useRoleApi
+// useUserBusinessRoleQuery - getUserBusinessRole - useRoleApi
 router.get('/user_role/:business_id', [validToken], async (req, res, next) => {
     try {
         const { business_id } = req.params

@@ -27,7 +27,7 @@ const upload = multer({ storage: storage })
 // '/business'
 const router = express.Router()
 
-// useBusinessesQuery - getBusiness - useBusinessApi
+//! RETURN A LIST OF ALL BUSINESSES
 router.get('/', async (req, res) => {
     try {
         const businesses = await db.find()
