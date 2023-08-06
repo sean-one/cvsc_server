@@ -11,7 +11,6 @@ const passport = require('passport')
 // const fileUpload = require('express-fileupload');
 
 // routes
-const contactRouter = require('./routes/contactRoute');
 const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoute');
 const eventRouter = require('./routes/eventRoute');
@@ -58,7 +57,6 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use('/contacts', contactRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/events', eventRouter);

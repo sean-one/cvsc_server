@@ -202,6 +202,32 @@ const validateBusinessIdentifier = async (req, res, next) => {
     }
 }
 
+const validateBusinessAdmin = async (req, res, next) => {
+    const user_id = req.user_decoded
+    const { business_id } = req.params
+
+    // validate that user_id is a uuid
+    if(!uuidPattern.test(user_id)){
+        return res.status(400).json({ message: 'invalid user' })
+    }
+
+    // validate that business_id is a uuid
+    if(!uuidPattern.test(business_id)) {
+        return res.status(400).json({ message: 'invalid business identifier' })
+    }
+
+    const currentBusiness = await businessDB.findBusinessById(business_id)
+    if(currentBusiness === undefined) {
+        return res.status(400).json({ message: 'business not found' })
+    } else {
+        if(currentBusiness.business_admin !== user_id) {
+            return res.status(400).json({ message: 'invalid role rights' })
+        } else {
+            next()
+        }
+    }
+}
+
 const validateRoleRequest = async (req, res, next) => {
     const { business_id } = req.params
     const user_id = req.user_decoded
@@ -290,6 +316,32 @@ const validateRoleManagement = async (req, res, next) => {
             next()
         } else {
             return res.status(400).json({ message: 'invalid management role'})
+        }
+    }
+}
+
+const validateBusinessManagement = async (req, res, next) => {
+    const user_id = req.user_decoded
+    const { business_id } = req.params
+
+    // validate that user_id is a uuid
+    if(!uuidPattern.test(user_id)) {
+        return res.status(400).json({ message: 'invalid user' })
+    }
+
+    // validate that business_id is a uuid
+    if(!uuidPattern.test(business_id)) {
+        return res.status(400).json({ message: 'invalid business identifier' })
+    }
+
+    const businessRole = await rolesDB.findUserBusinessRole(business_id, user_id)
+    if(businessRole === undefined) {
+        return res.status(400).json({ message: 'business role not found' })
+    } else {
+        if(businessRole.business_admin !== user_id) {
+            return res.status(400).json({ message: 'invalid role rights' })
+        } else {
+            next()
         }
     }
 }
@@ -477,6 +529,7 @@ const result = (req, res, next) => {
         })
     }
 
+    console.log('passed result')
     next()
 }
 
@@ -488,9 +541,11 @@ module.exports = {
     validateImageFile,
     validateImageAdmin,
     validateBusinessIdentifier,
+    validateBusinessAdmin,
     validateRoleRequest,
     validateRoleDelete,
     validateRoleManagement,
+    validateBusinessManagement,
     updateBusinessValidator,
     updateUserValidator,
     newEventValidator,

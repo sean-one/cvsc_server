@@ -4,7 +4,7 @@ const db = require('../data/models/roles');
 const dbBusiness = require('../data/models/business');
 const roleErrors = require('../error_messages/roleErrors');
 const { validToken, roleRequestUser } = require('../helpers/jwt_helper');
-const { validateRoleDelete, validateRoleManagement, validateRoleRequest, result } = require('../helpers/validators');
+const { validateRoleDelete, validateRoleManagement, validateRoleRequest, uuidValidation, result } = require('../helpers/validators');
 
 const router = express.Router();
 
@@ -103,8 +103,8 @@ router.post('/approve/:role_id', [validToken, validateRoleManagement, result ], 
     }
 })
 
-// useUpgradeRoleMutation - upgradeRole - useRolesApi - had validateRoleManagement
-router.post('/upgrade/:role_id', [validToken ], async (req, res, next) => {
+//! useUpgradeRoleMutation - upgradeRole - useRolesApi - UPGRADE CREATOR TO MANAGER
+router.post('/upgrade/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
     try {
         const { role_id } = req.params
         const management_id = await req.user_decoded
@@ -121,8 +121,8 @@ router.post('/upgrade/:role_id', [validToken ], async (req, res, next) => {
     }
 })
 
-// useDowngradeRoleMutation - downgradeRole - useRolesApi - had validateRoleManagement
-router.post('/downgrade/:role_id', [validToken ], async (req, res, next) => {
+//! useDowngradeRoleMutation - downgradeRole - useRolesApi - DOWNGRADE MANAGER TO CREATOR
+router.post('/downgrade/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
     try {
         const { role_id } = req.params
         const admin_id = await req.user_decoded

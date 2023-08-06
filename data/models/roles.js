@@ -195,7 +195,7 @@ async function approveRoleRequest(request_id, management_id) {
         .first()
 }
 
-// useUpgradeRoleMutation - useRolesApi 
+//! useUpgradeRoleMutation - useRolesApi - UPGRADE CREATOR TO MANAGER 
 async function upgradeCreatorRole(request_id, management_id) {
     await db('roles')
         .where({ id: request_id })
@@ -218,7 +218,7 @@ async function upgradeCreatorRole(request_id, management_id) {
         .first()
 }
 
-// useDowngradeRoleMutation - useRolesApi
+//! useDowngradeRoleMutation - useRolesApi - DOWNGRADE MANAGER TO CREATOR
 async function downgradeManagerRole(role_id, admin_id) {
     await db('roles')
         .where({ id: role_id })

@@ -8,9 +8,18 @@ const db = require('../data/models/business');
 const { updatedGoogleMapsClient } = require('../helpers/geocoder');
 
 const businessErrors = require('../error_messages/businessErrors');
-const { checkBusinessManagement, validToken, businessEditRole, businessAdmin } = require('../helpers/jwt_helper');
+const { validToken } = require('../helpers/jwt_helper');
 
-const { newBusinessValidator, result, updateBusinessValidator, validateImageAdmin, validateImageFile, uuidValidation } = require('../helpers/validators.js')
+const {
+    newBusinessValidator,
+    updateBusinessValidator,
+    validateImageAdmin,
+    validateImageFile,
+    validateBusinessManagement,
+    validateBusinessAdmin,
+    uuidValidation,
+    result,
+} = require('../helpers/validators.js')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -43,8 +52,6 @@ router.get('/single/:business_id', [ uuidValidation, result ], async (req, res, 
         res.status(200).json(business);
 
     } catch (error) {
-        console.log('inside route error')
-        console.log(error)
         next({
             status: businessErrors[error.message]?.status,
             message: businessErrors[error.message]?.message,
@@ -54,7 +61,7 @@ router.get('/single/:business_id', [ uuidValidation, result ], async (req, res, 
     }
 });
 
-// useCreateBusinessMutation - createBusiness - useBusinessApi
+//! useCreateBusinessMutation - createBusiness - useBusinessApi - CREATE BUSINESS
 router.post('/create', [upload.single('business_avatar'), validToken, newBusinessValidator, validateImageFile, result ], async (req, res, next) => {
     let image_key
     try {
@@ -129,8 +136,8 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
     }
 })
 
-// useUpdateBusinessMutation - updateBusiness - useBusinessApi
-router.put('/update/:business_id', [upload.single('business_avatar'), validToken, checkBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
+//! useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
+router.put('/update/:business_id', [upload.single('business_avatar'), validToken, validateBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;
@@ -210,8 +217,8 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
     }
 })
 
-// useActiveBusinessToggle - toggleActiveBusiness - useBusinessApi
-router.put('/toggle-active/:business_id', [validToken, businessAdmin], async (req, res) => {
+//! useActiveBusinessToggle - toggleActiveBusiness - useBusinessApi - TOGGLE BUSINESS ACTIVE STATUS
+router.put('/toggle-active/:business_id', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
     try {
         const { business_id } = req.params;
         const business = await db.toggleActiveBusiness(business_id)
@@ -219,13 +226,16 @@ router.put('/toggle-active/:business_id', [validToken, businessAdmin], async (re
         res.status(201).json(business)
         
     } catch (error) {
-        console.log(error)
-        res.status(500).json({ message: 'something went wrong yo!' })
+        next({
+            status: businessErrors[error.message]?.status,
+            message: businessErrors[error.message]?.message,
+            type: businessErrors[error.message]?.type
+        })
     }
 })
 
-// useBusinessRequestToggle - toggleBusinessRequest - useBusinessApi
-router.put('/toggle-request/:business_id', [validToken, businessAdmin], async (req, res) => {
+//! useBusinessRequestToggle - toggleBusinessRequest - useBusinessApi - TOGGLE BUSINESS REQUEST STATUS
+router.put('/toggle-request/:business_id', [validToken, validateBusinessAdmin, result], async (req, res) => {
     try {
         const { business_id } = req.params;
         const business = await db.toggleBusinessRequest(business_id)
