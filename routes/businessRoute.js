@@ -249,8 +249,8 @@ router.put('/toggle-request/:business_id', [validToken, validateBusinessAdmin, r
     }
 })
 
-// useRemoveBusinessMutation - removeBusiness - useBusinessApi
-router.delete('/remove/:business_id', async (req, res, next) => {
+//! useRemoveBusinessMutation - removeBusiness - useBusinessApi - DELETE BUSINESS
+router.delete('/remove/:business_id', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
     try {
         const { business_id } = req.params;
         const deleted_business = await db.removeBusiness(business_id)

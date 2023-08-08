@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/roles');
-const businessDB = require('../data/models/business');
 const eventDB = require('../data/models/event');
 const tokenErrors = require('../error_messages/tokenErrors');
 
@@ -95,38 +94,6 @@ const validateEventCreation = async (req, res, next) => {
 }
 
 // =============================================
-//      BUSINESS VALIDATIONS
-// =============================================
-
-// confirm user making change to business is business_admin
-const businessAdmin = async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded
-        const { business_id } = req.params
-        if(!user_id || !business_id) throw new Error('invalid_request')
-
-        // get the business admin for selected business
-        const { business_admin } = await businessDB.findBusinessById(business_id)
-        if(!business_admin) throw new Error('invalid_request')
-
-        // confirm request user is same as business_admin listed on business
-        if(business_admin === user_id) {
-            next()
-        } else {
-            throw new Error('invalid_user')
-        }
-
-    } catch (error) {
-        console.log(error)
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type,
-        })
-    }
-}
-
-// =============================================
 //      EVENT VALIDATIONS
 // =============================================
 
@@ -197,11 +164,6 @@ module.exports = {
     createRefreshToken,
     validToken,
     validateEventCreation,
-    validateRoleManagement,
-    roleRequestUser,
-    businessAdmin,
-    businessEditRole,
-    checkBusinessManagement,
     eventCreator,
     eventManager,
 }
