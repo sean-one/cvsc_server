@@ -351,26 +351,26 @@ const validateEventCreation = async (req, res, next) => {
     const { venue_id, brand_id } = req.body
 
     if(!uuidPattern.test(user_id)) {
-        return res.status(400).json({ message: 'invalid user' })
+        return res.status(400).json({ type: 'user', message: 'invalid user' })
     }
 
     if(!uuidPattern.test(venue_id)) {
-        return res.status(400).json({ message: 'invalid location identifier' })
+        return res.status(400).json({ type: 'venue_id', message: 'invalid location identifier' })
     }
 
     if(!uuidPattern.test(brand_id)) {
-        return res.status(400).json({ message: 'invalid business brand identifier' })
+        return res.status(400).json({ type: 'brand_id', message: 'invalid business brand identifier' })
     }
 
     const businessIDs = await rolesDB.getUserBusinessRoles(user_id)
     if(businessIDs === undefined) {
-        return res.status(404).json({ message: 'no user roles found' })
+        return res.status(404).json({ type: 'role_rights', message: 'no user roles found' })
     }
 
     if(businessIDs?.business_ids.includes(venue_id) || businessIDs?.business_ids.includes(brand_id)) {
         next()
     } else {
-        return res.status(404).json({ message: 'invalid user rights' })
+        return res.status(404).json({ type: 'user', message: 'invalid user rights' })
     }
 }
 
