@@ -122,7 +122,7 @@ async function findRoleByBusiness(business_id) {
         )
 }
 
-// jwt_helper validateEventCreation - returns an array of ative roles business_id(s)
+//! validateEventCreation - returns an array of ative roles business_id(s) - VALIDATION HELPER
 async function getUserBusinessRoles(user_id) {
     return await db('roles')
         .where({ user_id: user_id, active_role: true })

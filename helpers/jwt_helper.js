@@ -64,35 +64,6 @@ const validToken = (req, res, next) => {
 //      ROLES VALIDATIONS
 // =============================================
 
-// confirms event creator has 'creator' or higher roles with either brand_id or venue_id
-const validateEventCreation = async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded
-        if (!user_id) throw new Error('invalid_user')
-
-        const { venue_id, brand_id } = req.body
-
-        // get array of business_id's for ALL ACTIVE roles for CREATOR, MANAGER & ADMIN 
-        const { business_ids } = await db.getUserBusinessRoles(user_id)
-
-        if(business_ids.includes(venue_id) || business_ids.includes(brand_id)) {
-            console.log('valid creator')
-            next()
-        } else {
-            throw new Error('invalid_user')
-        }
-
-    } catch (error) {
-        console.log('error in validcreator')
-        next({
-            status: tokenErrors[error.message]?.status,
-            message: tokenErrors[error.message]?.message,
-            type: tokenErrors[error.message]?.type,
-        })
-
-    }
-}
-
 // =============================================
 //      EVENT VALIDATIONS
 // =============================================
@@ -163,7 +134,6 @@ module.exports = {
     createAccessToken,
     createRefreshToken,
     validToken,
-    validateEventCreation,
     eventCreator,
     eventManager,
 }

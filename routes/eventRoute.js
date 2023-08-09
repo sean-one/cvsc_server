@@ -5,8 +5,8 @@ const sharp = require('sharp');
 const { deleteImageS3, uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
-const { validToken, validateEventCreation, eventCreator, eventManager } = require('../helpers/jwt_helper');
-const { newEventValidator, updateEventValidator, validateImageFile, result } = require('../helpers/validators');
+const { validToken, eventCreator, eventManager } = require('../helpers/jwt_helper');
+const { newEventValidator, updateEventValidator, validateEventCreation, validateImageFile, result } = require('../helpers/validators');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
@@ -24,12 +24,11 @@ router.get('/', async (req, res) => {
     }
 });
 
-// useEventsApi - createEvent - useCreateEventMutation
+//! useEventsApi - createEvent - useCreateEventMutation - CREATE NEW EVENT
 router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation, newEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const new_event = req.body
 
-        if(!req.user_decoded) throw new Error('invalid_admin')
         new_event.created_by = req.user_decoded
         
         if(!req.file) throw new Error('missing_image')
@@ -44,7 +43,6 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation
         new_event['eventmedia'] = image_key
         
         const event = await db.createEvent(new_event)
-        // const event = await db.updateImage(event_id, image_key)
 
         res.status(201).json(event)
 

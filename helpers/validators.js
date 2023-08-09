@@ -346,6 +346,34 @@ const validateBusinessManagement = async (req, res, next) => {
     }
 }
 
+const validateEventCreation = async (req, res, next) => {
+    const user_id = req.user_decoded
+    const { venue_id, brand_id } = req.body
+
+    if(!uuidPattern.test(user_id)) {
+        return res.status(400).json({ message: 'invalid user' })
+    }
+
+    if(!uuidPattern.test(venue_id)) {
+        return res.status(400).json({ message: 'invalid location identifier' })
+    }
+
+    if(!uuidPattern.test(brand_id)) {
+        return res.status(400).json({ message: 'invalid business brand identifier' })
+    }
+
+    const businessIDs = await rolesDB.getUserBusinessRoles(user_id)
+    if(businessIDs === undefined) {
+        return res.status(404).json({ message: 'no user roles found' })
+    }
+
+    if(businessIDs?.business_ids.includes(venue_id) || businessIDs?.business_ids.includes(brand_id)) {
+        next()
+    } else {
+        return res.status(404).json({ message: 'invalid user rights' })
+    }
+}
+
 
 const uuidValidation = [
     check('business_id').trim().optional()
@@ -546,6 +574,7 @@ module.exports = {
     validateRoleDelete,
     validateRoleManagement,
     validateBusinessManagement,
+    validateEventCreation,
     updateBusinessValidator,
     updateUserValidator,
     newEventValidator,
