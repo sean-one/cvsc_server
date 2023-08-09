@@ -47,7 +47,7 @@ function find() {
 
 }
 
-//! used inside jwt_helper eventCreator
+//! used inside valdations & to grab information
 async function findById(eventId) {
     return await db('events')
         .where({ 'events.id': eventId })

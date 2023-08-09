@@ -374,6 +374,41 @@ const validateEventCreation = async (req, res, next) => {
     }
 }
 
+const validateEventUpdate = async (req, res, next) => {
+    const user_id = req.user_decoded
+    const { event_id } = req.params
+
+    if(!uuidPattern.test(user_id)) {
+        return res.status(400).json({ type: 'user', message: 'requesting user id error' })
+    }
+
+    if(!uuidPattern.test(event_id)) {
+        return res.status(400).json({ type: 'server', message: 'invalid event identifier' })
+    }
+
+    const { venue_id: current_venue, brand_id: current_brand } = await eventsDB.findById(event_id)
+    const { venue_id = current_venue, brand_id = current_brand } = req.body
+
+    if(!uuidPattern.test(venue_id)) {
+        return res.status(400).json({ type: 'venue_id', message: 'invalid location identifier' })
+    }
+
+    if(!uuidPattern.test(brand_id)) {
+        return res.status(400).json({ type: 'brand_id', message: 'invalid business brand identifier' })
+    }
+
+    const businessIDs = await rolesDB.getUserBusinessRoles(user_id)
+    if(businessIDs === undefined) {
+        return res.status(404).json({ type: 'user', message: 'no user roles found' })
+    }
+
+    if(businessIDs?.business_ids.includes(venue_id) || businessIDs?.business_ids.includes(brand_id)) {
+        next()
+    } else {
+        return res.status(404).json({ type: 'role_rights', message: 'must have at least creator rights to at least one business' })
+    }
+}
+
 
 const uuidValidation = [
     check('business_id').trim().optional()
@@ -575,6 +610,7 @@ module.exports = {
     validateRoleManagement,
     validateBusinessManagement,
     validateEventCreation,
+    validateEventUpdate,
     updateBusinessValidator,
     updateUserValidator,
     newEventValidator,

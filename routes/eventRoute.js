@@ -6,7 +6,7 @@ const { deleteImageS3, uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
 const { validToken, eventCreator, eventManager } = require('../helpers/jwt_helper');
-const { newEventValidator, updateEventValidator, validateEventCreation, validateImageFile, result } = require('../helpers/validators');
+const { newEventValidator, updateEventValidator, validateEventCreation, validateEventUpdate, validateImageFile, result } = require('../helpers/validators');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
@@ -67,8 +67,8 @@ router.get('/:event_id', async (req, res, next) => {
     }
 });
 
-// useEventsApi - updateEvent - useUpdateEventMutation
-router.post('/update/:event_id', [upload.single('eventmedia'), validToken, eventCreator, updateEventValidator, validateImageFile, result], async (req, res, next) => {
+//! useEventsApi - updateEvent - useUpdateEventMutation - UPDATE EVENT
+router.post('/update/:event_id', [upload.single('eventmedia'), validToken, validateEventUpdate, updateEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
@@ -140,6 +140,7 @@ router.put('/remove_business/:event_id', [ validToken, eventManager ], async (re
         res.status(202).json({ success: true })
 
     } catch (error) {
+        console.log('INSIDE THE ROUTE CATCH')
         console.log(error)
         next({
             status: eventErrors[error.message]?.status,
