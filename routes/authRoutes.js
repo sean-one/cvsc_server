@@ -121,12 +121,27 @@ router.get('/refresh', async (req, res) => {
 router.get('/google', passport.authenticate("google", { scope: ["profile", "email"] }));
 
 router.get('/google/redirect', passport.authenticate("google", {
-    successRedirect: `${process.env.FRONTEND_CLIENT}/profile`,
+    // successRedirect: `${process.env.FRONTEND_CLIENT}/profile`,
     failureRedirect: '/auth/login/failed',
     session: true
-}))
+}), async (req, res) => {
+
+    const user = req.user
+    const user_roles = await rolesDB.findUserRoles(user.id)
+    const filter_inactive = user_roles.filter(role => role.active_role)
+    user.account_type = filter_inactive[0]?.role_type || process.env.BASIC_ACCOUNT
+
+    res.cookie('jwt', user.refreshToken)
+    // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
+
+    delete user['refreshToken']
+
+    res.redirect(`${process.env.FRONTEND_CLIENT}/profile`)
+    // res.status(200).json({ user: user, roles: user_roles })
+})
 
 router.get('/login/failed', (req, res) => {
+    console.log(Object.keys(req))
     res.status(401).redirect(`${process.env.FRONTEND_CLIENT}/login`)
 })
 

@@ -11,17 +11,20 @@ const { createAccessToken, createRefreshToken } = require('./helpers/jwt_helper'
 const authErrors = require('./error_messages/authErrors');
 
 passport.serializeUser(async (user, done) => {
+    console.log('inside serialize')
     const accessToken = createAccessToken(user.id)
     const refreshToken = createRefreshToken(user.id)
     user.refreshToken = refreshToken
     user.accessToken = accessToken
 
+    console.log(user)
     await dbUser.addRefreshToken(user.id, refreshToken)
     
     done(null, user.id)
 })
 
 passport.deserializeUser(async (id, done) => {
+    console.log('inside deserialize')
     const user = await dbUser.getUserAccount(id)
 
     done(null, user)
@@ -39,9 +42,10 @@ passport.use(
         async (accessToken, refreshToken, profile, done) => {
             // check for user to log in
             const google_user = await dbUser.findByGoogleId(profile.id)
-            
+            console.log('google user')
+            console.log(google_user.length)
             // no user found - register user
-            if (google_user.length < 1) {
+            if (google_user.length === 0) {
                 const new_user = {
                     username: profile.displayName,
                     email: profile.emails[0].value,
