@@ -409,7 +409,6 @@ const validateEventUpdate = async (req, res, next) => {
     }
 }
 
-
 const uuidValidation = [
     check('business_id').trim().optional()
         .matches(uuidPattern).withMessage('invalid business identifier')
@@ -433,12 +432,12 @@ const uuidValidation = [
 
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
-        .isLength({ min: 3, max: 20 }).withMessage('username length must be between 3 and 20 characters')
+        .isLength({ min: 3, max: 50 }).withMessage('invalid username length')
         .custom(isUsernameValid)
         .custom(isUsernameUnique)
         .escape(),
     check('password').trim().not().isEmpty().withMessage('password is required')
-        .isLength({ min: 8, max: 50}).withMessage('password length may only be between 8 and 50 characters')
+        .isLength({ min: 8, max: 50}).withMessage('invalid password length')
         .custom(validatePassword)
         .escape(),
     check('email').trim().not().isEmpty().withMessage('email is required')
@@ -448,16 +447,21 @@ const registerUserValidator = [
 
 const loginUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
-        .isLength({ min: 3, max: 20 }).withMessage('username length must be between 3 and 20 characters')
+        .isLength({ min: 3, max: 50 }).withMessage('invalid username length')
         .custom(isUsernameValid)
         .escape(),
     check('password').trim().not().isEmpty().withMessage('password is required')
-        .isLength({ min: 8, max: 50 }).withMessage('password length may only be between 8 and 50 characters')
+        .isLength({ min: 8, max: 50 }).withMessage('invalid password length')
         .custom(validatePassword)
         .escape(),
 ]
 
 const updateUserValidator = [
+    check('username').trim().optional()
+        .isLength({ min: 3, max: 50 }).withMessage('invalid username length')
+        .custom(isUsernameValid)
+        .custom(isUsernameUnique)
+        .escape(),
     check('password').trim().optional()
         .isLength({ min: 8, max: 50 }).withMessage('password length may only be between 8 and 50 characters')
         .custom(validatePassword)
@@ -583,7 +587,6 @@ const result = (req, res, next) => {
     const hasError = !result.isEmpty();
 
     if(hasError) {
-        console.log('inside the result error')
         const error = result.array()[0]
         next({
             status: 400,
@@ -592,7 +595,6 @@ const result = (req, res, next) => {
         })
     }
 
-    console.log('passed result')
     next()
 }
 

@@ -8,23 +8,21 @@ const dbUser = require('./data/models/user');
 
 const { comparePassword } = require('./helpers/bcrypt_helper');
 const { createAccessToken, createRefreshToken } = require('./helpers/jwt_helper');
+const { generateUsername } = require('./helpers/generateUsername');
 const authErrors = require('./error_messages/authErrors');
 
 passport.serializeUser(async (user, done) => {
-    console.log('inside serialize')
     const accessToken = createAccessToken(user.id)
     const refreshToken = createRefreshToken(user.id)
     user.refreshToken = refreshToken
     user.accessToken = accessToken
 
-    console.log(user)
     await dbUser.addRefreshToken(user.id, refreshToken)
     
     done(null, user.id)
 })
 
 passport.deserializeUser(async (id, done) => {
-    console.log('inside deserialize')
     const user = await dbUser.getUserAccount(id)
 
     done(null, user)
@@ -42,17 +40,27 @@ passport.use(
         async (accessToken, refreshToken, profile, done) => {
             // check for user to log in
             const google_user = await dbUser.findByGoogleId(profile.id)
-            console.log('google user')
-            console.log(google_user.length)
+            
             // no user found - register user
             if (google_user.length === 0) {
+                let username = profile.displayName
+                
+                // check for username duplicate
+                const found = await dbUser.checkUsernameDuplicate(username)
+                
+                // if duplicate generate username
+                if(found !== undefined) {
+                    username = generateUsername()
+                }
+
                 const new_user = {
-                    username: profile.displayName,
+                    username: username,
                     email: profile.emails[0].value,
                     google_id: profile.id,
                     avatar: profile.photos[0].value,
 
                 }
+                
                 // create new user with google information
                 const created_user = await dbUser.createUser(new_user)
                 

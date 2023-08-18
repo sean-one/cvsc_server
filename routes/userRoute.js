@@ -8,7 +8,7 @@ const { hashPassword } = require('../helpers/bcrypt_helper');
 const { validToken } = require('../helpers/jwt_helper')
 const { uploadImageS3Url, deleteImageS3 } = require('../s3');
 
-const { result, updateUserValidator, validateImageFile } = require('../helpers/validators')
+const { result, updateUserValidator, validateImageFile, uuidValidation } = require('../helpers/validators')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -17,13 +17,17 @@ const router = express.Router();
 
 
 // user.account - update_user
-router.post('/update', [ upload.single('avatar'), validToken, updateUserValidator, validateImageFile, result ], async (req, res, next) => {
+router.post('/update', [ upload.single('avatar'), uuidValidation, validToken, updateUserValidator, validateImageFile, result ], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const user_id = req.user_decoded
         const user_changes = {}
         const user = await db.findUserById(user_id)
-        console.log(req.body)
+
+        if(req.body?.username) {
+            user_changes.username = req.body.username
+        }
+
         if(req.body?.email) {
             user_changes.email = req.body.email
         }
