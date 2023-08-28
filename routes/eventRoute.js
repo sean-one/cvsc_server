@@ -175,7 +175,7 @@ router.delete('/remove/:event_id', [validToken, eventCreator], async (req, res) 
 })
 
 //! useEventsApi - getAllUserEvents - useUserEventsQuery
-router.get('/user/:user_id', (req, res) => {
+router.get('/user/:user_id', [validToken], async (req, res) => {
     const { user_id } = req.params;
     db.findUserEvents(user_id)
         .then(events => {
