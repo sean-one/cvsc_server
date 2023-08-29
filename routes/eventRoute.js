@@ -130,7 +130,7 @@ router.post('/update/:event_id', [upload.single('eventmedia'), validToken, valid
 });
 
 // useEventsApi - removeBusiness - useRemoveEventBusinessMutation
-router.put('/remove_business/:event_id', [ validToken, eventManager ], async (req, res, next) => {
+router.put('/remove_business/:event_id', [validToken], async (req, res, next) => {
     try {
         const { event_id } = req.params
         const { event_updates } = req.body
@@ -151,7 +151,7 @@ router.put('/remove_business/:event_id', [ validToken, eventManager ], async (re
 })
 
 // useEventsApi - removeEvent - useRemoveEventMutation
-router.delete('/remove/:event_id', [validToken, eventCreator], async (req, res) => {
+router.delete('/remove/:event_id', [validToken], async (req, res) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
