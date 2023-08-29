@@ -1,14 +1,17 @@
 const tokenErrors = {
+    //! used in jwt_helper -> validToken
     invalid_token: {
         status: 401,
         message: 'invalid token, please log in',
         type: 'token'
     },
+    //! used in jwt_helper -> validToken
     no_token: {
         status: 401,
         message: 'missing token, please log in',
         type: 'token'
     },
+    //! used in jwt_helper -> validToken
     TokenExpiredError: {
         status: 401,
         message: 'token has expired, please log in',
@@ -19,6 +22,7 @@ const tokenErrors = {
         message: 'token has expired, please log in',
         type: 'token'
     },
+    // should be 403 Forbidden - valid token with suffiecient permission not met
     invalid_user: {
         status: 400,
         message: 'invalid user rights',

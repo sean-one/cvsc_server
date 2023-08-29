@@ -66,7 +66,7 @@ const isBusinessNameUnique = async (value) => {
     const found = await businessDB.checkBusinessName(value)
     
     if(found !== undefined) {
-        throw new Error('business name already in use (duplicate)')
+        throw new Error('Business name must be unique')
     }
     
     return true
