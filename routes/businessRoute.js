@@ -65,7 +65,6 @@ router.get('/single/:business_id', [ uuidValidation, result ], async (req, res, 
 router.post('/create', [upload.single('business_avatar'), validToken, newBusinessValidator, validateImageFile, result ], async (req, res, next) => {
     let image_key
     try {
-        let business_location
         const new_business = {
             business_name: req.body.business_name,
             business_description: req.body.business_description,
@@ -76,16 +75,11 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
             business_instagram: req.body.business_instagram,
             business_twitter: req.body.business_twitter,
             business_facebook: req.body.business_facebook,
-            business_website: req.body.business_website
+            business_website: req.body.business_website,
+            business_admin: req.user_decoded,
+            active_business: true,
         }
 
-        // check and add user admin
-        if (!req.user_decoded) {
-            throw new Error('missing_admin')
-        } else {
-            // save requesting user as business admin
-            new_business['business_admin'] = req.user_decoded
-        }
         // check if business location is attached
         if (new_business.place_id) {
             const geocode = await updatedGoogleMapsClient.geocode({ params: { place_id: new_business.place_id, key: process.env.GEOCODER_API_KEY }, timeout: 1000 })
@@ -103,9 +97,6 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
         } else {
             throw new Error('missing_image')
         }
-
-        // set business as active
-        new_business['active_business'] = true
         
         const created_business = await db.addBusiness(new_business)
         
@@ -198,8 +189,13 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
         res.status(201).json(updated_business)
         
     } catch (error) {
-        console.log(error)
-        if (error.message) {
+        if(error.constraint) {
+            next({
+                status: businessErrors[error.constraint]?.status,
+                message: businessErrors[error.constraint]?.message,
+                type: businessErrors[error.constraint]?.type,
+            })
+        } else if (error.message) {
 
             next({
                 status: businessErrors[error.message]?.status,
@@ -208,12 +204,6 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
             })
 
         }
-        // if (err.constraint === 'contacts_email_unique') {
-        //     res.status(400).json({ message: 'duplicate email', type: 'email'})
-        // } else {
-        //     res.status(500).json({ message: "server not connected", err });
-        // }
-        
     }
 })
 

@@ -174,7 +174,6 @@ async function updateBusiness(business_id, changes, user_id) {
             ])
             .first()
     } catch (error) {
-        console.log(error)
         throw error
     }
 }
