@@ -60,7 +60,7 @@ app.use(cors({
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
-app.use('/business', businessRouter);
+app.use('/businesses', businessRouter);
 app.use('/roles', roleRouter);
 app.use('/s3', s3Router);
 
