@@ -76,7 +76,6 @@ const isBusinessAdmin = async (value, { req }) => {
     if(req.business_role !== process.env.ADMIN_ACCOUNT && value) {
         throw new Error('invalid business role rights')
     }
-    
     return true
 }
 
@@ -323,24 +322,26 @@ const validateRoleManagement = async (req, res, next) => {
 const validateBusinessManagement = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params
-
+    
     // validate that user_id is a uuid
     if(!uuidPattern.test(user_id)) {
         return res.status(400).json({ message: 'invalid user' })
     }
-
+    
     // validate that business_id is a uuid
     if(!uuidPattern.test(business_id)) {
         return res.status(400).json({ message: 'invalid business identifier' })
     }
-
+    
     const businessRole = await rolesDB.findUserBusinessRole(business_id, user_id)
+
     if(businessRole === undefined) {
         return res.status(400).json({ message: 'business role not found' })
     } else {
-        if(businessRole.business_admin !== user_id) {
+        if ((businessRole.active_role === false) || (businessRole.role_type < process.env.MANAGER_ACCOUNT)) {
             return res.status(400).json({ message: 'invalid role rights' })
         } else {
+            req.business_role = businessRole.role_type
             next()
         }
     }
@@ -586,6 +587,7 @@ const result = (req, res, next) => {
     const result = validationResult(req);
     const hasError = !result.isEmpty();
 
+    console.log(result)
     if(hasError) {
         const error = result.array()[0]
         next({
