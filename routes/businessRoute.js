@@ -69,16 +69,24 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
             business_name: req.body.business_name,
             business_description: req.body.business_description,
             business_type: req.body.business_type,
-            place_id: req.body.place_id,
             business_email: req.body.business_email,
-            business_phone: req.body.business_phone,
-            business_instagram: req.body.business_instagram,
-            business_twitter: req.body.business_twitter,
-            business_facebook: req.body.business_facebook,
-            business_website: req.body.business_website,
             business_admin: req.user_decoded,
             active_business: true,
+
+            place_id: req.body?.place_id,
+            business_phone: req.body?.business_phone,
+            business_instagram: req.body?.business_instagram,
+            business_twitter: req.body?.business_twitter,
+            business_facebook: req.body?.business_facebook,
+            business_website: req.body?.business_website,
         }
+
+        // remove any undefined values from new business object
+        Object.keys(new_business).forEach(key => {
+            if (typeof new_business[key] === 'undefined') {
+                delete new_business[key];
+            }
+        });
 
         // check if business location is attached
         if (new_business.place_id) {
@@ -103,7 +111,6 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
         res.status(201).json(created_business);
 
     } catch (err) {
-        console.log(err)
         // errors returned from created_business database call - invalid input errors
         if (err.constraint) {
             // error return from database after image creation, remove image from s3
