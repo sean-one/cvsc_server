@@ -5,7 +5,7 @@ const sharp = require('sharp');
 const { deleteImageS3, uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
-const { validToken, eventCreator, eventManager } = require('../helpers/jwt_helper');
+const { validToken } = require('../helpers/jwt_helper');
 const { newEventValidator, updateEventValidator, validateEventCreation, validateEventUpdate, validateImageFile, result } = require('../helpers/validators');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -26,6 +26,7 @@ router.get('/', async (req, res) => {
 
 //! useEventsApi - createEvent - useCreateEventMutation - CREATE NEW EVENT
 router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation, newEventValidator, validateImageFile, result], async (req, res, next) => {
+    console.log(req.body)
     try {
         const new_event = req.body
 
