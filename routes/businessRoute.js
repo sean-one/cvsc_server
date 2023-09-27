@@ -223,6 +223,7 @@ router.put('/toggle-active/:business_id', [validToken, validateBusinessAdmin, re
         res.status(201).json(business)
         
     } catch (error) {
+        console.log(error)
         next({
             status: businessErrors[error.message]?.status,
             message: businessErrors[error.message]?.message,

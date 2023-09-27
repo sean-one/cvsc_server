@@ -220,7 +220,12 @@ const validateBusinessAdmin = async (req, res, next) => {
         return res.status(400).json({ message: 'business not found' })
     } else {
         if(currentBusiness.business_admin !== user_id) {
-            return res.status(400).json({ message: 'invalid role rights' })
+            // return res.status(400).json({ message: 'invalid role rights' })
+            next({
+                status: 400,
+                message: 'invalid role rights',
+                type: 'credentials',
+            })
         } else {
             next()
         }
