@@ -16,36 +16,71 @@ module.exports = {
 //! main calendar event call
 function find() {
     return db('events')
-        .where('events.eventdate', '>=', new Date())
-        // remove inactive events from event list return
+        // Ensure eventdate and eventstart are in the future
+        .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+        // Remove inactive events from event list return
         .andWhere({ active_event: true })
         .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
         .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
         .join('users', 'events.created_by', '=', 'users.id')
-        .select(
-            [
-                'events.id as event_id',
-                'events.eventname',
-                'events.eventdate',
-                'events.eventstart',
-                'events.eventend',
-                'events.eventmedia',
-                'events.details',
-                'events.active_event',
+        .select([
+            'events.id as event_id',
+            'events.eventname',
+            'events.eventdate',
+            'events.eventstart',
+            'events.eventend',
+            'events.eventmedia',
+            'events.details',
+            'events.active_event',
 
-                'venue.id as venue_id',
-                'venue.business_name as venue_name',
-                'venue.formatted_address as venue_location',
-                
-                'brand.id as brand_id',
-                'brand.business_name as brand_name',
+            'venue.id as venue_id',
+            'venue.business_name as venue_name',
+            'venue.formatted_address as venue_location',
 
-                'events.created_by',
-                'users.username as event_creator'
-            ]
-        )
+            'brand.id as brand_id',
+            'brand.business_name as brand_name',
 
+            'events.created_by',
+            'users.username as event_creator'
+        ])
+        // Order by combined timestamp of eventdate and reformatted eventstart
+        .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 }
+
+
+
+// function find() {
+//     return db('events')
+//         .where('events.eventdate', '>=', new Date())
+//         // remove inactive events from event list return
+//         .andWhere({ active_event: true })
+//         .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
+//         .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
+//         .join('users', 'events.created_by', '=', 'users.id')
+//         .select(
+//             [
+//                 'events.id as event_id',
+//                 'events.eventname',
+//                 'events.eventdate',
+//                 'events.eventstart',
+//                 'events.eventend',
+//                 'events.eventmedia',
+//                 'events.details',
+//                 'events.active_event',
+
+//                 'venue.id as venue_id',
+//                 'venue.business_name as venue_name',
+//                 'venue.formatted_address as venue_location',
+                
+//                 'brand.id as brand_id',
+//                 'brand.business_name as brand_name',
+
+//                 'events.created_by',
+//                 'users.username as event_creator'
+//             ]
+//         )
+
+// }
 
 //! used inside valdations & to grab information
 async function findById(eventId) {

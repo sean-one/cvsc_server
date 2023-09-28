@@ -1,8 +1,8 @@
 const businessErrors = {
     business_not_found: {
         status: 404,
-        message: 'unable to find business by id',
-        type: 'validation'
+        message: 'Unable to find business.',
+        type: 'missing_business'
     },
     businesses_business_name_unique: {
         status: 409,
