@@ -5,6 +5,7 @@ module.exports = {
     findById,
     checkEventName,
     findUserEvents,
+    findBusinessEvents,
     createEvent,
     updateImage,
     updateEvent,
@@ -357,4 +358,42 @@ function findUserEvents(user) {
             ]
         )
         .orderBy('events.eventdate')
+}
+
+function findBusinessEvents(business_id) {
+    return db('events')
+        // Ensure eventdate and eventstart are in the future
+        .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+        // Match either brand_id or venue_id with the provided business_id
+        .andWhere(function () {
+            this.where('events.brand_id', '=', business_id)
+                .orWhere('events.venue_id', '=', business_id)
+        })
+        // Remove inactive events from event list return
+        .andWhere({ active_event: true })
+        .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
+        .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
+        .join('users', 'events.created_by', '=', 'users.id')
+        .select([
+            'events.id as event_id',
+            'events.eventname',
+            'events.eventdate',
+            'events.eventstart',
+            'events.eventend',
+            'events.eventmedia',
+            'events.details',
+            'events.active_event',
+
+            'venue.id as venue_id',
+            'venue.business_name as venue_name',
+            'venue.formatted_address as venue_location',
+
+            'brand.id as brand_id',
+            'brand.business_name as brand_name',
+
+            'events.created_by',
+            'users.username as event_creator'
+        ])
+        // Order by combined timestamp of eventdate and reformatted eventstart
+        .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 }

@@ -176,6 +176,15 @@ router.delete('/remove/:event_id', [validToken], async (req, res) => {
     }
 })
 
+router.get('/business/:business_id', [validToken], async (req, res) => {
+    const { business_id } = req.params;
+    db.findBusinessEvents(business_id)
+        .then(events => {
+            res.status(200).json(events);
+        })
+        .catch(err => res.status(500).json(err));
+})
+
 //! useEventsApi - getAllUserEvents - useUserEventsQuery
 router.get('/user/:user_id', [validToken], async (req, res) => {
     const { user_id } = req.params;
