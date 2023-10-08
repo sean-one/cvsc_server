@@ -1,8 +1,9 @@
 const businessErrors = {
+    // if business not found at get('single/:business_id)
     business_not_found: {
         status: 404,
         message: 'Unable to find business.',
-        type: 'missing_business'
+        type: 'business_error'
     },
     businesses_business_name_unique: {
         status: 409,
