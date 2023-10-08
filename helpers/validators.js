@@ -162,7 +162,11 @@ const validateImageFile = async (req, res, next) => {
     } else {
         const fileExtension = req.file?.mimetype.split('/')[1];
         if(!exceptedFileTypes.includes(fileExtension)) {
-            return res.status(400).json({ message: 'only .png, .jpg, .jpeg & .webp file types' })
+            next({
+                status: 400,
+                message: 'only .png, .jpg, .jpeg & .webp file types',
+                type: 'credentials'
+            })
         }
 
         next()
@@ -175,13 +179,21 @@ const validateImageAdmin = async (req, res, next) => {
     if(!req.file) { next() }
 
     else if(req.file && req.business_role !== process.env.ADMIN_ACCOUNT) {
-        return res.status(400).json({ message: 'invalid business role rights' })
+        next({
+            status: 403,
+            message: 'invalid business role rights',
+            type: 'credentials'
+        })
     }
 
     else {
         const fileExtension = req.file?.mimetype.split('/')[1];
         if(!exceptedFileTypes.includes(fileExtension)) {
-            return res.status(400).json({ message: 'only .png, .jpg, .jpeg & .webp file types' })
+            next({
+                status: 400,
+                message: 'only .png, .jpg, .jpeg & .webp file types',
+                type: 'credentials'
+            })
         }
         next()
     }
@@ -207,22 +219,33 @@ const validateBusinessAdmin = async (req, res, next) => {
 
     // validate that user_id is a uuid
     if(!uuidPattern.test(user_id)){
-        return res.status(400).json({ message: 'invalid user' })
+        next({
+            status: 400,
+            message: 'invalid user',
+            type: 'credentials'
+        })
     }
 
     // validate that business_id is a uuid
     if(!uuidPattern.test(business_id)) {
-        return res.status(400).json({ message: 'invalid business identifier' })
+        next({
+            status: 400,
+            message: 'invalid business identifier',
+            type: 'credentials'
+        })
     }
 
     const currentBusiness = await businessDB.findBusinessById(business_id)
     if(currentBusiness === undefined) {
-        return res.status(400).json({ message: 'business not found' })
+        next({
+            status: 404,
+            message: 'business not found',
+            type: 'credentials'
+        })
     } else {
         if(currentBusiness.business_admin !== user_id) {
-            // return res.status(400).json({ message: 'invalid role rights' })
             next({
-                status: 400,
+                status: 403,
                 message: 'invalid role rights',
                 type: 'credentials',
             })
@@ -238,29 +261,49 @@ const validateRoleRequest = async (req, res, next) => {
     
     // validate that the user_id is a uuid
     if(!uuidPattern.test(user_id)) {
-        return res.status(400).json({ message: 'invalid user' })
+        next({
+            status: 400,
+            message: 'invalid user',
+            type: 'credentials'
+        })
     }
     
     // validate that the business_id is a uuid
     if(!uuidPattern.test(business_id)) {
-        return res.status(400).json({ message: 'invalid business identifier' })
+        next({
+            status: 400,
+            message: 'invalid business identifier',
+            type: 'credentials'
+        })
     }
     
     // validate that business_id is actual business
     const requestedBusiness = await businessDB.findBusinessById(business_id)
     if(!requestedBusiness) {
-        return res.status(400).json({ message: 'business not found' })
+        next({
+            status: 404,
+            message: 'business not found',
+            type: 'credentials'
+        })
     }
     
     // validate the business_request_open is true
     if(!requestedBusiness.business_request_open) {
-        return res.status(400).json({ message: 'business request closed' })
+        next({
+            status: 403,
+            message: 'business request closed',
+            type: 'credentials'
+        })
     }
     
     // confirm non duplicate
     const userRolesBusinessIds = await rolesDB.getAllUserRoles(user_id)
     if(userRolesBusinessIds?.business_ids.includes(business_id)) {
-        return res.status(400).json({ message: 'duplicate request not allowed' })
+        next({
+            status: 400,
+            message: 'duplicate request not allowed',
+            type: 'credentials'
+        })
     }
 
     next()
@@ -272,23 +315,39 @@ const validateRoleDelete = async (req, res, next) => {
 
     // validate that user_id is a uuid
     if(!uuidPattern.test(user_id)) {
-        return res.status(400).json({ message: 'invalid user' })
+        next({
+            status: 400,
+            message: 'invalid user',
+            type: 'credentials'
+        })
     }
 
     // validate that role_id is a uuid
     if(!uuidPattern.test(role_id)) {
-        return res.status(400).json({ message: 'invalid role identifier' })
+        next({
+            status: 400,
+            message: 'invalid role identifier',
+            type: 'credentials'
+        })
     }
 
     // validate that role with role_id exist
     const currentRole = await rolesDB.findRoleById(role_id)
     if(currentRole === undefined) {
-        return res.status(400).json({ message: 'role request not found'})
+        next({
+            status: 404,
+            message: 'role not found',
+            type: 'credentials'
+        })
     }
 
     // validate role.user_id is user_decoded
     if(user_id !== currentRole.user_id) {
-        return res.status(400).json({ message: 'invalid role rights' })
+        next({
+            status: 403,
+            message: 'invalid role rights',
+            type: 'credentials'
+        })
     }
     
     next()
@@ -300,18 +359,30 @@ const validateRoleManagement = async (req, res, next) => {
 
     // validate that user_id is a uuid
     if(!uuidPattern.test(user_id)) {
-        return res.status(400).json({ message: 'invalid user' })
+        next({
+            status: 400,
+            message: 'invalid user',
+            type: 'credentials'
+        })
     }
 
     // validate that role_id is a uuid
     if(!uuidPattern.test(role_id)) {
-        return res.status(400).json({ message: 'invalid role identifier' })
+        next({
+            status: 400,
+            message: 'invalid role identifier',
+            type: 'credentials'
+        })
     }
 
     // validate role exist
     const currentRole = await rolesDB.findRoleById(role_id)
     if(currentRole === undefined) {
-        return res.status(400).json({ message: 'role not found'})
+        next({
+            status: 404,
+            message: 'role not found',
+            type: 'credentials'
+        })
     } else {
         // get management role for user_id
         const managementrole = await rolesDB.findUserBusinessRole(currentRole.business_id, user_id)
@@ -319,7 +390,11 @@ const validateRoleManagement = async (req, res, next) => {
         if((managementrole?.role_type > currentRole.role_type) && managementrole?.active_role) {
             next()
         } else {
-            return res.status(400).json({ message: 'invalid management role'})
+            next({
+                status: 403,
+                message: 'invalid management role',
+                type: 'credentials'
+            })
         }
     }
 }
@@ -330,21 +405,37 @@ const validateBusinessManagement = async (req, res, next) => {
     
     // validate that user_id is a uuid
     if(!uuidPattern.test(user_id)) {
-        return res.status(400).json({ message: 'invalid user' })
+        next({
+            status: 400,
+            message: 'invalid user',
+            type: 'credentials'
+        })
     }
     
     // validate that business_id is a uuid
     if(!uuidPattern.test(business_id)) {
-        return res.status(400).json({ message: 'invalid business identifier' })
+        next({
+            status: 400,
+            message: 'invalid business identifier',
+            type: 'credentials'
+        })
     }
     
     const businessRole = await rolesDB.findUserBusinessRole(business_id, user_id)
 
     if(businessRole === undefined) {
-        return res.status(400).json({ message: 'business role not found' })
+        next({
+            status: 404,
+            message: 'business role not found',
+            type: 'credentials'
+        })
     } else {
         if ((businessRole.active_role === false) || (businessRole.role_type < process.env.MANAGER_ACCOUNT)) {
-            return res.status(400).json({ message: 'invalid role rights' })
+            next({
+                status: 403,
+                message: 'invalid role rights',
+                type: 'credentials'
+            })
         } else {
             req.business_role = businessRole.role_type
             next()
@@ -357,26 +448,46 @@ const validateEventCreation = async (req, res, next) => {
     const { venue_id, brand_id } = req.body
 
     if(!uuidPattern.test(user_id)) {
-        return res.status(400).json({ type: 'user', message: 'invalid user' })
+        next({
+            status: 400,
+            message: 'invalid user',
+            type: 'user'
+        })
     }
 
     if(!uuidPattern.test(venue_id)) {
-        return res.status(400).json({ type: 'venue_id', message: 'invalid location identifier' })
+        next({
+            status: 400,
+            message: 'invalid location identifer',
+            type: 'venune_id'
+        })
     }
 
     if(!uuidPattern.test(brand_id)) {
-        return res.status(400).json({ type: 'brand_id', message: 'invalid business brand identifier' })
+        next({
+            status: 400,
+            message: 'invalid business brand identifier',
+            type: 'brand_id'
+        })
     }
 
     const businessIDs = await rolesDB.getUserBusinessRoles(user_id)
     if(businessIDs === undefined) {
-        return res.status(404).json({ type: 'role_rights', message: 'no user roles found' })
+        next({
+            status: 404,
+            message: 'no user roles found',
+            type: 'role_rights'
+        })
     }
 
     if(businessIDs?.business_ids.includes(venue_id) || businessIDs?.business_ids.includes(brand_id)) {
         next()
     } else {
-        return res.status(404).json({ type: 'user', message: 'invalid user rights' })
+        next({
+            status: 403,
+            message: 'invalid user rights',
+            type: 'user'
+        })
     }
 }
 
@@ -385,33 +496,57 @@ const validateEventUpdate = async (req, res, next) => {
     const { event_id } = req.params
 
     if(!uuidPattern.test(user_id)) {
-        return res.status(400).json({ type: 'user', message: 'requesting user id error' })
+        next({
+            status: 400,
+            message: 'invalid user identifier',
+            type: 'credentials'
+        })
     }
 
     if(!uuidPattern.test(event_id)) {
-        return res.status(400).json({ type: 'server', message: 'invalid event identifier' })
+        next({
+            status: 400,
+            message: 'invalid event identifier',
+            type: 'credentials'
+        })
     }
 
     const { venue_id: current_venue, brand_id: current_brand } = await eventsDB.findById(event_id)
     const { venue_id = current_venue, brand_id = current_brand } = req.body
 
     if(!uuidPattern.test(venue_id)) {
-        return res.status(400).json({ type: 'venue_id', message: 'invalid location identifier' })
+        next({
+            status: 400,
+            message: 'invalid location identifier',
+            type: 'venue_id'
+        })
     }
 
     if(!uuidPattern.test(brand_id)) {
-        return res.status(400).json({ type: 'brand_id', message: 'invalid business brand identifier' })
+        next({
+            status: 400,
+            message: 'invalid business brand identifier',
+            type: 'brand_id'
+        })
     }
 
     const businessIDs = await rolesDB.getUserBusinessRoles(user_id)
     if(businessIDs === undefined) {
-        return res.status(404).json({ type: 'user', message: 'no user roles found' })
+        next({
+            status: 404,
+            message: 'no user roles found',
+            type: 'credentials'
+        })
     }
 
     if(businessIDs?.business_ids.includes(venue_id) || businessIDs?.business_ids.includes(brand_id)) {
         next()
     } else {
-        return res.status(404).json({ type: 'role_rights', message: 'must have at least creator rights to at least one business' })
+        next({
+            status: 403,
+            message: 'invalid role rights',
+            type: 'role_rights'
+        })
     }
 }
 
