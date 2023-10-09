@@ -280,3 +280,12 @@ router.delete('/remove/:business_id', [validToken, validateBusinessAdmin, result
 })
 
 module.exports = router;
+
+// update endpoints to more standard pattern
+// router.get('/')
+// router.get('/:business_id')
+// router.post('/')
+// router.put('/:business_id')
+// router.put('/:business_id/toggle-active')
+// router.put('/:business_id/toggle-request')
+// router.delete('/:business_id')
