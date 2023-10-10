@@ -27,7 +27,6 @@ router.get('/', async (req, res) => {
 
 //! useEventsApi - createEvent - useCreateEventMutation - CREATE NEW EVENT
 router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation, newEventValidator, validateImageFile, result], async (req, res, next) => {
-    console.log(req.body)
     try {
         const new_event = req.body
 
@@ -49,7 +48,6 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation
         res.status(201).json(event)
 
     } catch (error) {
-        console.log(error.message)
         next({
             status: eventErrors[error.message]?.status,
             message: eventErrors[error.message]?.message,

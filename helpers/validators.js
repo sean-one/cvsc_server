@@ -165,7 +165,7 @@ const validateImageFile = async (req, res, next) => {
             next({
                 status: 400,
                 message: 'only .png, .jpg, .jpeg & .webp file types',
-                type: 'credentials'
+                type: 'media_error'
             })
         }
 
@@ -451,22 +451,22 @@ const validateEventCreation = async (req, res, next) => {
         next({
             status: 400,
             message: 'invalid user',
-            type: 'user'
+            type: 'server'
         })
     }
 
     if(!uuidPattern.test(venue_id)) {
         next({
             status: 400,
-            message: 'invalid location identifer',
-            type: 'venune_id'
+            message: 'invalid business venue',
+            type: 'venue_id'
         })
     }
 
     if(!uuidPattern.test(brand_id)) {
         next({
             status: 400,
-            message: 'invalid business brand identifier',
+            message: 'invalid business brand',
             type: 'brand_id'
         })
     }
@@ -475,7 +475,7 @@ const validateEventCreation = async (req, res, next) => {
     if(businessIDs === undefined) {
         next({
             status: 404,
-            message: 'no user roles found',
+            message: 'user roles not found',
             type: 'role_rights'
         })
     }
@@ -485,8 +485,8 @@ const validateEventCreation = async (req, res, next) => {
     } else {
         next({
             status: 403,
-            message: 'invalid user rights',
-            type: 'user'
+            message: 'invalid user permission',
+            type: 'server'
         })
     }
 }
@@ -668,7 +668,7 @@ const updateBusinessValidator = [
 
 const newEventValidator = [
     check('eventname').trim().not().isEmpty().withMessage('eventname is required')
-        .isLength({ min: 2, max: 50}).withMessage('event name must be at least 2 characters, and no more then 50')
+        .isLength({ min: 4, max: 50}).withMessage('event name at least 4 characters, no more then 50')
         .custom(isEventNameUnique),
     check('eventdate').trim().not().isEmpty().withMessage('event date is required')
         .custom(isValidDate),
