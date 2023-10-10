@@ -443,6 +443,46 @@ const validateBusinessManagement = async (req, res, next) => {
     }
 }
 
+const validateEventCreator = async (req, res, next) => {
+    const user_id = req.user_decoded
+    const { event_id } = req.params
+
+    if(!uuidPattern.test(user_id)) {
+        next({
+            status: 400,
+            message: 'invalid user',
+            type: 'server'
+        })
+    }
+
+    if(!uuidPattern.test(event_id)) {
+        next({
+            status: 400,
+            message: 'invalid event',
+            type: 'server'
+        })
+    }
+
+    const event = await eventsDB.validateCreatedBy(event_id)
+    if(event === undefined) {
+        next({
+            status: 404,
+            message: 'event not found',
+            type: 'server'
+        })
+    }
+
+    if(event.created_by !== user_id) {
+        next({
+            status: 403,
+            message: 'invalid event permission',
+            type: 'server'
+        })
+    }
+
+    next()
+}
+
 const validateEventCreation = async (req, res, next) => {
     const user_id = req.user_decoded
     const { venue_id, brand_id } = req.body
@@ -498,16 +538,16 @@ const validateEventUpdate = async (req, res, next) => {
     if(!uuidPattern.test(user_id)) {
         next({
             status: 400,
-            message: 'invalid user identifier',
-            type: 'credentials'
+            message: 'invalid user',
+            type: 'server'
         })
     }
 
     if(!uuidPattern.test(event_id)) {
         next({
             status: 400,
-            message: 'invalid event identifier',
-            type: 'credentials'
+            message: 'invalid event',
+            type: 'server'
         })
     }
 
@@ -517,7 +557,7 @@ const validateEventUpdate = async (req, res, next) => {
     if(!uuidPattern.test(venue_id)) {
         next({
             status: 400,
-            message: 'invalid location identifier',
+            message: 'invalid venue',
             type: 'venue_id'
         })
     }
@@ -525,7 +565,7 @@ const validateEventUpdate = async (req, res, next) => {
     if(!uuidPattern.test(brand_id)) {
         next({
             status: 400,
-            message: 'invalid business brand identifier',
+            message: 'invalid business brand',
             type: 'brand_id'
         })
     }
@@ -534,8 +574,8 @@ const validateEventUpdate = async (req, res, next) => {
     if(businessIDs === undefined) {
         next({
             status: 404,
-            message: 'no user roles found',
-            type: 'credentials'
+            message: 'no roles found',
+            type: 'server'
         })
     }
 
@@ -544,8 +584,8 @@ const validateEventUpdate = async (req, res, next) => {
     } else {
         next({
             status: 403,
-            message: 'invalid role rights',
-            type: 'role_rights'
+            message: 'invalid role permission',
+            type: 'server'
         })
     }
 }
@@ -730,6 +770,7 @@ module.exports = {
     validateRoleDelete,
     validateRoleManagement,
     validateBusinessManagement,
+    validateEventCreator,
     validateEventCreation,
     validateEventUpdate,
     updateBusinessValidator,

@@ -6,7 +6,15 @@ const { deleteImageS3, uploadImageS3Url } = require('../s3')
 const db = require('../data/models/event');
 const eventErrors = require('../error_messages/eventErrors');
 const { validToken } = require('../helpers/jwt_helper');
-const { newEventValidator, updateEventValidator, validateEventCreation, validateEventUpdate, validateImageFile, result } = require('../helpers/validators');
+const {
+    newEventValidator,
+    updateEventValidator,
+    validateEventCreator,
+    validateEventCreation,
+    validateEventUpdate,
+    validateImageFile,
+    result
+} = require('../helpers/validators');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
@@ -150,27 +158,29 @@ router.put('/remove_business/:event_id', [validToken], async (req, res, next) =>
     }
 })
 
-// useEventsApi - removeEvent - useRemoveEventMutation
-router.delete('/remove/:event_id', [validToken], async (req, res) => {
+//! useEventsApi - removeEvent - useRemoveEventMutation
+router.delete('/remove/:event_id', [validToken, validateEventCreator], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
         const { eventmedia, eventname } = await db.findById(event_id)
 
-        const deletedEvent = await db.removeEvent(event_id)
+        const deleteResponse = await db.removeEvent(event_id)
 
-        if (deletedEvent >= 1) {
+        if (deleteResponse >= 1) {
             // check for image hosted on s3 and delete if found
             if(!check_link.test(eventmedia)) await deleteImageS3(eventmedia)
 
             res.status(204).json(eventname);
         } else {
-            console.log(deletedEvent)
-            res.status(400).json({ message: 'invalid credentials' })
+            throw new Error('event_not_found')
         }
-    } catch (err) {
-        console.log('not found')
-        res.status(401).json({ message: 'invalid token', error: err })
+    } catch (error) {
+        next({
+            status: eventErrors[error.message].status,
+            message: eventErrors[error.message].message,
+            type: eventErrors[error.message].type
+        })
     }
 })
 

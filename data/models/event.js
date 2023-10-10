@@ -2,6 +2,7 @@ const db = require('../dbConfig');
 
 module.exports = {
     find,
+    validateCreatedBy,
     findById,
     checkEventName,
     findUserEvents,
@@ -48,40 +49,13 @@ function find() {
         .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 }
 
-
-
-// function find() {
-//     return db('events')
-//         .where('events.eventdate', '>=', new Date())
-//         // remove inactive events from event list return
-//         .andWhere({ active_event: true })
-//         .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
-//         .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
-//         .join('users', 'events.created_by', '=', 'users.id')
-//         .select(
-//             [
-//                 'events.id as event_id',
-//                 'events.eventname',
-//                 'events.eventdate',
-//                 'events.eventstart',
-//                 'events.eventend',
-//                 'events.eventmedia',
-//                 'events.details',
-//                 'events.active_event',
-
-//                 'venue.id as venue_id',
-//                 'venue.business_name as venue_name',
-//                 'venue.formatted_address as venue_location',
-                
-//                 'brand.id as brand_id',
-//                 'brand.business_name as brand_name',
-
-//                 'events.created_by',
-//                 'users.username as event_creator'
-//             ]
-//         )
-
-// }
+//! useing in validators-> validateEventCreator
+async function validateCreatedBy(eventId) {
+    return await db('events')
+        .where({ 'events.id': eventId })
+        .select([ 'events.created_by' ])
+        .first()
+}
 
 //! used inside valdations & to grab information
 async function findById(eventId) {
@@ -120,7 +94,6 @@ async function checkEventName(eventname) {
         .select([ 'events.id' ])
         .first()
 }
-
 
 // eventRoute - .post('/')
 async function createEvent(event) {

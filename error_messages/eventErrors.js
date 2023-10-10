@@ -1,4 +1,10 @@
 const eventErrors = {
+    //! event delete route
+    event_not_found: {
+        status: 404,
+        message: 'event not found',
+        type: 'server'
+    },
     //! event model error
     events_eventname_unique: {
         status: 400,
