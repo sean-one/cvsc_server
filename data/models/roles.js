@@ -8,6 +8,7 @@ module.exports = {
     findRoleByBusiness,
     getUserBusinessRoles,
     getAllUserRoles,
+    getActiveUserRoles,
     approveRoleRequest,
     upgradeCreatorRole,
     downgradeManagerRole,
@@ -35,6 +36,23 @@ function findUserBusinessRole(business_id, user_id) {
 async function findUserRoles(user_id) {
     return db('roles')
         .where({ user_id: user_id })
+        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
+        .select(
+            [
+                'roles.id',
+                'roles.business_id',
+                'roles.role_type',
+                'roles.active_role',
+                'businesses.business_name'
+            ]
+        )
+        .orderBy('roles.role_type', 'desc')
+}
+
+// used in authRoute when user needs to build the user roles
+async function getActiveUserRoles(user_id) {
+    return await db('roles')
+        .where({ user_id: user_id, active_role: true })
         .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [

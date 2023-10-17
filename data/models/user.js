@@ -71,15 +71,9 @@ async function findUserById(id) {
 // passport-config - deserialize user
 async function getUserAccount(id) {
     const user = await db('users').where({ 'users.id': id }).select(['users.id', 'users.username', 'users.avatar', 'users.email',]).first()
-    const account_type = await db('roles').where({ 'roles.user_id': id, 'roles.active_role': true }).select(['roles.business_id', 'roles.role_type']).orderBy('role_type', 'desc')
-
-    if (account_type.length > 0) {
-        user.account_type = account_type[0].role_type
-    } else {
-        user.account_type = process.env.BASIC_ACCOUNT
-    }
+    const active_user_roles = await db('roles').where({ 'roles.user_id': id, 'roles.active_role': true }).select(['roles.business_id', 'roles.role_type']).orderBy('role_type', 'desc')
     
-    return { user: user, roles: account_type }
+    return { user: user, roles: active_user_roles || [] }
 }
 
 //! passport-config - GoogleStrategy

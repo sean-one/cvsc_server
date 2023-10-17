@@ -49,8 +49,6 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
             const refreshToken = createRefreshToken(user.id)
             await userDB.addRefreshToken(user.id, refreshToken)
 
-            user.account_type = process.env.BASIC_ACCOUNT
-
             res.cookie('jwt', refreshToken)
 
             res.status(201).json({ user: user, roles: [] })
@@ -73,9 +71,7 @@ router.post('/login', loginUserValidator, result, passport.authenticate('local',
 }), async (req, res) => {
     
     const user = req.user
-    const user_roles = await rolesDB.findUserRoles(user.id)
-    const filter_inactive = user_roles.filter(role => role.active_role)
-    user.account_type = filter_inactive[0]?.role_type || process.env.BASIC_ACCOUNT
+    const user_roles = await rolesDB.getActiveUserRoles(user.id)
     
     res.cookie('jwt', user.refreshToken)
     // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
@@ -103,14 +99,10 @@ router.get('/refresh', async (req, res) => {
             if(err || user_found.id !== decoded.user) return res.sendStatus(403)
             // get user information
             const accessToken = createAccessToken(decoded.user)
-            // find ALL roles attached to user active & inactive
-            const user_roles = await rolesDB.findUserRoles(decoded.user)
+            // find active roles attached to user
+            const user_roles = await rolesDB.getActiveUserRoles(decoded.user)
             // set the accesstoken to the user details
             user_found.accessToken = accessToken
-            // filter out all inactive role request
-            const filter_inactive = user_roles.filter(role => role.active_role)
-            // get highest role type in all active only roles
-            user_found.account_type = filter_inactive[0]?.role_type || process.env.BASIC_ACCOUNT
            
             res.json({ user: user_found, roles: user_roles })
         }
@@ -127,9 +119,9 @@ router.get('/google/redirect', passport.authenticate("google", {
 }), async (req, res) => {
 
     const user = req.user
-    const user_roles = await rolesDB.findUserRoles(user.id)
-    const filter_inactive = user_roles.filter(role => role.active_role)
-    user.account_type = filter_inactive[0]?.role_type || process.env.BASIC_ACCOUNT
+    // const user_roles = await rolesDB.getActiveUserRoles(user.id)
+    // const filter_inactive = user_roles.filter(role => role.active_role)
+    // user.account_type = filter_inactive[0]?.role_type || process.env.BASIC_ACCOUNT
 
     res.cookie('jwt', user.refreshToken)
     // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
