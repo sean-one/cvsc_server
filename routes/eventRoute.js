@@ -203,13 +203,5 @@ router.get('/user/:user_id', [validToken], async (req, res) => {
         .catch(err => res.status(500).json(err));
 })
 
-router.get('/inactive/user', (req, res) => {
-    db.findInactive(req.user.id)
-        .then(events => {
-            res.status(200).json(events);
-        })
-        .catch(err => res.status(500).json(err));
-})
-
 
 module.exports = router;
