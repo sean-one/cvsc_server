@@ -19,7 +19,7 @@ const {
     validateBusinessAdmin,
     uuidValidation,
     result,
-} = require('../helpers/validators.js')
+} = require('../helpers/validators.js');
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -40,7 +40,7 @@ router.get('/', async (req, res) => {
 });
 
 //! useBusinessQuery - getBusiness - useBusinessApi - VIEW BUSINESS PAGE
-router.get('/single/:business_id', [ uuidValidation, result ], async (req, res, next) => {
+router.get('/:business_id', [ uuidValidation, result ], async (req, res, next) => {
     try {
         const { business_id } = req.params;
         const business = await db.findBusinessById(business_id)
@@ -62,7 +62,7 @@ router.get('/single/:business_id', [ uuidValidation, result ], async (req, res, 
 });
 
 //! useCreateBusinessMutation - createBusiness - useBusinessApi - CREATE BUSINESS
-router.post('/create', [upload.single('business_avatar'), validToken, newBusinessValidator, validateImageFile, result ], async (req, res, next) => {
+router.post('/', [upload.single('business_avatar'), validToken, newBusinessValidator, validateImageFile, result ], async (req, res, next) => {
     let image_key
     try {
         const new_business = {
@@ -134,8 +134,36 @@ router.post('/create', [upload.single('business_avatar'), validToken, newBusines
     }
 })
 
+router.put('/:business_id/toggle', async (req, res, next) => {
+    try {
+        const { business_id } = req.params;
+        const { toggleType } = req.body;
+    
+        if (toggleType === 'active') {
+            const updatedBusiness = await db.toggleActiveBusiness(business_id)
+            res.status(201).json(updatedBusiness)
+        }
+
+        else if (toggleType === 'request') {
+            const updatedBusiness = await db.toggleBusinessRequest(business_id)
+            res.status(201).json(updatedBusiness)
+        }
+
+        else {
+            throw new Error('invalid_toggle_type')
+        }
+        
+    } catch (error) {
+        next({
+            status: businessErrors[error.message]?.status,
+            message: businessErrors[error.message]?.message,
+            type: businessErrors[error.message]?.type,
+        })
+    }
+})
+
 //! useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
-router.put('/update/:business_id', [upload.single('business_avatar'), validToken, validateBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
+router.put('/:business_id', [upload.single('business_avatar'), validToken, validateBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;
@@ -214,38 +242,6 @@ router.put('/update/:business_id', [upload.single('business_avatar'), validToken
     }
 })
 
-//! useActiveBusinessToggle - toggleActiveBusiness - useBusinessApi - TOGGLE BUSINESS ACTIVE STATUS
-router.put('/toggle-active/:business_id', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
-    try {
-        const { business_id } = req.params;
-        const business = await db.toggleActiveBusiness(business_id)
-
-        res.status(201).json(business)
-        
-    } catch (error) {
-        next({
-            status: businessErrors[error.message]?.status,
-            message: businessErrors[error.message]?.message,
-            type: businessErrors[error.message]?.type
-        })
-    }
-})
-
-//! useBusinessRequestToggle - toggleBusinessRequest - useBusinessApi - TOGGLE BUSINESS REQUEST STATUS
-router.put('/toggle-request/:business_id', [validToken, validateBusinessAdmin, result], async (req, res) => {
-    try {
-        const { business_id } = req.params;
-        const business = await db.toggleBusinessRequest(business_id)
-        
-        res.status(201).json(business)
-            
-        } catch (error) {
-        console.log(error)
-        res.status(500).json({ message: 'something went a stray' })
-        
-    }
-})
-
 //! useRemoveBusinessMutation - removeBusiness - useBusinessApi - DELETE BUSINESS
 router.delete('/remove/:business_id', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
     try {
@@ -285,7 +281,6 @@ module.exports = router;
 // router.get('/')
 // router.get('/:business_id')
 // router.post('/')
+// router.put('/:business_id/toggle')
 // router.put('/:business_id')
-// router.put('/:business_id/toggle-active')
-// router.put('/:business_id/toggle-request')
 // router.delete('/:business_id')

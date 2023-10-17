@@ -42,6 +42,12 @@ const businessErrors = {
         message: 'missing location address',
         type: 'server'
     },
+    // .put('/:business_id/toggle)
+    invalid_toggle_type: {
+        status: 400,
+        message: 'invalid toggle type request',
+        type: 'server'
+    }
 }
 
 module.exports = businessErrors;

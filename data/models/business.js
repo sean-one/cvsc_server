@@ -178,7 +178,7 @@ async function updateBusiness(business_id, changes, user_id) {
     }
 }
 
-// .put('/business/toggle-active/:business_id) - toggles 'active_business', all roles.active_roles toggle too
+// .put('/:business_id/toggle)
 async function toggleActiveBusiness(business_id) {
 
     return await db.transaction(async trx => {
@@ -232,7 +232,7 @@ async function toggleActiveBusiness(business_id) {
     })
 }
 
-// .put('/business/toggle-request/:business_id) - toggles 'business_request_open'
+// .put('/:business_id/toggle)
 async function toggleBusinessRequest(business_id) {
     const business = await db('businesses')
         .where({ 'businesses.id': business_id })
