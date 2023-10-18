@@ -27,7 +27,7 @@ const upload = multer({ storage: storage })
 // '/business'
 const router = express.Router()
 
-//! RETURN A LIST OF ALL BUSINESSES
+// return a list of all businesses
 router.get('/', async (req, res) => {
     try {
         const businesses = await db.find()
@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-//! useBusinessQuery - getBusiness - useBusinessApi - VIEW BUSINESS PAGE
+// useBusinessQuery - getBusiness - useBusinessApi - VIEW BUSINESS PAGE
 router.get('/:business_id', [ uuidValidation, result ], async (req, res, next) => {
     try {
         const { business_id } = req.params;
@@ -61,7 +61,7 @@ router.get('/:business_id', [ uuidValidation, result ], async (req, res, next) =
     }
 });
 
-//! useCreateBusinessMutation - createBusiness - useBusinessApi - CREATE BUSINESS
+// useCreateBusinessMutation - createBusiness - useBusinessApi - CREATE BUSINESS
 router.post('/', [upload.single('business_avatar'), validToken, newBusinessValidator, validateImageFile, result ], async (req, res, next) => {
     let image_key
     try {
@@ -134,7 +134,8 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
     }
 })
 
-router.put('/:business_id/toggle', async (req, res, next) => {
+// useBusinessToggle - business.admin.view toggle active & toggle request
+router.put('/:business_id/toggle', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
     try {
         const { business_id } = req.params;
         const { toggleType } = req.body;
@@ -162,7 +163,7 @@ router.put('/:business_id/toggle', async (req, res, next) => {
     }
 })
 
-//! useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
+// useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
 router.put('/:business_id', [upload.single('business_avatar'), validToken, validateBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
@@ -243,7 +244,7 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, valid
 })
 
 //! useRemoveBusinessMutation - removeBusiness - useBusinessApi - DELETE BUSINESS
-router.delete('/remove/:business_id', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
+router.delete('/:business_id', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
     try {
         const { business_id } = req.params;
         const deleted_business = await db.removeBusiness(business_id)
@@ -276,11 +277,3 @@ router.delete('/remove/:business_id', [validToken, validateBusinessAdmin, result
 })
 
 module.exports = router;
-
-// update endpoints to more standard pattern
-// router.get('/')
-// router.get('/:business_id')
-// router.post('/')
-// router.put('/:business_id/toggle')
-// router.put('/:business_id')
-// router.delete('/:business_id')
