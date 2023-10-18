@@ -81,7 +81,6 @@ function getUserEvents(user) {
                 'brand.business_name as brand_name',
 
                 'events.created_by',
-                'users.username as event_creator'
             ]
         )
         .orderBy(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`)
@@ -146,7 +145,6 @@ async function getEventById(eventId) {
                 'brand.business_name as brand_name',
 
                 'events.created_by',
-                'users.username as event_creator'
             ]
         )
         .first()
@@ -180,7 +178,6 @@ async function createEvent(event) {
                         'brand.business_name as brand_name',
 
                         'events.created_by',
-                        'users.username as event_creator'
                     ]
                 )
                 .first()
@@ -238,7 +235,6 @@ async function updateEvent(event_id, eventChanges) {
                     'brand.business_name as brand_name',
 
                     'events.created_by',
-                    'users.username as event_creator'
                 ]
             )
             .first()
