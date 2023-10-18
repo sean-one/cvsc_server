@@ -21,10 +21,44 @@ const upload = multer({ storage: storage })
 // '/events'
 const router = express.Router();
 
+// useBusinessEventsQuery - returns all the events for a business id
+router.get('/business/:business_id', async (req, res) => {
+    try {
+        const { business_id } = req.params;
+        const business_events = await db.getBusinessEvents(business_id)
+
+        res.status(200).json(business_events)
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+// useUserEventsQuery - returns all the events for a user id
+router.get('/user/:user_id', [validToken], async (req, res) => {
+    const { user_id } = req.params;
+    db.getUserEvents(user_id)
+        .then(events => {
+            res.status(200).json(events);
+        })
+        .catch(err => res.status(500).json(err));
+})
+
+// useEventQuery - returns a single event from event id
+router.get('/:event_id', async (req, res, next) => {
+    try {
+        const { event_id } = req.params
+        const selected_event = await db.getEventById(event_id)
+
+        res.status(200).json(selected_event)
+    } catch (error) {
+        console.log(error)
+    }
+});
+
 //! updated endpoint - needs error handling
 router.get('/', async (req, res) => {
     try {
-        const events = await db.find()
+        const events = await db.getAllEvents()
             
         res.status(200).json(events);
     } catch (error) {
@@ -64,19 +98,8 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation
     }
 });
 
-router.get('/:event_id', async (req, res, next) => {
-    try {
-        const { event_id } = req.params
-        const selected_event = await db.findById(event_id)
-
-        res.status(200).json(selected_event)
-    } catch (error) {
-        console.log(error)
-    }
-});
-
 //! useEventsApi - updateEvent - useUpdateEventMutation - UPDATE EVENT
-router.post('/update/:event_id', [upload.single('eventmedia'), validToken, validateEventUpdate, updateEventValidator, validateImageFile, result], async (req, res, next) => {
+router.put('/:event_id', [upload.single('eventmedia'), validToken, validateEventUpdate, updateEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
@@ -138,7 +161,7 @@ router.post('/update/:event_id', [upload.single('eventmedia'), validToken, valid
 });
 
 // useEventsApi - removeBusiness - useRemoveEventBusinessMutation
-router.put('/remove_business/:event_id', [validToken], async (req, res, next) => {
+router.put('/business/remove/:event_id', [validToken], async (req, res, next) => {
     try {
         const { event_id } = req.params
         const { event_updates } = req.body
@@ -182,25 +205,6 @@ router.delete('/remove/:event_id', [validToken, validateEventCreator], async (re
             type: eventErrors[error.message].type
         })
     }
-})
-
-router.get('/business/:business_id', [validToken], async (req, res) => {
-    const { business_id } = req.params;
-    db.findBusinessEvents(business_id)
-        .then(events => {
-            res.status(200).json(events);
-        })
-        .catch(err => res.status(500).json(err));
-})
-
-//! useEventsApi - getAllUserEvents - useUserEventsQuery
-router.get('/user/:user_id', [validToken], async (req, res) => {
-    const { user_id } = req.params;
-    db.findUserEvents(user_id)
-        .then(events => {
-            res.status(200).json(events);
-        })
-        .catch(err => res.status(500).json(err));
 })
 
 

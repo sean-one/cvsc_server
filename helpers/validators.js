@@ -551,7 +551,7 @@ const validateEventUpdate = async (req, res, next) => {
         })
     }
 
-    const { venue_id: current_venue, brand_id: current_brand } = await eventsDB.findById(event_id)
+    const { venue_id: current_venue, brand_id: current_brand } = await eventsDB.getEventById(event_id)
     const { venue_id = current_venue, brand_id = current_brand } = req.body
 
     if(!uuidPattern.test(venue_id)) {

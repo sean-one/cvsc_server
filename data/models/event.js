@@ -1,22 +1,94 @@
 const db = require('../dbConfig');
 
 module.exports = {
-    find,
-    validateCreatedBy,
-    findById,
-    checkEventName,
-    findUserEvents,
-    findBusinessEvents,
+    getBusinessEvents,
+    getUserEvents,
+    getEventById,
+    getAllEvents,
     createEvent,
-    updateImage,
     updateEvent,
     removeEventBusiness,
     removeEvent,
-    removeBusinessByType
+    removeBusinessByType,
+
+
+    checkEventName,
+    validateCreatedBy,
 };
 
+// .get('/events/business/:user_id')
+function getBusinessEvents(business_id) {
+    return db('events')
+        // Ensure eventdate and eventstart are in the future
+        .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+        // Match either brand_id or venue_id with the provided business_id
+        .andWhere(function () {
+            this.where('events.brand_id', '=', business_id)
+                .orWhere('events.venue_id', '=', business_id)
+        })
+        // Remove inactive events from event list return
+        .andWhere({ active_event: true })
+        .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
+        .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
+        .join('users', 'events.created_by', '=', 'users.id')
+        .select([
+            'events.id as event_id',
+            'events.eventname',
+            'events.eventdate',
+            'events.eventstart',
+            'events.eventend',
+            'events.eventmedia',
+            'events.details',
+            'events.active_event',
+
+            'venue.id as venue_id',
+            'venue.business_name as venue_name',
+            'venue.formatted_address as venue_location',
+
+            'brand.id as brand_id',
+            'brand.business_name as brand_name',
+
+            'events.created_by',
+            'users.username as event_creator'
+        ])
+        // Order by combined timestamp of eventdate and reformatted eventstart
+        .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
+}
+
+// .get('/events/user/:user_id')
+function getUserEvents(user) {
+    return db('events')
+        .where({ created_by: user })
+        .andWhere('events.eventdate', '>=', new Date())
+        .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
+        .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
+        .select(
+            [
+                'events.id as event_id',
+                'events.eventname',
+                'events.eventdate',
+                'events.eventstart',
+                'events.eventend',
+                'events.eventmedia',
+                'events.details',
+                'events.active_event',
+
+                'venue.id as venue_id',
+                'venue.business_name as venue_name',
+                'venue.formatted_address as venue_location',
+
+                'brand.id as brand_id',
+                'brand.business_name as brand_name',
+
+                'events.created_by',
+                'users.username as event_creator'
+            ]
+        )
+        .orderBy(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`)
+}
+
 //! main calendar event call
-function find() {
+function getAllEvents() {
     return db('events')
         // Ensure eventdate and eventstart are in the future
         .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
@@ -49,16 +121,8 @@ function find() {
         .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 }
 
-//! useing in validators-> validateEventCreator
-async function validateCreatedBy(eventId) {
-    return await db('events')
-        .where({ 'events.id': eventId })
-        .select([ 'events.created_by' ])
-        .first()
-}
-
-//! used inside valdations & to grab information
-async function findById(eventId) {
+// validateEventUpdate & .get('/:event_id')
+async function getEventById(eventId) {
     return await db('events')
         .where({ 'events.id': eventId })
         .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
@@ -81,21 +145,14 @@ async function findById(eventId) {
                 'brand.id as brand_id',
                 'brand.business_name as brand_name',
 
-                'events.created_by'
+                'events.created_by',
+                'users.username as event_creator'
             ]
         )
         .first()
 }
 
-// .post('/events/create') - checks if event name is already in use
-async function checkEventName(eventname) {
-    return db('events')
-        .where(db.raw('LOWER(eventname) ILIKE ?', eventname.toLowerCase()))
-        .select([ 'events.id' ])
-        .first()
-}
-
-// eventRoute - .post('/')
+// .post('/') - create new event
 async function createEvent(event) {
     return await db('events').insert(event, ['id'])
         .then(eventId => {
@@ -122,7 +179,8 @@ async function createEvent(event) {
                         'brand.id as brand_id',
                         'brand.business_name as brand_name',
 
-                        'events.created_by'
+                        'events.created_by',
+                        'users.username as event_creator'
                     ]
                 )
                 .first()
@@ -147,46 +205,7 @@ async function createEvent(event) {
         })
 }
 
-//! adds an image to a created event during create process
-// doing this separtely allows me to make sure the event is valid prior to uploading to s3
-async function updateImage(event_id, image_update) {
-    try {
-        await db('events').where({ id: event_id }).update({ eventmedia: image_update })
-        
-        return db('events')
-            .where('events.id', event_id)
-            .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
-            .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
-            .select(
-                [
-                    'events.id as event_id',
-                    'events.eventname',
-                    'events.eventdate',
-                    'events.eventstart',
-                    'events.eventend',
-                    'events.eventmedia',
-                    'events.details',
-                    'events.active_event',
-
-                    'venue.id as venue_id',
-                    'venue.business_name as venue_name',
-                    'venue.formatted_address as venue_location',
-
-                    'brand.id as brand_id',
-                    'brand.business_name as brand_name',
-
-                    'events.created_by'
-                ]
-            )
-            .first()
-
-    } catch (error) {
-        console.log(error)
-    }
-
-}
-
-//! updates event
+// .put('/:event_id') - update event
 async function updateEvent(event_id, eventChanges) {
     try {
         const updated_event = await db('events').where({ id: event_id }).update(eventChanges, ['id', 'brand_id', 'venue_id'])
@@ -218,7 +237,8 @@ async function updateEvent(event_id, eventChanges) {
                     'brand.id as brand_id',
                     'brand.business_name as brand_name',
 
-                    'events.created_by'
+                    'events.created_by',
+                    'users.username as event_creator'
                 ]
             )
             .first()
@@ -303,70 +323,21 @@ async function removeEventBusiness(event_id, business_type) {
     }
 }
 
-function findUserEvents(user) {
+
+
+//! VALIDATION HELPERS - validators.js
+// isEventNameUnique
+async function checkEventName(eventname) {
     return db('events')
-        .where({ created_by: user })
-        .andWhere('events.eventdate', '>=', new Date())
-        .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
-        .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
-        .select(
-            [
-                'events.id as event_id',
-                'events.eventname',
-                'events.eventdate',
-                'events.eventstart',
-                'events.eventend',
-                'events.eventmedia',
-                'events.details',
-                'events.active_event',
-
-                'venue.id as venue_id',
-                'venue.business_name as venue_name',
-                'venue.formatted_address as venue_location',
-
-                'brand.id as brand_id',
-                'brand.business_name as brand_name',
-
-                'events.created_by'
-            ]
-        )
-        .orderBy('events.eventdate')
+        .where(db.raw('LOWER(eventname) ILIKE ?', eventname.toLowerCase()))
+        .select([ 'events.id' ])
+        .first()
 }
 
-function findBusinessEvents(business_id) {
-    return db('events')
-        // Ensure eventdate and eventstart are in the future
-        .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
-        // Match either brand_id or venue_id with the provided business_id
-        .andWhere(function () {
-            this.where('events.brand_id', '=', business_id)
-                .orWhere('events.venue_id', '=', business_id)
-        })
-        // Remove inactive events from event list return
-        .andWhere({ active_event: true })
-        .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
-        .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
-        .join('users', 'events.created_by', '=', 'users.id')
-        .select([
-            'events.id as event_id',
-            'events.eventname',
-            'events.eventdate',
-            'events.eventstart',
-            'events.eventend',
-            'events.eventmedia',
-            'events.details',
-            'events.active_event',
-
-            'venue.id as venue_id',
-            'venue.business_name as venue_name',
-            'venue.formatted_address as venue_location',
-
-            'brand.id as brand_id',
-            'brand.business_name as brand_name',
-
-            'events.created_by',
-            'users.username as event_creator'
-        ])
-        // Order by combined timestamp of eventdate and reformatted eventstart
-        .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
+// validateEventCreator
+async function validateCreatedBy(eventId) {
+    return await db('events')
+        .where({ 'events.id': eventId })
+        .select([ 'events.created_by' ])
+        .first()
 }
