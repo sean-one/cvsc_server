@@ -35,6 +35,18 @@ router.get('/business/:business_id', [uuidValidation, result], async (req, res, 
     }
 })
 
+// useInactiveUserEvents - returns all INACTIVE events for a user id
+router.get('/inactive_user/:user_id', [validToken, uuidValidation, result], async (req, res, next) => {
+    try {
+        const { user_id } = req.params;
+        const inactive_user_events = await db.getInactiveUserEvents(user_id)
+
+        res.status(200).json(inactive_user_events);
+    } catch (error) {
+        console.log(error)        
+    }
+})
+
 // useUserEventsQuery - returns all the events for a user id
 router.get('/user/:user_id', [validToken], async (req, res) => {
     try {
