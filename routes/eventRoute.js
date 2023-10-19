@@ -13,6 +13,7 @@ const {
     validateEventCreation,
     validateEventUpdate,
     validateImageFile,
+    uuidValidation,
     result
 } = require('../helpers/validators');
 const storage = multer.memoryStorage()
@@ -22,7 +23,7 @@ const upload = multer({ storage: storage })
 const router = express.Router();
 
 // useBusinessEventsQuery - returns all the events for a business id
-router.get('/business/:business_id', async (req, res) => {
+router.get('/business/:business_id', [uuidValidation, result], async (req, res, next) => {
     try {
         const { business_id } = req.params;
         const business_events = await db.getBusinessEvents(business_id)
@@ -30,17 +31,20 @@ router.get('/business/:business_id', async (req, res) => {
         res.status(200).json(business_events)
     } catch (error) {
         console.log(error)
+        next(error)
     }
 })
 
 // useUserEventsQuery - returns all the events for a user id
 router.get('/user/:user_id', [validToken], async (req, res) => {
-    const { user_id } = req.params;
-    db.getUserEvents(user_id)
-        .then(events => {
-            res.status(200).json(events);
-        })
-        .catch(err => res.status(500).json(err));
+    try {
+        const { user_id } = req.params;
+        const user_events = await db.getUserEvents(user_id)
+        
+        res.status(200).json(user_events);
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 // useEventQuery - returns a single event from event id

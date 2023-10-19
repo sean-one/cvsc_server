@@ -83,7 +83,7 @@ function getUserEvents(user) {
                 'events.created_by',
             ]
         )
-        .orderBy(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`)
+        .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`)
 }
 
 //! main calendar event call
