@@ -89,7 +89,7 @@ function getInactiveUserEvents(user_id) {
 // .get('/events/user/:user_id')
 function getUserEvents(user_id) {
     return db('events')
-        .where({ created_by: user_id })
+        .where({ created_by: user_id, active_event: true })
         .andWhere('events.eventdate', '>=', new Date())
         .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
         .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
