@@ -1,11 +1,11 @@
 const db = require('../dbConfig');
 
 module.exports = {
+    getBusinessRoles,
     findUserBusinessRole,
     findUserRoles,
     findRoleById,
     findRolesPendingManagement,
-    findRoleByBusiness,
     getUserBusinessRoles,
     getAllUserRoles,
     getActiveUserRoles,
@@ -14,6 +14,24 @@ module.exports = {
     downgradeManagerRole,
     createRoleRequest,
     removeRole,
+}
+
+// roleRoute - returns array of roles for a selected business (ACTIVE/INACTIVE)
+async function getBusinessRoles(business_id) {
+    return db('roles')
+        .where({ 'roles.business_id': business_id })
+        .leftJoin('users', 'roles.user_id', '=', 'users.id')
+        .select(
+            [
+                'roles.id',
+                'roles.user_id',
+                'users.username',
+                'roles.business_id',
+                'roles.role_type',
+                'roles.active_role',
+                'roles.approved_by',
+            ]
+        )
 }
 
 
@@ -118,24 +136,6 @@ async function findRolesPendingManagement(user_id) {
                 'businesses.business_name',
                 'roles.user_id',
                 'users.username'
-            ]
-        )
-}
-
-// use int roleroute returns an array of roles for a selected business
-async function findRoleByBusiness(business_id) {
-    return db('roles')
-        .where({ 'roles.business_id': business_id })
-        .leftJoin('users', 'roles.user_id', '=', 'users.id')
-        .select(
-            [
-                'roles.id',
-                'roles.user_id',
-                'users.username',
-                'roles.business_id',
-                'roles.role_type',
-                'roles.active_role',
-                'roles.approved_by',
             ]
         )
 }

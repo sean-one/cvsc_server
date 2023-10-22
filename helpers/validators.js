@@ -199,20 +199,6 @@ const validateImageAdmin = async (req, res, next) => {
     }
 }
 
-const validateBusinessIdentifier = async (req, res, next) => {
-    console.log('inside validateBusinessID')
-    const { business_id } = req.params
-
-    console.log(business_id)
-    if(!uuidPattern.test(business_id)) {
-        console.log('failed uuid pattern test')
-        throw new Error('business_id_invalid')
-        // return res.status(400).json({ message: 'invalid business identifier' })
-    } else {
-        next()
-    }
-}
-
 const validateBusinessAdmin = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params
@@ -403,31 +389,13 @@ const validateBusinessManagement = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params
     
-    // validate that user_id is a uuid
-    if(!uuidPattern.test(user_id)) {
-        next({
-            status: 400,
-            message: 'invalid user',
-            type: 'credentials'
-        })
-    }
-    
-    // validate that business_id is a uuid
-    if(!uuidPattern.test(business_id)) {
-        next({
-            status: 400,
-            message: 'invalid business identifier',
-            type: 'credentials'
-        })
-    }
-    
     const businessRole = await rolesDB.findUserBusinessRole(business_id, user_id)
 
     if(businessRole === undefined) {
         next({
             status: 404,
             message: 'business role not found',
-            type: 'credentials'
+            type: 'server'
         })
     } else {
         if ((businessRole.active_role === false) || (businessRole.role_type < process.env.MANAGER_ACCOUNT)) {
@@ -764,7 +732,6 @@ module.exports = {
     registerUserValidator,
     validateImageFile,
     validateImageAdmin,
-    validateBusinessIdentifier,
     validateBusinessAdmin,
     validateRoleRequest,
     validateRoleDelete,

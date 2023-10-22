@@ -3,24 +3,33 @@ const express = require('express');
 const db = require('../data/models/roles');
 const roleErrors = require('../error_messages/roleErrors');
 const { validToken } = require('../helpers/jwt_helper');
-const { validateRoleDelete, validateRoleManagement, validateRoleRequest, result } = require('../helpers/validators');
+const {
+    validateBusinessManagement,
+    validateRoleDelete,
+    validateRoleManagement,
+    validateRoleRequest,
+    uuidValidation,
+    result
+} = require('../helpers/validators');
 
 const router = express.Router();
 
-// useBusinessRolesQuery - getBusinessRoles - useRolesApi
-router.get('/business/:business_id', async (req, res) => {
+// useRolesApi - useBusinessRolesQuery
+router.get('/businesses/:business_id', [validToken, uuidValidation, validateBusinessManagement, result], async (req, res, next) => {
     try {
         const { business_id } = req.params
-        const business_roles = await db.findRoleByBusiness(business_id)
+        const business_roles = await db.getBusinessRoles(business_id)
         
         res.status(200).json(business_roles);
         
     } catch (error) {
-        next({
-            status: roleErrors[error.message]?.status,
-            message: roleErrors[error.message]?.message,
-            type: roleErrors[error.message]?.type,
-        })
+        console.log(error)
+        next()
+        // next({
+        //     status: roleErrors[error.message]?.status,
+        //     message: roleErrors[error.message]?.message,
+        //     type: roleErrors[error.message]?.type,
+        // })
 
     }
 })
@@ -176,24 +185,24 @@ router.get('/user/:user_id', [validToken], async (req, res, next) => {
 })
 
 // useUserBusinessRoleQuery - getUserBusinessRole - useRoleApi
-router.get('/user_role/:business_id', [validToken], async (req, res, next) => {
-    try {
-        const { business_id } = req.params
-        const user_id = req.user_decoded
+// router.get('/user_role/:business_id', [validToken], async (req, res, next) => {
+//     try {
+//         const { business_id } = req.params
+//         const user_id = req.user_decoded
 
-        const user_role = await db.findUserBusinessRole(business_id, user_id)
+//         const user_role = await db.findUserBusinessRole(business_id, user_id)
 
-        res.status(200).json(user_role)
-    } catch (error) {
+//         res.status(200).json(user_role)
+//     } catch (error) {
         
-        next({
-            status: roleErrors[error.message]?.status,
-            message: roleErrors[error.message]?.message,
-            type: roleErrors[error.message]?.type,
-        })
+//         next({
+//             status: roleErrors[error.message]?.status,
+//             message: roleErrors[error.message]?.message,
+//             type: roleErrors[error.message]?.type,
+//         })
         
-    }
-})
+//     }
+// })
 
 //! useRemoveUserRoleMutation - removeUserRole - useRolesApi - REMOVE USER ROLE (SELF)
 router.delete('/user_remove/:role_id', [validToken, validateRoleDelete, result], async (req, res, next) => {
