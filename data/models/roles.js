@@ -18,6 +18,7 @@ module.exports = {
 
 // roleRoute - returns array of roles for a selected business (ACTIVE/INACTIVE)
 async function getBusinessRoles(business_id) {
+    console.log('inside the getBusinessRoles MODEL')
     return db('roles')
         .where({ 'roles.business_id': business_id })
         .leftJoin('users', 'roles.user_id', '=', 'users.id')

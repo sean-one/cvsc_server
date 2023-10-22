@@ -388,6 +388,27 @@ const validateRoleManagement = async (req, res, next) => {
 const validateBusinessManagement = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params
+
+    console.log('INSIDE THE VALIDATEBUSINESSMANAGEMENT FUNCTION')
+    // validate that the user_id is a uuid
+    if (!uuidPattern.test(user_id)) {
+        console.log('USER ID FAILED')
+        next({
+            status: 400,
+            message: 'invalid user',
+            type: 'credentials'
+        })
+    }
+    
+    // validate that the business_id is a uuid
+    if (!uuidPattern.test(business_id)) {
+        console.log('BUSINESS ID FAILED')
+        next({
+            status: 400,
+            message: 'invalid business identifier',
+            type: 'credentials'
+        })
+    }
     
     const businessRole = await rolesDB.findUserBusinessRole(business_id, user_id)
 
@@ -720,9 +741,10 @@ const result = (req, res, next) => {
             message: error.msg,
             type: error.path
         })
+    } else {
+        next()
     }
 
-    next()
 }
 
 module.exports = {

@@ -23,13 +23,13 @@ router.get('/businesses/:business_id', [validToken, uuidValidation, validateBusi
         res.status(200).json(business_roles);
         
     } catch (error) {
+        console.log('FUUUUUUUUUCK')
         console.log(error)
-        next()
-        // next({
-        //     status: roleErrors[error.message]?.status,
-        //     message: roleErrors[error.message]?.message,
-        //     type: roleErrors[error.message]?.type,
-        // })
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
 
     }
 })
