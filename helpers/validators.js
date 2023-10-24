@@ -579,26 +579,32 @@ const validateEventUpdate = async (req, res, next) => {
     }
 }
 
-const uuidValidation = [
-    check('business_id').trim().optional()
+const existenceChecks = oneOf([
+    check('business_id').exists(),
+    check('user_id').exists(),
+    check('event_id').exists(),
+    check('role_id').exists(),
+], 'invalid / missing id in request');
+
+const formatValidations = [
+    check('business_id').if(check('business_id').exists()).trim()
         .matches(uuidPattern)
         .withMessage('invalid business identifier'),
-    check('user_id').trim().optional()
+    check('user_id').if(check('user_id').exists()).trim()
         .matches(uuidPattern)
         .withMessage('invalid user identifier'),
-    check('event_id').trim().optional()
+    check('event_id').if(check('event_id').exists()).trim()
         .matches(uuidPattern)
         .withMessage('invalid event identifier'),
-    check('role_id').trim().optional()
+    check('role_id').if(check('role_id').exists()).trim()
         .matches(uuidPattern)
         .withMessage('invalid role identifier'),
-    oneOf([
-        check('business_id').exists(),
-        check('user_id').exists(),
-        check('event_id').exists(),
-        check('role_id').exists(),
-    ], 'invalid / missing identifier')
-]
+];
+
+const uuidValidation = [
+    existenceChecks,
+    ...formatValidations
+];
 
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
@@ -732,7 +738,9 @@ const updateEventValidator =[
 const result = (req, res, next) => {
     const result = validationResult(req);
     const hasError = !result.isEmpty();
-
+    console.log(result)
+    console.log('INSIDE THE RESULT OF THE VALIDATORS')
+    console.log(hasError)
     if(hasError) {
         console.log(result)
         const error = result.array()[0]
