@@ -2,23 +2,21 @@ const db = require('../dbConfig');
 
 module.exports = {
     getBusinessRoles,
-    findUserBusinessRole,
-    findUserRoles,
-    findRoleById,
-    findRolesPendingManagement,
-    getUserBusinessRoles,
     getAllUserRoles,
-    getActiveUserRoles,
+    createRoleRequest,
+    findRoleById,
+    getUserBusinessRoles,
     approveRoleRequest,
     upgradeCreatorRole,
     downgradeManagerRole,
-    createRoleRequest,
     removeRole,
+
+    findUserBusinessRole,
+    checkRoleDuplicate,
 }
 
 // roleRoute - returns array of roles for a selected business (ACTIVE/INACTIVE)
 async function getBusinessRoles(business_id) {
-    console.log('inside the getBusinessRoles MODEL')
     return db('roles')
         .where({ 'roles.business_id': business_id })
         .leftJoin('users', 'roles.user_id', '=', 'users.id')
@@ -35,139 +33,24 @@ async function getBusinessRoles(business_id) {
         )
 }
 
-
-//! validateRoleManagement validators.js - finds business role for user
-function findUserBusinessRole(business_id, user_id) {
-    return db('roles')
-        .where({ user_id: user_id, business_id: business_id, active_role: true })
-        .select(
-            [
-                'roles.id',
-                'roles.business_id',
-                'roles.role_type',
-                'roles.active_role'
-            ]
-        )
-        .first()
-}
-
-// used in authRoute when user signs in
-async function findUserRoles(user_id) {
-    return db('roles')
-        .where({ user_id: user_id })
-        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.id',
-                'roles.business_id',
-                'roles.role_type',
-                'roles.active_role',
-                'businesses.business_name'
-            ]
-        )
-        .orderBy('roles.role_type', 'desc')
-}
-
-// used in authRoute when user needs to build the user roles
-async function getActiveUserRoles(user_id) {
-    return await db('roles')
-        .where({ user_id: user_id, active_role: true })
-        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.id',
-                'roles.business_id',
-                'roles.role_type',
-                'roles.active_role',
-                'businesses.business_name'
-            ]
-        )
-        .orderBy('roles.role_type', 'desc')
-}
-
-// jwt_helper - inside validateRoleManagement & roleRequestUser
-//! inside various validators.js functions
-async function findRoleById(request_id) {
-    return await db('roles')
-        .where({ 'roles.id': request_id })
-        .select(
-            [
-                'roles.business_id',
-                'roles.user_id',
-                'roles.role_type'
-            ]
-        )
-        .first()
-}
-
-// returns an array of pending role request based on accounts with manager and admin credentials
-async function findRolesPendingManagement(user_id) {
-    let business_ids = []
-    const management_roles = await db('roles')
-        .where({ user_id: user_id, active_role: true })
-        .whereNotIn('roles.role_type', [process.env.BASIC_ACCOUNT, process.env.CREATOR_ACCOUNT])
-        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.business_id',
-                'businesses.active_business'
-            ]
-        )
-
-    await management_roles.map(role => {
-        if(role.active_business) {
-            return business_ids.push(role.business_id)
-        } else {
-            return
-        }
-    })
-    
-
-    return await db('roles')
-        // .where('roles.active_role', false)
-        .whereIn('roles.business_id', business_ids)
-        .andWhere('roles.active_role', 'false' )
-        .leftJoin('users', 'roles.user_id', '=', 'users.id')
-        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.id',
-                'roles.business_id',
-                'roles.role_type',
-                'businesses.business_name',
-                'roles.user_id',
-                'users.username'
-            ]
-        )
-}
-
-//! validateEventCreation - returns an array of ative roles business_id(s) - VALIDATION HELPER
-async function getUserBusinessRoles(user_id) {
-    return await db('roles')
-        .where({ user_id: user_id, active_role: true })
-        .select(
-            [
-                db.raw('ARRAY_AGG(roles.business_id) as business_ids')
-            ]
-        )
-        .groupBy('roles.user_id')
-        .first()
-}
-
-// validators - validateRoleRequest - returns an array of all roles business_ids active or not
+// roleRoute - returns array of ALL roles (active/inactive) for a selected user id
 async function getAllUserRoles(user_id) {
-    return await db('roles')
+    return db('roles')
         .where({ user_id: user_id })
+        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
         .select(
             [
-                db.raw('ARRAY_AGG(roles.business_id) as business_ids')
+                'roles.id',
+                'roles.business_id',
+                'roles.role_type',
+                'roles.active_role',
+                'businesses.business_name'
             ]
         )
-        .groupBy('roles.user_id')
-        .first()
+        .orderBy('roles.role_type', 'desc')
 }
 
-// useCreateRoleMutation - useRolesApi
+// roleRoute - creates a new role request with business and user ids
 async function createRoleRequest(business_id, user_id) {
     const created_role = await db('roles')
         .insert({
@@ -189,6 +72,51 @@ async function createRoleRequest(business_id, user_id) {
         )
 
 }
+
+
+
+// jwt_helper - inside validateRoleManagement & roleRequestUser
+//! inside various validators.js functions
+async function findRoleById(request_id) {
+    return await db('roles')
+        .where({ 'roles.id': request_id })
+        .select(
+            [
+                'roles.business_id',
+                'roles.user_id',
+                'roles.role_type'
+            ]
+        )
+        .first()
+}
+
+//! validateEventCreation - returns an array of ative roles business_id(s) - VALIDATION HELPER
+async function getUserBusinessRoles(user_id) {
+    return await db('roles')
+        .where({ user_id: user_id, active_role: true })
+        .select(
+            [
+                db.raw('ARRAY_AGG(roles.business_id) as business_ids')
+            ]
+        )
+        .groupBy('roles.user_id')
+        .first()
+}
+
+// validators - validateRoleRequest - returns an array of all roles business_ids active or not
+// async function getAllUserRoles(user_id) {
+//     return await db('roles')
+//         .where({ user_id: user_id })
+//         .select(
+//             [
+//                 db.raw('ARRAY_AGG(roles.business_id) as business_ids')
+//             ]
+//         )
+//         .groupBy('roles.user_id')
+//         .first()
+// }
+
+
 
 // useApproveRoleMutation - useRolesApi
 async function approveRoleRequest(request_id, management_id) {
@@ -265,4 +193,29 @@ async function removeRole(role_id) {
     return await db('roles')
         .where({ id: role_id })
         .del()
+}
+
+//! VALIDATION FUNCTIONS
+// validators.js - validateBusinessManagement
+function findUserBusinessRole(business_id, user_id) {
+    return db('roles')
+        .where({ user_id: user_id, business_id: business_id, active_role: true })
+        .select(
+            [
+                'roles.id',
+                'roles.business_id',
+                'roles.role_type',
+                'roles.active_role'
+            ]
+        )
+        .first()
+}
+
+// validators.js - validateRoleRequest
+function checkRoleDuplicate(business_id, user_id) {
+    return db('roles')
+        .where({ user_id: user_id, business_id: business_id})
+        .select(['roles.id'])
+        .first()
+        .then(role => !!role)
 }

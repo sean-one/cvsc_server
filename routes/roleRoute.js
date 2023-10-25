@@ -24,8 +24,6 @@ router.get('/businesses/:business_id', [validToken, uuidValidation, formatValida
         res.status(200).json(business_roles);
         
     } catch (error) {
-        console.log('FUUUUUUUUUCK')
-        console.log(error)
         next({
             status: roleErrors[error.message]?.status,
             message: roleErrors[error.message]?.message,
@@ -35,29 +33,28 @@ router.get('/businesses/:business_id', [validToken, uuidValidation, formatValida
     }
 })
 
-//! usePendingBusinessRolesQuery - getBusinessPendingRoles - useRolesApi - GET MANAGEMENT ROLE REQUEST
-router.get('/management/:user_id', [ validToken ], async (req, res, next) => {
+// useRolesApi - useUserRolesQuery
+router.get('/users/:user_id', [validToken], async (req, res, next) => {
     try {
         const user_id = req.user_decoded
-        
-        const management_roles = await db.findRolesPendingManagement(user_id)
-        
-        res.status(200).json(management_roles)
-            
+
+        const user_roles = await db.getAllUserRoles(user_id)
+
+        res.status(200).json(user_roles)
+
     } catch (error) {
-        console.log(error)
+
         next({
             status: roleErrors[error.message]?.status,
             message: roleErrors[error.message]?.message,
             type: roleErrors[error.message]?.type,
         })
-        
-    }
 
+    }
 })
 
-//! useCreateRoleMutation - createRoleRequest - useRolesApi - CREATE NEW ROLE REQUEST
-router.post('/request/:business_id', [ validToken, validateRoleRequest, result ], async (req, res, next) => {
+// useRolesApi - useCreateRoleMutation
+router.post('/businesses/:business_id/role-requests', [validToken, uuidValidation, formatValidationCheck, validateRoleRequest, result], async (req, res, next) => {
     try {
         const { business_id } = req.params
     
@@ -93,6 +90,9 @@ router.post('/request/:business_id', [ validToken, validateRoleRequest, result ]
     }
 
 })
+
+
+
 
 //! useApproveRoleMutation - approveRole - useRolesApi - APPROVE ROLE
 router.post('/approve/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
@@ -165,45 +165,6 @@ router.delete('/remove/:role_id', [validToken, validateRoleManagement, result ],
         })
     }
 })
-
-router.get('/user/:user_id', [validToken], async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded
-
-        const user_roles = await db.findUserRoles(user_id)
-
-        res.status(200).json(user_roles)
-
-    } catch (error) {
-        
-        next({
-            status: roleErrors[error.message]?.status,
-            message: roleErrors[error.message]?.message,
-            type: roleErrors[error.message]?.type,
-        })
-
-    }
-})
-
-// useUserBusinessRoleQuery - getUserBusinessRole - useRoleApi
-// router.get('/user_role/:business_id', [validToken], async (req, res, next) => {
-//     try {
-//         const { business_id } = req.params
-//         const user_id = req.user_decoded
-
-//         const user_role = await db.findUserBusinessRole(business_id, user_id)
-
-//         res.status(200).json(user_role)
-//     } catch (error) {
-        
-//         next({
-//             status: roleErrors[error.message]?.status,
-//             message: roleErrors[error.message]?.message,
-//             type: roleErrors[error.message]?.type,
-//         })
-        
-//     }
-// })
 
 //! useRemoveUserRoleMutation - removeUserRole - useRolesApi - REMOVE USER ROLE (SELF)
 router.delete('/user_remove/:role_id', [validToken, validateRoleDelete, result], async (req, res, next) => {

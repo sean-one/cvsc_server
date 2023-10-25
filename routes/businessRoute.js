@@ -11,6 +11,7 @@ const businessErrors = require('../error_messages/businessErrors');
 const { validToken } = require('../helpers/jwt_helper');
 
 const {
+    formatValidationCheck,
     newBusinessValidator,
     updateBusinessValidator,
     validateImageAdmin,
@@ -164,7 +165,7 @@ router.put('/:business_id/toggle', [validToken, validateBusinessAdmin, result], 
 })
 
 // useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
-router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidValidation, validateBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
+router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;

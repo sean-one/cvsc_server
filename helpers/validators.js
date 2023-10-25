@@ -260,27 +260,10 @@ const validateBusinessAdmin = async (req, res, next) => {
     }
 }
 
+// .post('ROLES/businesses/:business_id/role-request')
 const validateRoleRequest = async (req, res, next) => {
     const { business_id } = req.params
     const user_id = req.user_decoded
-    
-    // validate that the user_id is a uuid
-    if(!uuidPattern.test(user_id)) {
-        next({
-            status: 400,
-            message: 'invalid user',
-            type: 'credentials'
-        })
-    }
-    
-    // validate that the business_id is a uuid
-    if(!uuidPattern.test(business_id)) {
-        next({
-            status: 400,
-            message: 'invalid business identifier',
-            type: 'credentials'
-        })
-    }
     
     // validate that business_id is actual business
     const requestedBusiness = await businessDB.findBusinessById(business_id)
@@ -302,8 +285,8 @@ const validateRoleRequest = async (req, res, next) => {
     }
     
     // confirm non duplicate
-    const userRolesBusinessIds = await rolesDB.getAllUserRoles(user_id)
-    if(userRolesBusinessIds?.business_ids.includes(business_id)) {
+    const hasDuplicate = await rolesDB.checkRoleDuplicate(business_id, user_id)
+    if(hasDuplicate) {
         next({
             status: 400,
             message: 'duplicate request not allowed',
@@ -404,30 +387,10 @@ const validateRoleManagement = async (req, res, next) => {
     }
 }
 
+// .put('BUSINESSES/:business_id'), .get('ROLES/businesses/:business_id')
 const validateBusinessManagement = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params
-
-    console.log('INSIDE THE VALIDATEBUSINESSMANAGEMENT FUNCTION')
-    // validate that the user_id is a uuid
-    if (!uuidPattern.test(user_id)) {
-        console.log('USER ID FAILED')
-        return next({
-            status: 400,
-            message: 'invalid user',
-            type: 'credentials'
-        })
-    }
-    
-    // validate that the business_id is a uuid
-    if (!uuidPattern.test(business_id)) {
-        console.log('BUSINESS ID FAILED')
-        return next({
-            status: 400,
-            message: 'invalid business identifier',
-            type: 'credentials'
-        })
-    }
     
     const businessRole = await rolesDB.findUserBusinessRole(business_id, user_id)
 
