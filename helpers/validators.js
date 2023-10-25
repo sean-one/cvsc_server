@@ -153,7 +153,26 @@ function isValidTime(value) {
 }
 
 
-// MIDDLEWARE VALIDATIONS
+//! MIDDLEWARE VALIDATIONS
+//! ======================
+
+// after uuidValidation this will run to catch any error before checking any other validatiors
+const formatValidationCheck = async(req, res, next) => {
+    const errors = validationResult(req)
+
+    if(!errors.isEmpty()) {
+        const error = errors.array()[0];
+
+        return next({
+            status: 400,
+            message: error.msg,
+            type: error.path
+        })
+    }
+
+    next();
+}
+
 const validateImageFile = async (req, res, next) => {
     const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
     if(!req.file) {
@@ -393,7 +412,7 @@ const validateBusinessManagement = async (req, res, next) => {
     // validate that the user_id is a uuid
     if (!uuidPattern.test(user_id)) {
         console.log('USER ID FAILED')
-        next({
+        return next({
             status: 400,
             message: 'invalid user',
             type: 'credentials'
@@ -403,7 +422,7 @@ const validateBusinessManagement = async (req, res, next) => {
     // validate that the business_id is a uuid
     if (!uuidPattern.test(business_id)) {
         console.log('BUSINESS ID FAILED')
-        next({
+        return next({
             status: 400,
             message: 'invalid business identifier',
             type: 'credentials'
@@ -413,14 +432,14 @@ const validateBusinessManagement = async (req, res, next) => {
     const businessRole = await rolesDB.findUserBusinessRole(business_id, user_id)
 
     if(businessRole === undefined) {
-        next({
+        return next({
             status: 404,
             message: 'business role not found',
             type: 'server'
         })
     } else {
         if ((businessRole.active_role === false) || (businessRole.role_type < process.env.MANAGER_ACCOUNT)) {
-            next({
+            return next({
                 status: 403,
                 message: 'invalid role rights',
                 type: 'credentials'
@@ -589,16 +608,16 @@ const existenceChecks = oneOf([
 const formatValidations = [
     check('business_id').if(check('business_id').exists()).trim()
         .matches(uuidPattern)
-        .withMessage('invalid business identifier'),
+        .withMessage('invalid identifier'),
     check('user_id').if(check('user_id').exists()).trim()
         .matches(uuidPattern)
-        .withMessage('invalid user identifier'),
+        .withMessage('invalid identifier'),
     check('event_id').if(check('event_id').exists()).trim()
         .matches(uuidPattern)
-        .withMessage('invalid event identifier'),
+        .withMessage('invalid identifier'),
     check('role_id').if(check('role_id').exists()).trim()
         .matches(uuidPattern)
-        .withMessage('invalid role identifier'),
+        .withMessage('invalid identifier'),
 ];
 
 const uuidValidation = [
@@ -738,11 +757,8 @@ const updateEventValidator =[
 const result = (req, res, next) => {
     const result = validationResult(req);
     const hasError = !result.isEmpty();
-    console.log(result)
-    console.log('INSIDE THE RESULT OF THE VALIDATORS')
-    console.log(hasError)
+    
     if(hasError) {
-        console.log(result)
         const error = result.array()[0]
         next({
             status: 400,
@@ -760,6 +776,7 @@ module.exports = {
     newBusinessValidator,
     uuidValidation,
     registerUserValidator,
+    formatValidationCheck,
     validateImageFile,
     validateImageAdmin,
     validateBusinessAdmin,

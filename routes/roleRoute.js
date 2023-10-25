@@ -4,6 +4,7 @@ const db = require('../data/models/roles');
 const roleErrors = require('../error_messages/roleErrors');
 const { validToken } = require('../helpers/jwt_helper');
 const {
+    formatValidationCheck,
     validateBusinessManagement,
     validateRoleDelete,
     validateRoleManagement,
@@ -15,7 +16,7 @@ const {
 const router = express.Router();
 
 // useRolesApi - useBusinessRolesQuery
-router.get('/businesses/:business_id', [validToken, uuidValidation, validateBusinessManagement, result], async (req, res, next) => {
+router.get('/businesses/:business_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
     try {
         const { business_id } = req.params
         const business_roles = await db.getBusinessRoles(business_id)
