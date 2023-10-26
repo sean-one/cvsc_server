@@ -73,6 +73,79 @@ async function createRoleRequest(business_id, user_id) {
 
 }
 
+// roleRoute - approves business role request
+async function approveRoleRequest(request_id, management_id) {
+
+    await db('roles')
+        .where({ id: request_id })
+        .update({ active_role: true, approved_by: management_id })
+
+    return await db('roles')
+        .where({ 'roles.id': request_id })
+        .leftJoin('users', 'roles.user_id', '=', 'users.id')
+        .select(
+            [
+                'roles.id',
+                'roles.user_id',
+                'users.username',
+                'roles.business_id',
+                'roles.role_type',
+                'roles.active_role',
+                'roles.approved_by',
+            ]
+        )
+        .first()
+}
+
+// roleRoute - upgrade business creator role to business management role 
+async function upgradeCreatorRole(request_id, management_id) {
+    await db('roles')
+        .where({ id: request_id })
+        .update({ role_type: process.env.MANAGER_ACCOUNT, approved_by: management_id })
+
+    return await db('roles')
+        .where({ 'roles.id': request_id })
+        .leftJoin('users', 'roles.user_id', '=', 'users.id')
+        .select(
+            [
+                'roles.id',
+                'roles.user_id',
+                'users.username',
+                'roles.business_id',
+                'roles.role_type',
+                'roles.active_role',
+                'roles.approved_by',
+            ]
+        )
+        .first()
+}
+
+// roleRote - downgrade business manager role to business creator role
+async function downgradeManagerRole(role_id, admin_id) {
+    await db('roles')
+        .where({ id: role_id })
+        .update({ role_type: process.env.CREATOR_ACCOUNT, approved_by: admin_id })
+
+    return await db('roles')
+        .where({ 'roles.id': role_id })
+        .leftJoin('users', 'roles.user_id', '=', 'users.id')
+        .select(
+            [
+                'roles.id',
+                'roles.user_id',
+                'users.username',
+                'roles.business_id',
+                'roles.role_type',
+                'roles.active_role',
+                'roles.approved_by',
+            ]
+        )
+        .first()
+}
+
+
+
+
 
 
 // jwt_helper - inside validateRoleManagement & roleRequestUser
@@ -103,90 +176,7 @@ async function getUserBusinessRoles(user_id) {
         .first()
 }
 
-// validators - validateRoleRequest - returns an array of all roles business_ids active or not
-// async function getAllUserRoles(user_id) {
-//     return await db('roles')
-//         .where({ user_id: user_id })
-//         .select(
-//             [
-//                 db.raw('ARRAY_AGG(roles.business_id) as business_ids')
-//             ]
-//         )
-//         .groupBy('roles.user_id')
-//         .first()
-// }
 
-
-
-// roleRoute - approves business role request
-async function approveRoleRequest(request_id, management_id) {
-
-    await db('roles')
-        .where({ id: request_id })
-        .update({ active_role: true, approved_by: management_id})
-
-    return await db('roles')
-        .where({ 'roles.id': request_id })
-        .leftJoin('users', 'roles.user_id', '=', 'users.id')
-        .select(
-            [
-                'roles.id',
-                'roles.user_id',
-                'users.username',
-                'roles.business_id',
-                'roles.role_type',
-                'roles.active_role',
-                'roles.approved_by',
-            ]
-        )
-        .first()
-}
-
-//! useUpgradeRoleMutation - useRolesApi - UPGRADE CREATOR TO MANAGER 
-async function upgradeCreatorRole(request_id, management_id) {
-    await db('roles')
-        .where({ id: request_id })
-        .update({ role_type: process.env.MANAGER_ACCOUNT, approved_by: management_id})
-    
-    return await db('roles')
-        .where({ 'roles.id': request_id })
-        .leftJoin('users', 'roles.user_id', '=', 'users.id')
-        .select(
-            [
-                'roles.id',
-                'roles.user_id',
-                'users.username',
-                'roles.business_id',
-                'roles.role_type',
-                'roles.active_role',
-                'roles.approved_by',
-            ]
-        )
-        .first()
-}
-
-//! useDowngradeRoleMutation - useRolesApi - DOWNGRADE MANAGER TO CREATOR
-async function downgradeManagerRole(role_id, admin_id) {
-    await db('roles')
-        .where({ id: role_id })
-        .update({ role_type: process.env.CREATOR_ACCOUNT, approved_by: admin_id})
-    
-    return await db('roles')
-        .where({ 'roles.id': role_id })
-        .leftJoin('users', 'roles.user_id', '=', 'users.id')
-        .select(
-            [
-                'roles.id',
-                'roles.user_id',
-                'users.username',
-                'roles.business_id',
-                'roles.role_type',
-                'roles.active_role',
-                'roles.approved_by',
-            ]
-        )
-        .first()
-}
 
 //! useRemoveRoleMutation & useRemoveUserRoleMutation - useRolesApi - REMOVE USER ROLE (SELF & MANAGEMENT)
 async function removeRole(role_id) {

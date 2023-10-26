@@ -107,33 +107,22 @@ router.put('/:role_id/actions', [validToken], async (req, res, next) => {
 
         // upgrade business creator role to business manager role
         else if (action_type === 'upgrade') {
+            const new_manager_role = await db.upgradeCreatorRole(role_id, management_id)
 
+            res.status(200).json(new_manager_role)
         }
 
         // downgrade business manager role to business creator role
-        else if (action_type === 'downgrade') {}
+        else if (action_type === 'downgrade') {
+            const downgraded_role = await db.downgradeManagerRole(role_id, admin_id)
+
+            res.status(200).json(downgraded_role)
+        }
         else {}
         console.log(action_type)
         return
         
     } catch (error) {
-        
-    }
-})
-
-
-
-
-//! useApproveRoleMutation - approveRole - useRolesApi - APPROVE ROLE
-router.post('/approve/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
-    try {
-        const { role_id } = req.params
-        const management_id = await req.user_decoded
-
-        const new_creator = await db.approveRoleRequest(role_id, management_id)
-        
-        res.status(200).json(new_creator)
-    } catch (error) {
         next({
             status: roleErrors[error.message]?.status,
             message: roleErrors[error.message]?.message,
@@ -142,41 +131,9 @@ router.post('/approve/:role_id', [validToken, validateRoleManagement, result ], 
     }
 })
 
-//! useUpgradeRoleMutation - upgradeRole - useRolesApi - UPGRADE CREATOR TO MANAGER
-router.post('/upgrade/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
-    try {
-        const { role_id } = req.params
-        const management_id = await req.user_decoded
-        const new_manager = await db.upgradeCreatorRole(role_id, management_id)
-    
-        res.status(200).json(new_manager)
-        
-    } catch (error) {
-        next({
-            status: roleErrors[error.message]?.status,
-            message: roleErrors[error.message]?.message,
-            type: roleErrors[error.message]?.type,
-        })
-    }
-})
 
-//! useDowngradeRoleMutation - downgradeRole - useRolesApi - DOWNGRADE MANAGER TO CREATOR
-router.post('/downgrade/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
-    try {
-        const { role_id } = req.params
-        const admin_id = await req.user_decoded
-        const creator_role = await db.downgradeManagerRole(role_id, admin_id)
-    
-        res.status(200).json(creator_role)
-        
-    } catch (error) {
-        next({
-            status: roleErrors[error.message]?.status,
-            message: roleErrors[error.message]?.message,
-            type: roleErrors[error.message]?.type,
-        })
-    }
-})
+
+
 
 //! useRemoveRoleMutation - removeRole - useRolesApi - REMOVE ROLE REQUEST (MANAGEMENT)
 router.delete('/remove/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
