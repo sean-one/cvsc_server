@@ -91,6 +91,36 @@ router.post('/businesses/:business_id/role-requests', [validToken, uuidValidatio
 
 })
 
+// useRolesApi - useRoleAction
+router.put('/:role_id/actions', [validToken], async (req, res, next) => {
+    try {
+        const { action_type } = req.body
+        const { role_id } = req.params
+        const management_id = await req.user_decoded
+    
+        // approve business creator role request
+        if (action_type === 'approve') {
+            const new_creator_role = await db.approveRoleRequest(role_id, management_id)
+    
+            res.status(200).json(new_creator_role)
+        }
+
+        // upgrade business creator role to business manager role
+        else if (action_type === 'upgrade') {
+
+        }
+
+        // downgrade business manager role to business creator role
+        else if (action_type === 'downgrade') {}
+        else {}
+        console.log(action_type)
+        return
+        
+    } catch (error) {
+        
+    }
+})
+
 
 
 

@@ -118,7 +118,7 @@ async function getUserBusinessRoles(user_id) {
 
 
 
-// useApproveRoleMutation - useRolesApi
+// roleRoute - approves business role request
 async function approveRoleRequest(request_id, management_id) {
 
     await db('roles')
@@ -194,6 +194,9 @@ async function removeRole(role_id) {
         .where({ id: role_id })
         .del()
 }
+
+
+
 
 //! VALIDATION FUNCTIONS
 // validators.js - validateBusinessManagement
