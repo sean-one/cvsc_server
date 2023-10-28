@@ -92,7 +92,7 @@ router.post('/businesses/:business_id/role-requests', [validToken, uuidValidatio
 })
 
 // useRolesApi - useRoleAction
-router.put('/:role_id/actions', [validToken], async (req, res, next) => {
+router.put('/:role_id/actions', [validToken, uuidValidation, formatValidationCheck], async (req, res, next) => {
     try {
         const { action_type } = req.body
         const { role_id } = req.params
@@ -114,13 +114,13 @@ router.put('/:role_id/actions', [validToken], async (req, res, next) => {
 
         // downgrade business manager role to business creator role
         else if (action_type === 'downgrade') {
-            const downgraded_role = await db.downgradeManagerRole(role_id, admin_id)
+            const downgraded_role = await db.downgradeManagerRole(role_id, management_id)
 
             res.status(200).json(downgraded_role)
         }
-        else {}
-        console.log(action_type)
-        return
+        else {
+            throw new Error('invalid_action')
+        }
         
     } catch (error) {
         next({

@@ -285,7 +285,7 @@ const validateRoleRequest = async (req, res, next) => {
     }
     
     // confirm non duplicate
-    const hasDuplicate = await rolesDB.checkRoleDuplicate(business_id, user_id)
+    const hasDuplicate = await rolesDB.checkForRole(business_id, user_id)
     if(hasDuplicate) {
         next({
             status: 400,
@@ -341,30 +341,13 @@ const validateRoleDelete = async (req, res, next) => {
     next()
 }
 
+// .put('ROLES/:role_id/actions)
 const validateRoleManagement = async (req, res, next) => {
     const user_id = req.user_decoded
     const { role_id } = req.params
 
-    // validate that user_id is a uuid
-    if(!uuidPattern.test(user_id)) {
-        next({
-            status: 400,
-            message: 'invalid user',
-            type: 'credentials'
-        })
-    }
-
-    // validate that role_id is a uuid
-    if(!uuidPattern.test(role_id)) {
-        next({
-            status: 400,
-            message: 'invalid role identifier',
-            type: 'credentials'
-        })
-    }
-
     // validate role exist
-    const currentRole = await rolesDB.findRoleById(role_id)
+    const currentRole = await rolesDB.getRoleById(role_id)
     if(currentRole === undefined) {
         next({
             status: 404,

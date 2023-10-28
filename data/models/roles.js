@@ -4,15 +4,16 @@ module.exports = {
     getBusinessRoles,
     getAllUserRoles,
     createRoleRequest,
-    findRoleById,
-    getUserBusinessRoles,
     approveRoleRequest,
     upgradeCreatorRole,
     downgradeManagerRole,
+    findRoleById,
+    getUserBusinessRoles,
     removeRole,
 
+    getRoleById,
     findUserBusinessRole,
-    checkRoleDuplicate,
+    checkForRole,
 }
 
 // roleRoute - returns array of roles for a selected business (ACTIVE/INACTIVE)
@@ -189,6 +190,19 @@ async function removeRole(role_id) {
 
 
 //! VALIDATION FUNCTIONS
+async function getRoleById(role_id) {
+    return await db('roles')
+        .where({ 'roles.id': role_id})
+        .select(
+            [
+                'roles.business_id',
+                'roles.user_id',
+                'roles.role_type',
+                'roles.active_role'
+            ]
+        )
+}
+
 // validators.js - validateBusinessManagement
 function findUserBusinessRole(business_id, user_id) {
     return db('roles')
@@ -204,8 +218,8 @@ function findUserBusinessRole(business_id, user_id) {
         .first()
 }
 
-// validators.js - validateRoleRequest
-function checkRoleDuplicate(business_id, user_id) {
+// validators.js - validateRoleRequest (TRUE/FALSE)
+function checkForRole(business_id, user_id) {
     return db('roles')
         .where({ user_id: user_id, business_id: business_id})
         .select(['roles.id'])
