@@ -7,12 +7,15 @@ module.exports = {
     approveRoleRequest,
     upgradeCreatorRole,
     downgradeManagerRole,
-    findRoleById,
-    getUserBusinessRoles,
-    removeRole,
+    deleteRole,
 
+
+    getUserBusinessRoles,
+
+    validateBusinessAdmin,
+    validateBusinessManagement,
     getRoleById,
-    findUserBusinessRole,
+    getUserBusinessRole,
     checkForRole,
 }
 
@@ -121,7 +124,7 @@ async function upgradeCreatorRole(request_id, management_id) {
         .first()
 }
 
-// roleRote - downgrade business manager role to business creator role
+// roleRoute - downgrade business manager role to business creator role
 async function downgradeManagerRole(role_id, admin_id) {
     await db('roles')
         .where({ id: role_id })
@@ -144,25 +147,16 @@ async function downgradeManagerRole(role_id, admin_id) {
         .first()
 }
 
+// roleRoute - delete role by user or by manager
+async function deleteRole(role_id) {
+    const { business_id, user_id } = await db('roles').where({ id: role_id }).first();
+    
+    await db('roles').where({ id: role_id }).del()
 
-
-
-
-
-// jwt_helper - inside validateRoleManagement & roleRequestUser
-//! inside various validators.js functions
-async function findRoleById(request_id) {
-    return await db('roles')
-        .where({ 'roles.id': request_id })
-        .select(
-            [
-                'roles.business_id',
-                'roles.user_id',
-                'roles.role_type'
-            ]
-        )
-        .first()
+    return { business_id, user_id }
 }
+
+
 
 //! validateEventCreation - returns an array of ative roles business_id(s) - VALIDATION HELPER
 async function getUserBusinessRoles(user_id) {
@@ -179,17 +173,25 @@ async function getUserBusinessRoles(user_id) {
 
 
 
-//! useRemoveRoleMutation & useRemoveUserRoleMutation - useRolesApi - REMOVE USER ROLE (SELF & MANAGEMENT)
-async function removeRole(role_id) {
-    return await db('roles')
-        .where({ id: role_id })
-        .del()
-}
-
-
-
 
 //! VALIDATION FUNCTIONS
+async function validateBusinessAdmin(business_id, user_id) {
+    return await db('roles')
+        .where({ business_id: business_id, user_id: user_id, active_role: true, role_type: process.env.ADMIN_ACCOUNT })
+        .select(['roles.id'])
+        .first()
+        .then(role => !!role)
+}
+
+async function validateBusinessManagement(business_id, user_id) {
+    return await db('roles')
+        .where({ business_id: business_id, user_id: user_id, active_role: true })
+        .andWhere('role_type', '>=', process.env.MANAGER_ACCOUNT)
+        .select(['roles.id'])
+        .first()
+        .then(role => !!role)
+}
+
 async function getRoleById(role_id) {
     return await db('roles')
         .where({ 'roles.id': role_id})
@@ -201,10 +203,11 @@ async function getRoleById(role_id) {
                 'roles.active_role'
             ]
         )
+        .first()
 }
 
-// validators.js - validateBusinessManagement
-function findUserBusinessRole(business_id, user_id) {
+// validators.js - validateBusinessManagement, validateRoleDelete
+function getUserBusinessRole(business_id, user_id) {
     return db('roles')
         .where({ user_id: user_id, business_id: business_id, active_role: true })
         .select(

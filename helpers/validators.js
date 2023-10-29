@@ -4,7 +4,6 @@ const businessDB = require('../data/models/business');
 const eventsDB = require('../data/models/event');
 const rolesDB = require('../data/models/roles');
 
-
 // CUSTOM REGEX PATTERNS
 const googlePlaceIdFormat = /^[\w-]+$/;
 const phonePattern = /^\d{10}$/;
@@ -297,76 +296,81 @@ const validateRoleRequest = async (req, res, next) => {
     next()
 }
 
+// .delete('ROLES/:role_id)
 const validateRoleDelete = async (req, res, next) => {
     const user_id = req.user_decoded
     const { role_id } = req.params
 
-    // validate that user_id is a uuid
-    if(!uuidPattern.test(user_id)) {
-        next({
-            status: 400,
-            message: 'invalid user',
-            type: 'credentials'
-        })
-    }
-
-    // validate that role_id is a uuid
-    if(!uuidPattern.test(role_id)) {
-        next({
-            status: 400,
-            message: 'invalid role identifier',
-            type: 'credentials'
-        })
-    }
-
-    // validate that role with role_id exist
-    const currentRole = await rolesDB.findRoleById(role_id)
-    if(currentRole === undefined) {
-        next({
+    // validate pending role exist throw error if role is not found
+    const { user_id: role_user_id, business_id, role_type: role_role_type } = await rolesDB.getRoleById(role_id)
+    if (!role_user_id) {
+        return next({
             status: 404,
             message: 'role not found',
-            type: 'credentials'
+            type: 'server'
         })
     }
 
-    // validate role.user_id is user_decoded
-    if(user_id !== currentRole.user_id) {
-        next({
-            status: 403,
-            message: 'invalid role rights',
-            type: 'credentials'
-        })
-    }
-    
-    next()
+    // if role.user_id is user_decoded role belongs to user
+    if(user_id === role_user_id) {
+        next()
+    } else {
+        const requestUserRole = await rolesDB.getUserBusinessRole(business_id, user_id)
+        console.log(requestUserRole)
+        if (requestUserRole !== undefined && role_role_type < requestUserRole.role_type) {
+            next()
+        } else {
+            return next({
+                status: 403,
+                message: 'invalid role permissions',
+                type: 'server'
+            })
+        }
+    }   
 }
 
 // .put('ROLES/:role_id/actions)
-const validateRoleManagement = async (req, res, next) => {
+const validateRoleAction = async (req, res, next) => {
+    const { action_type } = req.body
     const user_id = req.user_decoded
     const { role_id } = req.params
 
-    // validate role exist
-    const currentRole = await rolesDB.getRoleById(role_id)
-    if(currentRole === undefined) {
-        next({
+    const validActionTypes = ['approve', 'upgrade', 'downgrade']
+    if (!validActionTypes.includes(action_type)) {
+        return next({
+            status: 400,
+            message: 'invalid action type',
+            type: 'server'
+        });
+    }
+
+    // validate pending role exist throw error if role is not found
+    const { business_id } = await rolesDB.getRoleById(role_id)
+    if (!business_id) {
+        return next({
             status: 404,
             message: 'role not found',
-            type: 'credentials'
+            type: 'server'
         })
-    } else {
-        // get management role for user_id
-        const managementrole = await rolesDB.findUserBusinessRole(currentRole.business_id, user_id)
-        // confirm higher role_type
-        if((managementrole?.role_type > currentRole.role_type) && managementrole?.active_role) {
-            next()
-        } else {
-            next({
-                status: 403,
-                message: 'invalid management role',
-                type: 'credentials'
-            })
-        }
+    }
+    
+    const isBusinessAdmin = await rolesDB.validateBusinessAdmin(business_id, user_id)
+    const isBusinessManager = await rolesDB.validateBusinessManagement(business_id, user_id)
+
+    if (action_type === 'downgrade' && isBusinessAdmin) {
+        next()
+    }
+    
+    else if ((action_type === 'upgrade' || action_type === 'approve') && isBusinessManager) {
+        next()
+    }
+
+    else {
+        return next({
+            status: 403,
+            message: 'invalid business permissions',
+            type: 'server'
+        })
     }
 }
 
@@ -375,7 +379,7 @@ const validateBusinessManagement = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params
     
-    const businessRole = await rolesDB.findUserBusinessRole(business_id, user_id)
+    const businessRole = await rolesDB.getUserBusinessRole(business_id, user_id)
 
     if(businessRole === undefined) {
         return next({
@@ -728,7 +732,7 @@ module.exports = {
     validateBusinessAdmin,
     validateRoleRequest,
     validateRoleDelete,
-    validateRoleManagement,
+    validateRoleAction,
     validateBusinessManagement,
     validateEventCreator,
     validateEventCreation,

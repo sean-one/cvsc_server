@@ -7,7 +7,7 @@ const {
     formatValidationCheck,
     validateBusinessManagement,
     validateRoleDelete,
-    validateRoleManagement,
+    validateRoleAction,
     validateRoleRequest,
     uuidValidation,
     result
@@ -92,7 +92,7 @@ router.post('/businesses/:business_id/role-requests', [validToken, uuidValidatio
 })
 
 // useRolesApi - useRoleAction
-router.put('/:role_id/actions', [validToken, uuidValidation, formatValidationCheck], async (req, res, next) => {
+router.put('/:role_id/actions', [validToken, uuidValidation, formatValidationCheck, validateRoleAction, result], async (req, res, next) => {
     try {
         const { action_type } = req.body
         const { role_id } = req.params
@@ -131,37 +131,13 @@ router.put('/:role_id/actions', [validToken, uuidValidation, formatValidationChe
     }
 })
 
-
-
-
-
-//! useRemoveRoleMutation - removeRole - useRolesApi - REMOVE ROLE REQUEST (MANAGEMENT)
-router.delete('/remove/:role_id', [validToken, validateRoleManagement, result ], async (req, res, next) => {
+// useRolesApi - useRoleDelete
+router.delete('/:role_id', [validToken, uuidValidation, formatValidationCheck, validateRoleDelete, result], async (req, res, next) => {
     try {
-        const { role_id } = req.params
+        const { role_id } = req.params;
+        const deletedRole = await db.deleteRole(role_id)
 
-        await db.removeRole(role_id)
-        
-        res.status(200).json({ success: true, message: 'role successfully deleted' })
-
-    } catch (error) {
-        next({
-            status: roleErrors[error.message]?.status,
-            message: roleErrors[error.message]?.message,
-            type: roleErrors[error.message]?.type,
-        })
-    }
-})
-
-//! useRemoveUserRoleMutation - removeUserRole - useRolesApi - REMOVE USER ROLE (SELF)
-router.delete('/user_remove/:role_id', [validToken, validateRoleDelete, result], async (req, res, next) => {
-    try {
-        const { role_id } = req.params
-
-        await db.removeRole(role_id)
-
-        res.status(200).json({ success: true, message: 'role successfully deleted' })
-
+        res.status(200).json(deletedRole)
     } catch (error) {
         next({
             status: roleErrors[error.message]?.status,
@@ -171,6 +147,5 @@ router.delete('/user_remove/:role_id', [validToken, validateRoleDelete, result],
         
     }
 })
-
 
 module.exports = router;
