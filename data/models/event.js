@@ -2,7 +2,6 @@ const db = require('../dbConfig');
 
 module.exports = {
     getBusinessEvents,
-    getInactiveUserEvents,
     getUserEvents,
     getEventById,
     getAllEvents,
@@ -56,40 +55,10 @@ function getBusinessEvents(business_id) {
         .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 }
 
-// .get('/events/inactive_user/:user_id)
-function getInactiveUserEvents(user_id) {
-    return db('events')
-        .where({ created_by: user_id, active_event: false })
-        .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
-        .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
-        .select(
-            [
-                'events.id as event_id',
-                'events.eventname',
-                'events.eventdate',
-                'events.eventstart',
-                'events.eventend',
-                'events.eventmedia',
-                'events.details',
-                'events.active_event',
-
-                'venue.id as venue_id',
-                'venue.business_name as venue_name',
-                'venue.formatted_address as venue_location',
-
-                'brand.id as brand_id',
-                'brand.business_name as brand_name',
-
-                'events.created_by',
-            ]
-        )
-        .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`)
-}
-
 // .get('/events/user/:user_id')
 function getUserEvents(user_id) {
     return db('events')
-        .where({ created_by: user_id, active_event: true })
+        .where({ created_by: user_id })
         .andWhere('events.eventdate', '>=', new Date())
         .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
         .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
