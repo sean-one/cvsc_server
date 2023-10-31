@@ -16,7 +16,7 @@ module.exports = {
     validateCreatedBy,
 };
 
-// .get('/events/business/:user_id')
+// .get('/events/business/:business_id') - returns array of ACTIVE events for specific business id
 function getBusinessEvents(business_id) {
     return db('events')
         // Ensure eventdate and eventstart are in the future

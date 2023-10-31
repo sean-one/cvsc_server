@@ -4,7 +4,7 @@ const db = require('../dbConfig');
 const { deleteImageS3 } = require('../../s3');
 
 module.exports = {
-    find,
+    getAllBusinesses,
     findBusinessById,
     checkBusinessName,
     addBusiness,
@@ -14,7 +14,7 @@ module.exports = {
     removeBusiness
 };
 
-function find() {
+function getAllBusinesses() {
     return db('businesses')
         // .where({ active_bus  iness: true })
         .leftJoin('users', 'businesses.business_admin', '=', 'users.id')

@@ -31,7 +31,7 @@ const router = express.Router()
 // return a list of all businesses
 router.get('/', async (req, res) => {
     try {
-        const businesses = await db.find()
+        const businesses = await db.getAllBusinesses()
         
         res.status(200).json(businesses)
         

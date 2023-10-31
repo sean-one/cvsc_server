@@ -154,8 +154,38 @@ function isValidTime(value) {
 
 //! MIDDLEWARE VALIDATIONS
 //! ======================
+// check that at least one is present (business_id, user_id, event_id or role_id)
+const existenceChecks = oneOf([
+    check('business_id').exists(),
+    check('user_id').exists(),
+    check('event_id').exists(),
+    check('role_id').exists(),
+], 'invalid / missing id in request');
 
-// after uuidValidation this will run to catch any error before checking any other validatiors
+// check format IF EXISTS for business_id, user_id, event_id and role_id - 
+const formatValidations = [
+    check('business_id').if(check('business_id').exists()).trim()
+        .matches(uuidPattern)
+        .withMessage('invalid business format error'),
+    check('user_id').if(check('user_id').exists()).trim()
+        .matches(uuidPattern)
+        .withMessage('invalid user format error'),
+    check('event_id').if(check('event_id').exists()).trim()
+        .matches(uuidPattern)
+        .withMessage('invalid event format error'),
+    check('role_id').if(check('role_id').exists()).trim()
+        .matches(uuidPattern)
+        .withMessage('invalid role format error'),
+];
+
+// validates that at least one of business_id, user_id, event_id or role_id is present and all present are formated as uuid
+const uuidValidation = [
+    existenceChecks,
+    ...formatValidations
+];
+
+// check for any errors in uuid formating and throws an error before more validations
+// if no validation is needed after uuidValidation - result can be used instead
 const formatValidationCheck = async(req, res, next) => {
     const errors = validationResult(req)
 
@@ -548,32 +578,7 @@ const validateEventUpdate = async (req, res, next) => {
     }
 }
 
-const existenceChecks = oneOf([
-    check('business_id').exists(),
-    check('user_id').exists(),
-    check('event_id').exists(),
-    check('role_id').exists(),
-], 'invalid / missing id in request');
 
-const formatValidations = [
-    check('business_id').if(check('business_id').exists()).trim()
-        .matches(uuidPattern)
-        .withMessage('invalid identifier'),
-    check('user_id').if(check('user_id').exists()).trim()
-        .matches(uuidPattern)
-        .withMessage('invalid identifier'),
-    check('event_id').if(check('event_id').exists()).trim()
-        .matches(uuidPattern)
-        .withMessage('invalid identifier'),
-    check('role_id').if(check('role_id').exists()).trim()
-        .matches(uuidPattern)
-        .withMessage('invalid identifier'),
-];
-
-const uuidValidation = [
-    existenceChecks,
-    ...formatValidations
-];
 
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
@@ -705,6 +710,7 @@ const updateEventValidator =[
 ]
 
 const result = (req, res, next) => {
+    console.log('hit the result middleware')
     const result = validationResult(req);
     const hasError = !result.isEmpty();
     

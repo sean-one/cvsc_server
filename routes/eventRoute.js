@@ -30,20 +30,33 @@ router.get('/business/:business_id', [uuidValidation, result], async (req, res, 
 
         res.status(200).json(business_events)
     } catch (error) {
+        console.log('INSIDE THE BUSINESS EVENTS ROUTE ERROR')
         console.log(error)
-        next(error)
+        next({
+            status: eventErrors[error.message]?.status,
+            message: eventErrors[error.message]?.message,
+            type: eventErrors[error.message]?.type,
+        })
     }
 })
 
 // useUserEventsQuery - returns all the events for a user id
-router.get('/user/:user_id', [validToken], async (req, res) => {
+router.get('/user/:user_id', [validToken], async (req, res, next) => {
     try {
         const { user_id } = req.params;
+        
+        if (req.user_decoded !== user_id) { throw new Error() }
+        
         const user_events = await db.getUserEvents(user_id)
         
         res.status(200).json(user_events);
     } catch (error) {
         console.log(error)
+        next({
+            status: eventErrors[error.message]?.status,
+            message: eventErrors[error.message]?.message,
+            type: eventErrors[error.message]?.type,
+        })
     }
 })
 
