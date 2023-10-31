@@ -30,7 +30,7 @@ function getAllBusinesses() {
                 'businesses.business_request_open',
                 'businesses.active_business',
                 'businesses.business_admin',
-                'users.username as admin_user',
+                'users.usename as admin_user',
                 'businesses.business_email',
                 'businesses.business_phone',
                 'businesses.business_instagram',

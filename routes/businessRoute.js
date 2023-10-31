@@ -28,8 +28,8 @@ const upload = multer({ storage: storage })
 // '/business'
 const router = express.Router()
 
-// return a list of all businesses
-router.get('/', async (req, res) => {
+// useBusinessesQuery - return a list of all businesses
+router.get('/', async (req, res, next) => {
     try {
         const businesses = await db.getAllBusinesses()
         
@@ -37,6 +37,12 @@ router.get('/', async (req, res) => {
         
     } catch (error) {
         console.log(error)
+        console.log(Object.keys(error))
+        next({
+            status: businessErrors[error.message]?.status,
+            message: businessErrors[error.message]?.message,
+            type: businessErrors[error.message]?.type,
+        })
     }
 });
 
