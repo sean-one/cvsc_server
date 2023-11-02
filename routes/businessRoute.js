@@ -36,8 +36,6 @@ router.get('/', async (req, res, next) => {
         res.status(200).json(businesses)
         
     } catch (error) {
-        console.log(error)
-        console.log(Object.keys(error))
         next({
             status: businessErrors[error.message]?.status,
             message: businessErrors[error.message]?.message,
@@ -50,7 +48,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:business_id', [ uuidValidation, result ], async (req, res, next) => {
     try {
         const { business_id } = req.params;
-        const business = await db.findBusinessById(business_id)
+        const business = await db.getBusinessById(business_id)
         
         if(business === undefined) {
             throw new Error('business_not_found')

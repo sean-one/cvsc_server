@@ -5,7 +5,7 @@ const { deleteImageS3 } = require('../../s3');
 
 module.exports = {
     getAllBusinesses,
-    findBusinessById,
+    getBusinessById,
     checkBusinessName,
     addBusiness,
     updateBusiness,
@@ -42,7 +42,7 @@ function getAllBusinesses() {
 }
 
 // .put('/business/update/:business_id)
-function findBusinessById(business_id) {
+function getBusinessById(business_id) {
     return db('businesses')
         .where({ 'businesses.id': business_id })
         .select(
