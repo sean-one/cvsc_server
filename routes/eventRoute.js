@@ -14,7 +14,9 @@ const {
     validateEventUpdate,
     validateImageFile,
     uuidValidation,
-    result
+    result,
+    validateBusinessManagement,
+    formatValidationCheck
 } = require('../helpers/validators');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -178,14 +180,13 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, validateEvent
 });
 
 // useEventsApi - removeBusiness - useRemoveEventBusinessMutation
-router.put('/business/remove/:event_id', [validToken], async (req, res, next) => {
+router.put('/businesses/:business_id/events/:event_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
     try {
-        const { event_id } = req.params
-        const { event_updates } = req.body
+        const { event_id, business_id } = req.params
 
-        await db.removeEventBusiness(event_id, event_updates.business_type)
+        await db.removeEventBusiness(event_id, business_id)
         
-        res.status(202).json({ success: true })
+        res.status(202).json({ event_id: event_id, business_id: business_id })
 
     } catch (error) {
         console.log('INSIDE THE ROUTE CATCH')

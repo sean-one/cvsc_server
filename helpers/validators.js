@@ -404,7 +404,7 @@ const validateRoleAction = async (req, res, next) => {
     }
 }
 
-// .put('BUSINESSES/:business_id'), .get('ROLES/businesses/:business_id')
+// .put('BUSINESSES/:business_id'), .get('ROLES/businesses/:business_id'), .put('EVENTS/businesses/:business_id/events/:events_id')
 const validateBusinessManagement = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params

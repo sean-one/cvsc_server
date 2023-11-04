@@ -306,29 +306,21 @@ async function removeBusinessByType(business_id, business_type) {
 }
 
 // remove business from event and mark active_event to false
-async function removeEventBusiness(event_id, business_type) {
-    console.log(event_id, business_type)
-    if(business_type === 'venue') {
-        return await db('events')
-            .where({ id: event_id })
-            .update({
-                venue_id: null,
-                active_event: false
-            })
+async function removeEventBusiness(event_id, business_id) {
+    let eventUpdates = { active_event: false }
+    const current_event = await db('events').where({ id: event_id }).select(['venue_id', 'brand_id']).first()
 
-    } else if(business_type === 'brand') {
-        return await db('events')
-            .where({ id: event_id })
-            .update({
-                brand_id: null,
-                active_event: false
-            })
-
-    } else {
-        console.log(event_id, business_type)
-        console.log('error inside the events model for remove business')
-        return
+    if (current_event.venue_id === business_id) {
+        eventUpdates.venue_id = null
     }
+
+    if (current_event.brand_id === business_id) {
+        eventUpdates.brand_id = null
+    }
+
+    return db('events')
+        .where({ id: event_id })
+        .update(eventUpdates, ['events.id as event_id'])
 }
 
 
