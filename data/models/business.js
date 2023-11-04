@@ -6,6 +6,7 @@ const { deleteImageS3 } = require('../../s3');
 module.exports = {
     getAllBusinesses,
     getBusinessById,
+    getBusinessManagement,
     checkBusinessName,
     addBusiness,
     updateBusiness,
@@ -66,6 +67,61 @@ function getBusinessById(business_id) {
             ]
         )
         .first();
+}
+
+// .get('/businesses/management')
+async function getBusinessManagement(user_id) {
+    try {
+        const { business_ids } = await db('roles')
+            .where({ user_id: user_id, active_role: true })
+            .andWhere('role_type', '>=', process.env.MANAGER_ACCOUNT)
+            .select(
+                [
+                    db.raw('ARRAY_AGG(roles.business_id) as business_ids')
+                ]
+            )
+            .first()
+        
+        // if no roles with role type of manager or admin throw non manager error    
+        if (business_ids === null) { throw new Error('non_manager') }
+        
+        return db('businesses')
+            .whereIn('id', business_ids)
+            .select(
+                [
+                    'businesses.id',
+                    'businesses.business_name',
+                    'businesses.formatted_address',
+                    'businesses.place_id',
+                    'businesses.business_avatar',
+                    'businesses.business_description',
+                    'businesses.business_type',
+                    'businesses.business_request_open',
+                    'businesses.active_business',
+                    'businesses.business_admin',
+                    'businesses.business_email',
+                    'businesses.business_phone',
+                    'businesses.business_instagram',
+                    'businesses.business_facebook',
+                    'businesses.business_website',
+                    'businesses.business_twitter',
+                ]
+            )
+
+    } catch (error) {
+        // if user_id is not properly formatted as a uuid
+        if (error?.routine === 'string_to_uuid') {
+            throw new Error('string_to_uuid')
+        }
+
+        // if no management roles were found
+        if (error?.message === 'non_manager') {
+            throw new Error('non_manager')
+        }
+
+        // fall back in case of unexpected errors
+        throw new Error('server_error')
+    }
 }
 
 // .post('/business/create') - checks if business name is already in use

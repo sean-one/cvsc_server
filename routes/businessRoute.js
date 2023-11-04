@@ -44,6 +44,22 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+// useBusinessManagement - get an array of businesses based on user id with management rights
+router.get('/management', [validToken], async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+        const business_management_list = await db.getBusinessManagement(user_id)
+
+        res.status(200).json(business_management_list)
+    } catch (error) {
+        next({
+            status: businessErrors[error.message]?.status,
+            message: businessErrors[error.message]?.message,
+            type: businessErrors[error.message]?.type,
+        })
+    }
+})
+
 // useBusinessQuery - getBusiness - useBusinessApi - VIEW BUSINESS PAGE
 router.get('/:business_id', [ uuidValidation, result ], async (req, res, next) => {
     try {

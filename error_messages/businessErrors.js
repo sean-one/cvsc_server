@@ -5,6 +5,24 @@ const businessErrors = {
         message: 'Unable to find business.',
         type: 'business_error'
     },
+    // getBusinessManagement
+    string_to_uuid: {
+        status: 400,
+        message: 'invalid user id credentials',
+        type: 'server'
+    },
+    // getBusinessManagement
+    non_manager: {
+        status: 404,
+        message: 'no managing businesses found',
+        type: 'server'
+    },
+    // getBusinessManagement
+    server_error: {
+        status: 500,
+        message: 'server error',
+        type: 'server'
+    },
     businesses_business_name_unique: {
         status: 409,
         message: 'business name already registered',
