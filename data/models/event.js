@@ -42,10 +42,12 @@ function getBusinessEvents(business_id) {
             'events.active_event',
 
             'venue.id as venue_id',
+            'venue.business_avatar as venue_logo',
             'venue.business_name as venue_name',
             'venue.formatted_address as venue_location',
 
             'brand.id as brand_id',
+            'brand.business_avatar as brand_logo',
             'brand.business_name as brand_name',
 
             'events.created_by',
@@ -74,10 +76,12 @@ function getUserEvents(user_id) {
                 'events.active_event',
 
                 'venue.id as venue_id',
+                'venue.business_avatar as venue_logo',
                 'venue.business_name as venue_name',
                 'venue.formatted_address as venue_location',
 
                 'brand.id as brand_id',
+                'brand.business_avatar as brand_logo',
                 'brand.business_name as brand_name',
 
                 'events.created_by',
@@ -108,9 +112,11 @@ function getAllEvents() {
 
             'venue.id as venue_id',
             'venue.business_name as venue_name',
+            'venue.business_avatar as venue_logo',
             'venue.formatted_address as venue_location',
 
             'brand.id as brand_id',
+            'brand.business_avatar as brand_logo',
             'brand.business_name as brand_name',
 
             'events.created_by',
@@ -139,9 +145,11 @@ async function getEventById(eventId) {
                 
                 'venue.id as venue_id',
                 'venue.business_name as venue_name',
+                'venue.business_avatar as venue_logo',
                 'venue.formatted_address as venue_location',
                 
                 'brand.id as brand_id',
+                'brand.business_avatar as brand_logo',
                 'brand.business_name as brand_name',
 
                 'events.created_by',
@@ -172,9 +180,11 @@ async function createEvent(event) {
 
                         'venue.id as venue_id',
                         'venue.business_name as venue_name',
+                        'venue.business_avatar as venue_logo',
                         'venue.formatted_address as venue_location',
                         
                         'brand.id as brand_id',
+                        'brand.business_avatar as brand_logo',
                         'brand.business_name as brand_name',
 
                         'events.created_by',
@@ -229,9 +239,11 @@ async function updateEvent(event_id, eventChanges) {
 
                     'venue.id as venue_id',
                     'venue.business_name as venue_name',
+                    'venue.business_avatar as venue_logo',
                     'venue.formatted_address as venue_location',
 
                     'brand.id as brand_id',
+                    'brand.business_avatar as brand_logo',
                     'brand.business_name as brand_name',
 
                     'events.created_by',

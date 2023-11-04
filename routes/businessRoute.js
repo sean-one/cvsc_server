@@ -25,7 +25,7 @@ const {
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
-// '/business'
+// '/businesses'
 const router = express.Router()
 
 // useBusinessesQuery - return a list of all businesses
