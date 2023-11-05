@@ -12,7 +12,9 @@ const twitterPattern = /^[a-zA-Z0-9_]{1,15}$/;
 const facebookPattern = /^[a-zA-Z0-9._-]{5,}$/;
 const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
-// CUSTOM VALIDATIONS
+//! CUSTOM VALIDATIONS
+//! ==================
+// loginUserValidator, registerUserValidator
 const isUsernameValid = (value) => {
     if (!/^[a-zA-Z0-9*_\-.$!@]+$/.test(value)) {
         throw new Error('Username can only contain letters, numbers, *, _, -, ., $, !, @');
@@ -34,7 +36,7 @@ const isUsernameValid = (value) => {
 
     return true;
 };
-
+// registerUserValidator
 const isUsernameUnique = async (value) => {
     const found = await userDB.checkUsernameDuplicate(value)
 
@@ -44,7 +46,7 @@ const isUsernameUnique = async (value) => {
     
     return true
 };
-
+// loginUserValidator, registerUserValidator
 const validatePassword = (value) => {
     if(value.length < 8) {
         return 'password is too short - must be at least 8 characters'
@@ -201,7 +203,7 @@ const formatValidationCheck = async(req, res, next) => {
 
     next();
 }
-
+// .post('/register')
 const validateImageFile = async (req, res, next) => {
     const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
     if(!req.file) {
@@ -556,7 +558,7 @@ const validateEventUpdate = async (req, res, next) => {
 }
 
 
-
+// .post('/register')
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
         .isLength({ min: 3, max: 50 }).withMessage('invalid username length')
@@ -572,6 +574,7 @@ const registerUserValidator = [
         .escape(),
 ]
 
+// .post('/login')
 const loginUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
         .isLength({ min: 3, max: 50 }).withMessage('invalid username length')
