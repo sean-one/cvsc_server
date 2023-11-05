@@ -179,7 +179,7 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, validateEvent
     }
 });
 
-// useEventsApi - removeBusiness - useRemoveEventBusinessMutation
+// useEventsApi - removes a business id from venue_id and or brand_id & sets active_event to false
 router.put('/businesses/:business_id/events/:event_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
     try {
         const { event_id, business_id } = req.params
@@ -199,12 +199,12 @@ router.put('/businesses/:business_id/events/:event_id', [validToken, uuidValidat
     }
 })
 
-//! useEventsApi - removeEvent - useRemoveEventMutation
-router.delete('/remove/:event_id', [validToken, validateEventCreator], async (req, res, next) => {
+// useEventsApi - removes an event from the database
+router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, validateEventCreator, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
-        const { eventmedia, eventname } = await db.findById(event_id)
+        const { eventmedia, eventname, venue_id, brand_id } = await db.getEventById(event_id)
 
         const deleteResponse = await db.removeEvent(event_id)
 
@@ -212,7 +212,7 @@ router.delete('/remove/:event_id', [validToken, validateEventCreator], async (re
             // check for image hosted on s3 and delete if found
             if(!check_link.test(eventmedia)) await deleteImageS3(eventmedia)
 
-            res.status(204).json(eventname);
+            res.status(200).json({ user_id: req.user_decoded, eventname: eventname, venue_id: venue_id, brand_id: brand_id, event_id: event_id });
         } else {
             throw new Error('event_not_found')
         }

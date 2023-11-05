@@ -272,12 +272,28 @@ async function updateEvent(event_id, eventChanges) {
     }
 }
 
-//! remove event
-function removeEvent(event_id) {
+// .put('/businesses/:business_id/events/:event_id')
+async function removeEventBusiness(event_id, business_id) {
+    let eventUpdates = { active_event: false }
+    const current_event = await db('events').where({ id: event_id }).select(['venue_id', 'brand_id']).first()
+
+    if (current_event.venue_id === business_id) {
+        eventUpdates.venue_id = null
+    }
+
+    if (current_event.brand_id === business_id) {
+        eventUpdates.brand_id = null
+    }
+
     return db('events')
         .where({ id: event_id })
-        .first()
-        .del()
+        .update(eventUpdates, ['events.id as event_id'])
+}
+
+
+// .delete('/:event_id')
+function removeEvent(event_id) {
+    return db('events').where({ id: event_id }).first().del()
 }
 
 // when a business adjust its business type between brand and venue,
@@ -305,24 +321,6 @@ async function removeBusinessByType(business_id, business_type) {
     }
 }
 
-// remove business from event and mark active_event to false
-async function removeEventBusiness(event_id, business_id) {
-    let eventUpdates = { active_event: false }
-    const current_event = await db('events').where({ id: event_id }).select(['venue_id', 'brand_id']).first()
-
-    if (current_event.venue_id === business_id) {
-        eventUpdates.venue_id = null
-    }
-
-    if (current_event.brand_id === business_id) {
-        eventUpdates.brand_id = null
-    }
-
-    return db('events')
-        .where({ id: event_id })
-        .update(eventUpdates, ['events.id as event_id'])
-}
-
 
 
 //! VALIDATION HELPERS - validators.js
@@ -335,9 +333,10 @@ async function checkEventName(eventname) {
 }
 
 // validateEventCreator
-async function validateCreatedBy(eventId) {
+async function validateCreatedBy(event_id, user_id) {
     return await db('events')
-        .where({ 'events.id': eventId })
-        .select([ 'events.created_by' ])
+        .where({ 'events.id': event_id, 'events.created_by': user_id })
+        .select([ 'events.id' ])
         .first()
+        .then(event => !!event)
 }

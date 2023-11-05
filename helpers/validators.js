@@ -431,44 +431,21 @@ const validateBusinessManagement = async (req, res, next) => {
     }
 }
 
+// .delete('EVENTS/:event_id')
 const validateEventCreator = async (req, res, next) => {
     const user_id = req.user_decoded
     const { event_id } = req.params
 
-    if(!uuidPattern.test(user_id)) {
-        next({
-            status: 400,
-            message: 'invalid user',
-            type: 'server'
-        })
-    }
-
-    if(!uuidPattern.test(event_id)) {
-        next({
-            status: 400,
-            message: 'invalid event',
-            type: 'server'
-        })
-    }
-
-    const event = await eventsDB.validateCreatedBy(event_id)
-    if(event === undefined) {
-        next({
-            status: 404,
-            message: 'event not found',
-            type: 'server'
-        })
-    }
-
-    if(event.created_by !== user_id) {
+    const isEventCreator = await eventsDB.validateCreatedBy(event_id, user_id)
+    if(isEventCreator) {
+        next()
+    } else {
         next({
             status: 403,
             message: 'invalid event permission',
             type: 'server'
         })
     }
-
-    next()
 }
 
 const validateEventCreation = async (req, res, next) => {
