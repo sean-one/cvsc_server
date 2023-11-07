@@ -63,14 +63,22 @@ router.get('/user/:user_id', [validToken], async (req, res, next) => {
 })
 
 // useEventQuery - returns a single event from event id
-router.get('/:event_id', async (req, res, next) => {
+router.get('/:event_id', [uuidValidation, result], async (req, res, next) => {
     try {
         const { event_id } = req.params
         const selected_event = await db.getEventById(event_id)
 
-        res.status(200).json(selected_event)
+        if (selected_event === undefined) {
+            throw new Error('event_not_found')
+        } else {
+            res.status(200).json(selected_event)
+        }
     } catch (error) {
-        console.log(error)
+        next({
+            status: eventErrors[error.message]?.status,
+            message: eventErrors[error.message]?.message,
+            type: eventErrors[error.message]?.type,
+        })
     }
 });
 
