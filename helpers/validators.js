@@ -316,7 +316,7 @@ const validateRoleRequest = async (req, res, next) => {
     }
     
     // confirm non duplicate
-    const hasDuplicate = await rolesDB.checkForRole(business_id, user_id)
+    const hasDuplicate = await rolesDB.checkForDuplicate(business_id, user_id)
     if(hasDuplicate) {
         next({
             status: 400,
@@ -433,7 +433,7 @@ const validateBusinessManagement = async (req, res, next) => {
     }
 }
 
-// .delete('EVENTS/:event_id')
+// .delete('EVENTS/:event_id') - validate that user created an event
 const validateEventCreator = async (req, res, next) => {
     const user_id = req.user_decoded
     const { event_id } = req.params
@@ -450,109 +450,54 @@ const validateEventCreator = async (req, res, next) => {
     }
 }
 
-const validateEventCreation = async (req, res, next) => {
+// .post('EVENTS/') - validate user roles for businesses form  pending event
+const validateCreateEvent = async (req, res, next) => {
     const user_id = req.user_decoded
     const { venue_id, brand_id } = req.body
 
-    if(!uuidPattern.test(user_id)) {
-        next({
-            status: 400,
-            message: 'invalid user',
-            type: 'server'
-        })
-    }
+    const isVenueCreator = await rolesDB.checkForRole(venue_id, user_id)
+    const isBrandCreator = await rolesDB.checkForRole(brand_id, user_id)
 
-    if(!uuidPattern.test(venue_id)) {
-        next({
-            status: 400,
-            message: 'invalid business venue',
-            type: 'venue_id'
-        })
-    }
-
-    if(!uuidPattern.test(brand_id)) {
-        next({
-            status: 400,
-            message: 'invalid business brand',
-            type: 'brand_id'
-        })
-    }
-
-    const businessIDs = await rolesDB.getUserBusinessRoles(user_id)
-    if(businessIDs === undefined) {
-        next({
-            status: 404,
-            message: 'user roles not found',
-            type: 'role_rights'
-        })
-    }
-
-    if(businessIDs?.business_ids.includes(venue_id) || businessIDs?.business_ids.includes(brand_id)) {
+    if (isVenueCreator || isBrandCreator) {
         next()
     } else {
         next({
             status: 403,
-            message: 'invalid user permission',
-            type: 'server'
+            message: 'must have creator permission',
+            type: 'role_rights'
         })
     }
 }
 
-const validateEventUpdate = async (req, res, next) => {
-    const user_id = req.user_decoded
-    const { event_id } = req.params
+// .put('EVENTS/:event_id') - validate user roles for at least one event business
+const validateEventBusinessRoles = async (req, res, next) => {
+    const user_id = req.user_decoded;
+    let current_venue, current_brand;
 
-    if(!uuidPattern.test(user_id)) {
-        next({
-            status: 400,
-            message: 'invalid user',
-            type: 'server'
-        })
+    if (req.method === 'PUT') {
+        // get event id from put method indicating it is an update
+        const { event_id } = req.params;
+        // get current venue
+        const { venue_id, brand_id } = await eventsDB.getEventById(event_id);
+        current_venue = venue_id;
+        current_brand = brand_id;
     }
 
-    if(!uuidPattern.test(event_id)) {
-        next({
-            status: 400,
-            message: 'invalid event',
-            type: 'server'
-        })
-    }
+    console.log(`venue: ${current_venue}`)
+    console.log(`brand: ${current_brand}`)
 
-    const { venue_id: current_venue, brand_id: current_brand } = await eventsDB.getEventById(event_id)
-    const { venue_id = current_venue, brand_id = current_brand } = req.body
+    const { venue_id = current_venue, brand_id = current_brand } = req.body;
 
-    if(!uuidPattern.test(venue_id)) {
-        next({
-            status: 400,
-            message: 'invalid venue',
-            type: 'venue_id'
-        })
-    }
+    const isVenueCreator = await rolesDB.checkForRole(venue_id, user_id);
+    const isBrandCreator = await rolesDB.checkForRole(brand_id, user_id);
 
-    if(!uuidPattern.test(brand_id)) {
-        next({
-            status: 400,
-            message: 'invalid business brand',
-            type: 'brand_id'
-        })
-    }
-
-    const businessIDs = await rolesDB.getUserBusinessRoles(user_id)
-    if(businessIDs === undefined) {
-        next({
-            status: 404,
-            message: 'no roles found',
-            type: 'server'
-        })
-    }
-
-    if(businessIDs?.business_ids.includes(venue_id) || businessIDs?.business_ids.includes(brand_id)) {
+    if (isVenueCreator || isBrandCreator) {
         next()
     } else {
         next({
             status: 403,
-            message: 'invalid role permission',
-            type: 'server'
+            message: 'must have creator permission for at least one business',
+            type: 'role_rights'
         })
     }
 }
@@ -721,8 +666,8 @@ module.exports = {
     validateRoleAction,
     validateBusinessManagement,
     validateEventCreator,
-    validateEventCreation,
-    validateEventUpdate,
+    validateCreateEvent,
+    validateEventBusinessRoles,
     updateBusinessValidator,
     updateUserValidator,
     newEventValidator,

@@ -16,6 +16,7 @@ module.exports = {
     validateBusinessManagement,
     getRoleById,
     getUserBusinessRole,
+    checkForDuplicate,
     checkForRole,
 }
 
@@ -221,10 +222,19 @@ function getUserBusinessRole(business_id, user_id) {
         .first()
 }
 
-// validators.js - validateRoleRequest (TRUE/FALSE)
-function checkForRole(business_id, user_id) {
+// validators.js - validateRoleRequest (TRUE/FALSE) - checks for role active or inactive
+function checkForDuplicate(business_id, user_id) {
     return db('roles')
         .where({ user_id: user_id, business_id: business_id})
+        .select(['roles.id'])
+        .first()
+        .then(role => !!role)
+}
+
+// validators.js - validateCreateEvent (TRUE/FALSE) - checks for ACTIVE role
+function checkForRole(business_id, user_id) {
+    return db('roles')
+        .where({ user_id: user_id, business_id: business_id, active_role: true })
         .select(['roles.id'])
         .first()
         .then(role => !!role)

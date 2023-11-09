@@ -10,13 +10,12 @@ const {
     newEventValidator,
     updateEventValidator,
     validateEventCreator,
-    validateEventCreation,
-    validateEventUpdate,
     validateImageFile,
     uuidValidation,
     result,
     validateBusinessManagement,
-    formatValidationCheck
+    formatValidationCheck,
+    validateEventBusinessRoles
 } = require('../helpers/validators');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -95,7 +94,7 @@ router.get('/', async (req, res) => {
 });
 
 //! useEventsApi - createEvent - useCreateEventMutation - CREATE NEW EVENT
-router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation, newEventValidator, validateImageFile, result], async (req, res, next) => {
+router.post('/', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, newEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const new_event = req.body
 
@@ -125,8 +124,8 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventCreation
     }
 });
 
-//! useEventsApi - updateEvent - useUpdateEventMutation - UPDATE EVENT
-router.put('/:event_id', [upload.single('eventmedia'), validToken, validateEventUpdate, updateEventValidator, validateImageFile, result], async (req, res, next) => {
+// useEventsApi - update event
+router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, validateEventBusinessRoles, updateEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
@@ -159,7 +158,7 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, validateEvent
         const event_update = createUpdateObject(req.body, fieldsToInclude)
 
         if(req.file) {
-            const { eventmedia } = await db.findById(event_id)
+            const { eventmedia } = await db.getEventById(event_id)
             // resize the image
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
 
