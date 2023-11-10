@@ -93,8 +93,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-//! useEventsApi - createEvent - useCreateEventMutation - CREATE NEW EVENT
-router.post('/', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, newEventValidator, validateImageFile, result], async (req, res, next) => {
+// useCreateEventMutation - create a new event
+router.post('/', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, validateEventBusinessRoles, newEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const new_event = req.body
 
@@ -124,7 +124,7 @@ router.post('/', [upload.single('eventmedia'), validToken, uuidValidation, forma
     }
 });
 
-// useEventsApi - update event
+// useUpdateEventMutation - update event
 router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, validateEventBusinessRoles, updateEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
@@ -206,7 +206,7 @@ router.put('/businesses/:business_id/events/:event_id', [validToken, uuidValidat
     }
 })
 
-// useEventsApi - removes an event from the database
+// useRemoveEventMutation - removes an event from the database
 router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, validateEventCreator, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g

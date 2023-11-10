@@ -450,26 +450,7 @@ const validateEventCreator = async (req, res, next) => {
     }
 }
 
-// .post('EVENTS/') - validate user roles for businesses form  pending event
-const validateCreateEvent = async (req, res, next) => {
-    const user_id = req.user_decoded
-    const { venue_id, brand_id } = req.body
-
-    const isVenueCreator = await rolesDB.checkForRole(venue_id, user_id)
-    const isBrandCreator = await rolesDB.checkForRole(brand_id, user_id)
-
-    if (isVenueCreator || isBrandCreator) {
-        next()
-    } else {
-        next({
-            status: 403,
-            message: 'must have creator permission',
-            type: 'role_rights'
-        })
-    }
-}
-
-// .put('EVENTS/:event_id') - validate user roles for at least one event business
+// .post('EVENTS/'), .put('EVENTS/:event_id') - validate user roles for at least one event business
 const validateEventBusinessRoles = async (req, res, next) => {
     const user_id = req.user_decoded;
     let current_venue, current_brand;
@@ -666,7 +647,6 @@ module.exports = {
     validateRoleAction,
     validateBusinessManagement,
     validateEventCreator,
-    validateCreateEvent,
     validateEventBusinessRoles,
     updateBusinessValidator,
     updateUserValidator,

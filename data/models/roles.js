@@ -231,7 +231,7 @@ function checkForDuplicate(business_id, user_id) {
         .then(role => !!role)
 }
 
-// validators.js - validateCreateEvent (TRUE/FALSE) - checks for ACTIVE role
+// validators.js - validateEventBusinessRoles (TRUE/FALSE) - checks for ACTIVE role
 function checkForRole(business_id, user_id) {
     return db('roles')
         .where({ user_id: user_id, business_id: business_id, active_role: true })
