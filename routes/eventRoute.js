@@ -81,20 +81,23 @@ router.get('/:event_id', [uuidValidation, result], async (req, res, next) => {
     }
 });
 
-//! updated endpoint - needs error handling
-router.get('/', async (req, res) => {
+// useEventsQuery - returns all active events - main calendar call
+router.get('/', async (req, res, next) => {
     try {
         const events = await db.getAllEvents()
             
         res.status(200).json(events);
     } catch (error) {
-        console.log(error)
-        res.status(500).json(error)
+        next({
+            status: eventErrors[error.message]?.status,
+            message: eventErrors[error.message]?.message,
+            type: eventErrors[error.message]?.type,
+        })
     }
 });
 
 // useCreateEventMutation - create a new event
-router.post('/', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, validateEventBusinessRoles, newEventValidator, validateImageFile, result], async (req, res, next) => {
+router.post('/', [upload.single('eventmedia'), validToken, validateEventBusinessRoles, newEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const new_event = req.body
 

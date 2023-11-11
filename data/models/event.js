@@ -290,7 +290,6 @@ async function removeEventBusiness(event_id, business_id) {
         .update(eventUpdates, ['events.id as event_id'])
 }
 
-
 // .delete('/:event_id')
 function removeEvent(event_id) {
     return db('events').where({ id: event_id }).first().del()

@@ -5,7 +5,7 @@ const eventErrors = {
         message: 'event not found',
         type: 'server'
     },
-    //! event model error
+    // event model - createEvent, updateEvent
     events_eventname_unique: {
         status: 400,
         message: 'eventname already exist',
@@ -29,26 +29,26 @@ const eventErrors = {
         message: 'user not found',
         type: 'server'
     },
-    //! event model error
+    // event model - createEvent, updateEvent
     invalid_time_format: {
         // invalid formatting of time on insert
         status: 400,
         message: 'please be sure time has correct formatting',
         type: 'time_format'
     },
-    //! event model error
+    // event model - updateEvent
     invalid_business_id: {
         status: 400,
         message: 'invalid business',
         type: 'server',
     },
-    //! event model error
+    // event model - updateEvent
     invalid_date_format: {
         status: 400,
         message: 'please be sure date has correct formatting',
         type: 'eventdate'
     },
-    //! event model error
+    // event model - createEvent
     invalid_admin: {
         status: 400,
         message: 'unauthorized admin',
