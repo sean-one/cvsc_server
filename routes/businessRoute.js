@@ -115,7 +115,7 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
 
         }
     }
-})
+});
 
 // useBusinessManagement - get an array of businesses based on user id with management rights
 router.get('/managed', [validToken], async (req, res, next) => {
@@ -131,7 +131,7 @@ router.get('/managed', [validToken], async (req, res, next) => {
             type: businessErrors[error.message]?.type,
         })
     }
-})
+});
 
 // useBusinessQuery - getBusiness - useBusinessApi - VIEW BUSINESS PAGE
 router.get('/:business_id', [uuidValidation, result], async (req, res, next) => {
@@ -182,7 +182,7 @@ router.put('/:business_id/status/toggle', [validToken, validateBusinessAdmin, re
             type: businessErrors[error.message]?.type,
         })
     }
-})
+});
 
 // router.put('/:business_id/transfer')
 
@@ -264,7 +264,7 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
 
         }
     }
-})
+});
 
 //! useRemoveBusinessMutation - removeBusiness - useBusinessApi - DELETE BUSINESS
 router.delete('/:business_id', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
@@ -297,7 +297,7 @@ router.delete('/:business_id', [validToken, validateBusinessAdmin, result], asyn
             next(error)
         }
     }
-})
+});
 
 
 module.exports = router;

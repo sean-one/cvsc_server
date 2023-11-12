@@ -39,7 +39,7 @@ router.get('/business/:business_id', [uuidValidation, result], async (req, res, 
             type: eventErrors[error.message]?.type,
         })
     }
-})
+});
 
 // useUserEventsQuery - returns all the events for a user id
 router.get('/user/:user_id', [validToken], async (req, res, next) => {
@@ -59,7 +59,7 @@ router.get('/user/:user_id', [validToken], async (req, res, next) => {
             type: eventErrors[error.message]?.type,
         })
     }
-})
+});
 
 // useEventQuery - returns a single event from event id
 router.get('/:event_id', [uuidValidation, result], async (req, res, next) => {
@@ -127,6 +127,26 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventBusiness
     }
 });
 
+// useEventsApi - removes a business id from venue_id and or brand_id & sets active_event to false
+router.put('/businesses/:business_id/events/:event_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
+    try {
+        const { event_id, business_id } = req.params
+
+        await db.removeEventBusiness(event_id, business_id)
+        
+        res.status(202).json({ event_id: event_id, business_id: business_id })
+
+    } catch (error) {
+        console.log('INSIDE THE ROUTE CATCH')
+        console.log(error)
+        next({
+            status: eventErrors[error.message]?.status,
+            type: eventErrors[error.message]?.type,
+            message: eventErrors[error.message]?.message,
+        })
+    }
+});
+
 // useUpdateEventMutation - update event
 router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, validateEventBusinessRoles, updateEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
@@ -189,26 +209,6 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
     }
 });
 
-// useEventsApi - removes a business id from venue_id and or brand_id & sets active_event to false
-router.put('/businesses/:business_id/events/:event_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
-    try {
-        const { event_id, business_id } = req.params
-
-        await db.removeEventBusiness(event_id, business_id)
-        
-        res.status(202).json({ event_id: event_id, business_id: business_id })
-
-    } catch (error) {
-        console.log('INSIDE THE ROUTE CATCH')
-        console.log(error)
-        next({
-            status: eventErrors[error.message]?.status,
-            type: eventErrors[error.message]?.type,
-            message: eventErrors[error.message]?.message,
-        })
-    }
-})
-
 // useRemoveEventMutation - removes an event from the database
 router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, validateEventCreator, result], async (req, res, next) => {
     try {
@@ -233,7 +233,7 @@ router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, 
             type: eventErrors[error.message].type
         })
     }
-})
+});
 
 
 module.exports = router;
