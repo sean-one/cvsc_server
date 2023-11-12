@@ -16,7 +16,7 @@ module.exports = {
     validateCreatedBy,
 };
 
-// .get('/events/business/:business_id') - returns array of ACTIVE events for specific business id
+// .get('EVENTS/business/:business_id') - returns array of ACTIVE events for specific business id
 function getBusinessEvents(business_id) {
     return db('events')
         // Ensure eventdate and eventstart are in the future
@@ -57,7 +57,7 @@ function getBusinessEvents(business_id) {
         .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 }
 
-// .get('/events/user/:user_id')
+// .get('EVENTS/user/:user_id')
 function getUserEvents(user_id) {
     return db('events')
         .where({ created_by: user_id })
@@ -126,7 +126,7 @@ function getAllEvents() {
         .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 }
 
-// validateEventUpdate & .get('/:event_id')
+// .get('EVENTS/:event_id') & validateEventUpdate
 async function getEventById(eventId) {
     return await db('events')
         .where({ 'events.id': eventId })
@@ -158,7 +158,7 @@ async function getEventById(eventId) {
         .first()
 }
 
-// .post('/') - create new event
+// .post('EVENTS/') - create new event
 async function createEvent(event) {
     return await db('events').insert(event, ['id'])
         .then(eventId => {
@@ -212,7 +212,7 @@ async function createEvent(event) {
         })
 }
 
-// .put('/:event_id') - update event
+// .put('EVENTS/:event_id') - update event
 async function updateEvent(event_id, eventChanges) {
     try {
         const updated_event = await db('events').where({ id: event_id }).update(eventChanges, ['id', 'brand_id', 'venue_id'])
@@ -272,7 +272,7 @@ async function updateEvent(event_id, eventChanges) {
     }
 }
 
-// .put('/businesses/:business_id/events/:event_id')
+// .put('EVENTS/businesses/:business_id/events/:event_id')
 async function removeEventBusiness(event_id, business_id) {
     let eventUpdates = { active_event: false }
     const current_event = await db('events').where({ id: event_id }).select(['venue_id', 'brand_id']).first()
@@ -290,7 +290,7 @@ async function removeEventBusiness(event_id, business_id) {
         .update(eventUpdates, ['events.id as event_id'])
 }
 
-// .delete('/:event_id')
+// .delete('EVENTS/:event_id')
 function removeEvent(event_id) {
     return db('events').where({ id: event_id }).first().del()
 }

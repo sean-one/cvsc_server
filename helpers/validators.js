@@ -62,11 +62,11 @@ const validatePassword = (value) => {
 
     return true
 };
-
+// newBusinessValidator
 const isBusinessNameUnique = async (value) => {
-    const found = await businessDB.checkBusinessName(value)
+    const isDuplicate = await businessDB.checkBusinessNameDuplicate(value)
     
-    if(found !== undefined) {
+    if (isDuplicate) {
         throw new Error('Business name must be unique')
     }
     
@@ -527,6 +527,7 @@ const updateUserValidator = [
         .escape(),
 ]
 
+// .post('BUSINESSES/')
 const newBusinessValidator = [
     check('business_name').trim().not().isEmpty().withMessage('business name is required')
         .isLength({ min: 4, max: 25 }).withMessage('business name must be between 4 and 25 characters')

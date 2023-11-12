@@ -20,7 +20,7 @@ module.exports = {
     checkForRole,
 }
 
-// roleRoute - returns array of roles for a selected business (ACTIVE/INACTIVE)
+// .get('ROLES/businesses/:business_id') - returns array of roles for a selected business (ACTIVE/INACTIVE)
 async function getBusinessRoles(business_id) {
     return db('roles')
         .where({ 'roles.business_id': business_id })
@@ -38,7 +38,7 @@ async function getBusinessRoles(business_id) {
         )
 }
 
-// roleRoute - returns array of ALL roles (active/inactive) for a selected user id
+// .get('ROLES/users/:user_id') - returns array of ALL roles (active/inactive) for a selected user id
 async function getAllUserRoles(user_id) {
     return db('roles')
         .where({ user_id: user_id })
@@ -55,7 +55,7 @@ async function getAllUserRoles(user_id) {
         .orderBy('roles.role_type', 'desc')
 }
 
-// roleRoute - creates a new role request with business and user ids
+// .post('ROLES/businesses/:business_id/role-requests') - creates a new role request with business and user ids
 async function createRoleRequest(business_id, user_id) {
     const created_role = await db('roles')
         .insert({
@@ -78,7 +78,7 @@ async function createRoleRequest(business_id, user_id) {
 
 }
 
-// roleRoute - approves business role request
+// .put('ROLES/:role_id/actions') - approves business role request
 async function approveRoleRequest(request_id, management_id) {
 
     await db('roles')
@@ -102,7 +102,7 @@ async function approveRoleRequest(request_id, management_id) {
         .first()
 }
 
-// roleRoute - upgrade business creator role to business management role 
+// .put('ROLES/:role_id/actions') - upgrade business creator role to business management role 
 async function upgradeCreatorRole(request_id, management_id) {
     await db('roles')
         .where({ id: request_id })
@@ -125,7 +125,7 @@ async function upgradeCreatorRole(request_id, management_id) {
         .first()
 }
 
-// roleRoute - downgrade business manager role to business creator role
+// .put('ROLES/:role_id/actions') - downgrade business manager role to business creator role
 async function downgradeManagerRole(role_id, admin_id) {
     await db('roles')
         .where({ id: role_id })
@@ -148,7 +148,7 @@ async function downgradeManagerRole(role_id, admin_id) {
         .first()
 }
 
-// roleRoute - delete role by user or by manager
+// .delete('ROLES/:role_id') - delete role by user or by manager
 async function deleteRole(role_id) {
     const { business_id, user_id } = await db('roles').where({ id: role_id }).first();
     

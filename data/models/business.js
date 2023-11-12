@@ -7,14 +7,17 @@ module.exports = {
     getAllBusinesses,
     getBusinessById,
     getBusinessManagement,
-    checkBusinessName,
     addBusiness,
     updateBusiness,
     toggleActiveBusiness,
     toggleBusinessRequest,
-    removeBusiness
+    removeBusiness,
+
+
+    checkBusinessNameDuplicate,
 };
 
+// .get('BUSINESSES/)
 function getAllBusinesses() {
     return db('businesses')
         // .where({ active_bus  iness: true })
@@ -42,7 +45,7 @@ function getAllBusinesses() {
         )
 }
 
-// .put('/business/update/:business_id)
+// .put('BUSINESSES/:business_id)
 function getBusinessById(business_id) {
     return db('businesses')
         .where({ 'businesses.id': business_id })
@@ -69,7 +72,7 @@ function getBusinessById(business_id) {
         .first();
 }
 
-// .get('/businesses/management')
+// .get('BUSINESSES/managed')
 async function getBusinessManagement(user_id) {
     try {
         const { business_ids } = await db('roles')
@@ -124,13 +127,6 @@ async function getBusinessManagement(user_id) {
     }
 }
 
-// .post('/business/create') - checks if business name is already in use
-function checkBusinessName(business_name) {
-    return db('businesses')
-        .where(db.raw('LOWER(business_name) ILIKE ?', business_name.toLowerCase()))
-        .select([ 'businesses.id' ])
-        .first()
-}
 
 // .post('/business/create) - creates a new business
 async function addBusiness(business) {
@@ -370,4 +366,15 @@ async function removeBusiness(business_id) {
     } catch (error) {
         throw error
     }
+}
+
+
+//! VALIDATORS
+// isBusinessNameUnique - checks if business name is already in use
+function checkBusinessNameDuplicate(business_name) {
+    return db('businesses')
+        .where(db.raw('LOWER(business_name) ILIKE ?', business_name.toLowerCase()))
+        .select(['businesses.id'])
+        .first()
+        .then(business => !!business)
 }

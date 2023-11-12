@@ -44,46 +44,8 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-// useBusinessManagement - get an array of businesses based on user id with management rights
-router.get('/management', [validToken], async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded
-        const business_management_list = await db.getBusinessManagement(user_id)
-
-        res.status(200).json(business_management_list)
-    } catch (error) {
-        next({
-            status: businessErrors[error.message]?.status,
-            message: businessErrors[error.message]?.message,
-            type: businessErrors[error.message]?.type,
-        })
-    }
-})
-
-// useBusinessQuery - getBusiness - useBusinessApi - VIEW BUSINESS PAGE
-router.get('/:business_id', [ uuidValidation, result ], async (req, res, next) => {
-    try {
-        const { business_id } = req.params;
-        const business = await db.getBusinessById(business_id)
-        
-        if(business === undefined) {
-            throw new Error('business_not_found')
-        }
-
-        res.status(200).json(business);
-
-    } catch (error) {
-        next({
-            status: businessErrors[error.message]?.status,
-            message: businessErrors[error.message]?.message,
-            type: businessErrors[error.message]?.type
-        })
-
-    }
-});
-
 // useCreateBusinessMutation - createBusiness - useBusinessApi - CREATE BUSINESS
-router.post('/', [upload.single('business_avatar'), validToken, newBusinessValidator, validateImageFile, result ], async (req, res, next) => {
+router.post('/', [upload.single('business_avatar'), validToken, newBusinessValidator, validateImageFile, result], async (req, res, next) => {
     let image_key
     try {
         const new_business = {
@@ -112,31 +74,31 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
         // check if business location is attached
         if (new_business.place_id) {
             const geocode = await updatedGoogleMapsClient.geocode({ params: { place_id: new_business.place_id, key: process.env.GEOCODER_API_KEY }, timeout: 1000 })
-            
+
             new_business.formatted_address = geocode.data.results[0].formatted_address
         } else {
             delete new_business.place_id
         }
 
         // if file present resize the image and upload to s3 returning an image key or return error due to missing image
-        if(req.file) {
+        if (req.file) {
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).toBuffer()
             image_key = await uploadImageS3Url(req.file)
             new_business['business_avatar'] = image_key
         } else {
             throw new Error('missing_image')
         }
-        
+
         const created_business = await db.addBusiness(new_business)
-        
+
         res.status(201).json(created_business);
 
     } catch (err) {
         // errors returned from created_business database call - invalid input errors
         if (err.constraint) {
             // error return from database after image creation, remove image from s3
-            if(image_key) { await deleteImageS3(image_key) }
-            
+            if (image_key) { await deleteImageS3(image_key) }
+
             next({
                 status: businessErrors[err.constraint]?.status,
                 message: businessErrors[err.constraint]?.message,
@@ -144,7 +106,7 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
             })
 
         } else {
-            
+
             next({
                 status: businessErrors[err.message]?.status,
                 message: businessErrors[err.message]?.message,
@@ -155,12 +117,50 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
     }
 })
 
+// useBusinessManagement - get an array of businesses based on user id with management rights
+router.get('/managed', [validToken], async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+        const business_management_list = await db.getBusinessManagement(user_id)
+
+        res.status(200).json(business_management_list)
+    } catch (error) {
+        next({
+            status: businessErrors[error.message]?.status,
+            message: businessErrors[error.message]?.message,
+            type: businessErrors[error.message]?.type,
+        })
+    }
+})
+
+// useBusinessQuery - getBusiness - useBusinessApi - VIEW BUSINESS PAGE
+router.get('/:business_id', [uuidValidation, result], async (req, res, next) => {
+    try {
+        const { business_id } = req.params;
+        const business = await db.getBusinessById(business_id)
+
+        if (business === undefined) {
+            throw new Error('business_not_found')
+        }
+
+        res.status(200).json(business);
+
+    } catch (error) {
+        next({
+            status: businessErrors[error.message]?.status,
+            message: businessErrors[error.message]?.message,
+            type: businessErrors[error.message]?.type
+        })
+
+    }
+});
+
 // useBusinessToggle - business.admin.view toggle active & toggle request
-router.put('/:business_id/toggle', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
+router.put('/:business_id/status/toggle', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
     try {
         const { business_id } = req.params;
         const { toggleType } = req.body;
-    
+
         if (toggleType === 'active') {
             const updatedBusiness = await db.toggleActiveBusiness(business_id)
             res.status(201).json(updatedBusiness)
@@ -174,7 +174,7 @@ router.put('/:business_id/toggle', [validToken, validateBusinessAdmin, result], 
         else {
             throw new Error('invalid_toggle_type')
         }
-        
+
     } catch (error) {
         next({
             status: businessErrors[error.message]?.status,
@@ -184,13 +184,15 @@ router.put('/:business_id/toggle', [validToken, validateBusinessAdmin, result], 
     }
 })
 
+// router.put('/:business_id/transfer')
+
 // useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
 router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;
         const current_business = await db.findBusinessById(business_id)
-        
+
         // if only the image is being updated this object will be empty
         function createUpdateObject(originalObject, keysToInclude) {
             const update_details = {};
@@ -220,33 +222,33 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
         const business_update = createUpdateObject(req.body, fieldsToInclude);
 
         // if attempting to change from business type other then brand, an address must be attached or already on the business
-        if(business_update?.business_type !== 'brand' && (!current_business?.place_id && !business_update?.place_id)) {
+        if (business_update?.business_type !== 'brand' && (!current_business?.place_id && !business_update?.place_id)) {
             throw new Error('business_address_required')
         }
-        
+
         // if there is an image to update resize, save and delete previous
-        if(req.file && req.business_role === process.env.ADMIN_ACCOUNT) {
+        if (req.file && req.business_role === process.env.ADMIN_ACCOUNT) {
             // get current image for delete
             const { business_avatar } = await db.findBusinessById(business_id)
             // resize the image
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).toBuffer()
-            
+
             // upload the image to s3
             const image_key = await uploadImageS3Url(req.file)
-            
-            if(!check_link.test(business_avatar)) {
+
+            if (!check_link.test(business_avatar)) {
                 await deleteImageS3(business_avatar)
             }
-            
+
             business_update['business_avatar'] = image_key
         }
 
         const updated_business = await db.updateBusiness(business_id, business_update, req.user_decoded)
-        
+
         res.status(201).json(updated_business)
-        
+
     } catch (error) {
-        if(error.constraint) {
+        if (error.constraint) {
             next({
                 status: businessErrors[error.constraint]?.status,
                 message: businessErrors[error.constraint]?.message,
@@ -269,9 +271,9 @@ router.delete('/:business_id', [validToken, validateBusinessAdmin, result], asyn
     try {
         const { business_id } = req.params;
         const deleted_business = await db.removeBusiness(business_id)
-        
+
         if (deleted_business >= 1) {
-            
+
             res.status(204).json(deleted_business);
 
         } else {
@@ -284,17 +286,18 @@ router.delete('/:business_id', [validToken, validateBusinessAdmin, result], asyn
         }
 
     } catch (error) {
-        
+
         console.log(error)
         if (error.errors) {
-            
+
             res.status(400).json({ message: 'bad request', path: error.path, error: `${error.params.path} failed validation` });
 
         } else {
-            
+
             next(error)
         }
     }
 })
+
 
 module.exports = router;
