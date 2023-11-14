@@ -127,7 +127,6 @@ async function getBusinessManagement(user_id) {
     }
 }
 
-
 // .post('/business/create) - creates a new business
 async function addBusiness(business) {
     try {
