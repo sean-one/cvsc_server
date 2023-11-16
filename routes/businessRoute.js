@@ -248,6 +248,7 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
         res.status(201).json(updated_business)
 
     } catch (error) {
+        console.log(error)
         if (error.constraint) {
             next({
                 status: businessErrors[error.constraint]?.status,

@@ -72,10 +72,15 @@ const isBusinessNameUnique = async (value) => {
     
     return true
 };
-
+// updateBusinessValidator
 const isBusinessAdmin = async (value, { req }) => {
-    if(req.business_role !== process.env.ADMIN_ACCOUNT && value) {
-        throw new Error('invalid business role rights')
+    const { business_id } = req.params;
+    const user_id = req.user_decoded;
+    
+    const isAdminRole = rolesDB.validateBusinessAdmin(business_id, user_id)
+
+    if (!isAdminRole) {
+        throw new Error('you do not have permission to make these change')
     }
     return true
 }
@@ -225,6 +230,9 @@ const validateImageFile = async (req, res, next) => {
 };
 
 const validateImageAdmin = async (req, res, next) => {
+    const { business_id } = req.params;
+    const user_id = req.user_decoded;
+    
     const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
     if(!req.file) { next() }
 
@@ -413,23 +421,14 @@ const validateBusinessManagement = async (req, res, next) => {
     
     const businessRole = await rolesDB.getUserBusinessRole(business_id, user_id)
 
-    if(businessRole === undefined) {
+    if (businessRole === undefined || businessRole.active_role === false || businessRole.role_type < process.env.MANAGER_ACCOUNT) {
         return next({
-            status: 404,
-            message: 'business role not found',
-            type: 'server'
+            status: 403,
+            message: 'invalid role rights',
+            type: 'credentials'
         })
     } else {
-        if ((businessRole.active_role === false) || (businessRole.role_type < process.env.MANAGER_ACCOUNT)) {
-            return next({
-                status: 403,
-                message: 'invalid role rights',
-                type: 'credentials'
-            })
-        } else {
-            req.business_role = businessRole.role_type
-            next()
-        }
+        next()
     }
 }
 
