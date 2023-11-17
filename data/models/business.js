@@ -191,9 +191,9 @@ async function updateBusiness(business_id, changes, user_id) {
         const { role_type } = await db('roles').where({ business_id: business_id, user_id: user_id }).first()
         const { place_id } = await db('businesses').where({ id: business_id }).first()
         
-        
+        console.log(`current place_id: ${place_id}`)
         if(role_type === process.env.ADMIN_ACCOUNT) {
-            if(changes?.business_type && changes?.business_type === 'venue' || changes?.business_type === 'both' && (!changes?.place_id && !place_id)) {
+            if(changes?.business_type && (changes?.business_type === 'venue' || changes?.business_type === 'both') && (!!changes?.place_id && !!place_id)) {
                 throw new Error('missing_location')
             }
             

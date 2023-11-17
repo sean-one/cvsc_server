@@ -77,10 +77,10 @@ const isBusinessAdmin = async (value, { req }) => {
     const { business_id } = req.params;
     const user_id = req.user_decoded;
     
-    const isAdminRole = rolesDB.validateBusinessAdmin(business_id, user_id)
+    const isAdminRole = await rolesDB.validateBusinessAdmin(business_id, user_id)
 
     if (!isAdminRole) {
-        throw new Error('you do not have permission to make these change')
+        throw new Error('invalid permissions to make attempted changes')
     }
     return true
 }
@@ -228,34 +228,6 @@ const validateImageFile = async (req, res, next) => {
     }
 
 };
-
-const validateImageAdmin = async (req, res, next) => {
-    const { business_id } = req.params;
-    const user_id = req.user_decoded;
-    
-    const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
-    if(!req.file) { next() }
-
-    else if(req.file && req.business_role !== process.env.ADMIN_ACCOUNT) {
-        next({
-            status: 403,
-            message: 'invalid business role rights',
-            type: 'credentials'
-        })
-    }
-
-    else {
-        const fileExtension = req.file?.mimetype.split('/')[1];
-        if(!exceptedFileTypes.includes(fileExtension)) {
-            next({
-                status: 400,
-                message: 'only .png, .jpg, .jpeg & .webp file types',
-                type: 'credentials'
-            })
-        }
-        next()
-    }
-}
 
 const validateBusinessAdmin = async (req, res, next) => {
     const user_id = req.user_decoded
@@ -553,7 +525,7 @@ const newBusinessValidator = [
         .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )'),
     check('business_website').trim().optional().isURL(),
 ]
-
+// put('BUSINESSES/:business_id)
 const updateBusinessValidator = [
     check('business_description').trim().optional(),
     check('business_type').trim().optional()
@@ -640,7 +612,6 @@ module.exports = {
     registerUserValidator,
     formatValidationCheck,
     validateImageFile,
-    validateImageAdmin,
     validateBusinessAdmin,
     validateRoleRequest,
     validateRoleDelete,

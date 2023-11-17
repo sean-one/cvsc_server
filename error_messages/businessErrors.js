@@ -35,7 +35,8 @@ const businessErrors = {
     // .put('/update/:business_id')
     business_address_required: {
         status: 400,
-        message: 'business must have a valid address'
+        message: 'business type must have a valid address',
+        type: 'formatted_address'
     },
     // .post('/create')
     missing_image: {

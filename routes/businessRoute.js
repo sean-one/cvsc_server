@@ -14,7 +14,6 @@ const {
     formatValidationCheck,
     newBusinessValidator,
     updateBusinessValidator,
-    validateImageAdmin,
     validateImageFile,
     validateBusinessManagement,
     validateBusinessAdmin,
@@ -187,11 +186,11 @@ router.put('/:business_id/status/toggle', [validToken, validateBusinessAdmin, re
 // router.put('/:business_id/transfer')
 
 // useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
-router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, updateBusinessValidator, validateImageAdmin, result], async (req, res, next) => {
+router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, updateBusinessValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;
-        const current_business = await db.findBusinessById(business_id)
+        const current_business = await db.getBusinessById(business_id)
 
         // if only the image is being updated this object will be empty
         function createUpdateObject(originalObject, keysToInclude) {

@@ -176,6 +176,7 @@ async function getUserBusinessRoles(user_id) {
 
 
 //! VALIDATION FUNCTIONS
+// isBusinessAdmin - return TRUE/FALSE based on user business role
 async function validateBusinessAdmin(business_id, user_id) {
     return await db('roles')
         .where({ business_id: business_id, user_id: user_id, active_role: true, role_type: process.env.ADMIN_ACCOUNT })
