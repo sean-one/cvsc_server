@@ -15,6 +15,25 @@ const {
 
 const router = express.Router();
 
+// useRolesApi - useUserBusinessRole
+router.get('/businesses/:business_id/user-role', [validToken, uuidValidation, formatValidationCheck], async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded;
+        const { business_id } = req.params;
+    
+        const user_business_role = await db.getUserBusinessRole(business_id, user_id)
+        
+        res.status(200).json(user_business_role)
+    } catch (error) {
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
+        
+    }
+})
+
 // useRolesApi - useBusinessRolesQuery
 router.get('/businesses/:business_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
     try {

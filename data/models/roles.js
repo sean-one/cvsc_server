@@ -208,7 +208,7 @@ async function getRoleById(role_id) {
         .first()
 }
 
-// validators.js - validateBusinessManagement, validateRoleDelete
+// validators.js - validateBusinessManagement, validateRoleDelete - ONLY ACTIVE ROLE
 function getUserBusinessRole(business_id, user_id) {
     return db('roles')
         .where({ user_id: user_id, business_id: business_id, active_role: true })
