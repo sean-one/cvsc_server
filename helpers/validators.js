@@ -276,22 +276,14 @@ const validateRoleRequest = async (req, res, next) => {
     const { business_id } = req.params
     const user_id = req.user_decoded
     
-    // validate that business_id is actual business
-    const requestedBusiness = await businessDB.findBusinessById(business_id)
-    if(!requestedBusiness) {
+    // validate the business_request_open is true
+    const isAcceptingRequest = await businessDB.validateBusinessRequestOpen(business_id)
+
+    if (!isAcceptingRequest) {
         next({
             status: 404,
-            message: 'business not found',
-            type: 'credentials'
-        })
-    }
-    
-    // validate the business_request_open is true
-    if(!requestedBusiness.business_request_open) {
-        next({
-            status: 403,
-            message: 'business request closed',
-            type: 'credentials'
+            message: 'business not found or business request is closed',
+            type: 'server'
         })
     }
     

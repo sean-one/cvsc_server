@@ -15,6 +15,7 @@ module.exports = {
 
 
     checkBusinessNameDuplicate,
+    validateBusinessRequestOpen,
 };
 
 // .get('BUSINESSES/)
@@ -373,6 +374,14 @@ async function removeBusiness(business_id) {
 function checkBusinessNameDuplicate(business_name) {
     return db('businesses')
         .where(db.raw('LOWER(business_name) ILIKE ?', business_name.toLowerCase()))
+        .select(['businesses.id'])
+        .first()
+        .then(business => !!business)
+}
+// validateRoleRequest - check that business request open is set to true
+function validateBusinessRequestOpen(business_id) {
+    return db('businesses')
+        .where({ id: business_id, business_request_open: true })
         .select(['businesses.id'])
         .first()
         .then(business => !!business)
