@@ -1,4 +1,10 @@
 const roleErrors = {
+    // .get('ROLES/businesses/:business_id/user-role) - if no role is found
+    role_not_found: {
+        status: 404,
+        message: 'user business role not found',
+        type: 'server'
+    },
     roles_user_id_business_id_unique: {
         status: 400,
         message: 'request already pending',

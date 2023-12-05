@@ -22,6 +22,10 @@ router.get('/businesses/:business_id/user-role', [validToken, uuidValidation, fo
         const { business_id } = req.params;
     
         const user_business_role = await db.getUserBusinessRole(business_id, user_id)
+
+        if (user_business_role === undefined) {
+            throw new Error('role_not_found')
+        }
         
         res.status(200).json(user_business_role)
     } catch (error) {
