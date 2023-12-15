@@ -155,7 +155,7 @@ router.get('/:business_id', [uuidValidation, result], async (req, res, next) => 
 });
 
 // useBusinessToggle - business.admin.view toggle active & toggle request
-router.put('/:business_id/status/toggle', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
+router.put('/:business_id/status/toggle', [validToken, uuidValidation, formatValidationCheck, validateBusinessAdmin, result], async (req, res, next) => {
     try {
         const { business_id } = req.params;
         const { toggleType } = req.body;

@@ -228,42 +228,24 @@ const validateImageFile = async (req, res, next) => {
     }
 
 };
-
+// .put('BUSINESSES/:business_id/status/toggle)
 const validateBusinessAdmin = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params
 
-    // validate that user_id is a uuid
-    if(!uuidPattern.test(user_id)){
-        next({
-            status: 400,
-            message: 'invalid user',
-            type: 'credentials'
-        })
-    }
-
-    // validate that business_id is a uuid
-    if(!uuidPattern.test(business_id)) {
-        next({
-            status: 400,
-            message: 'invalid business identifier',
-            type: 'credentials'
-        })
-    }
-
-    const currentBusiness = await businessDB.findBusinessById(business_id)
+    const currentBusiness = await businessDB.getBusinessById(business_id)
     if(currentBusiness === undefined) {
         next({
             status: 404,
             message: 'business not found',
-            type: 'credentials'
+            type: 'server'
         })
     } else {
         if(currentBusiness.business_admin !== user_id) {
             next({
                 status: 403,
-                message: 'invalid role rights',
-                type: 'credentials',
+                message: 'must have business admin role',
+                type: 'server',
             })
         } else {
             next()
