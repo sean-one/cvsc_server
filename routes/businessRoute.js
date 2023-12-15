@@ -220,6 +220,10 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
 
         const business_update = createUpdateObject(req.body, fieldsToInclude);
 
+        if (Object.keys(business_update).length === 0) {
+            throw new Error('no_changes')
+        }
+        
         // if attempting to change from business type other then brand, an address must be attached or already on the business
         if (business_update?.business_type !== 'brand' && (!current_business?.place_id && !business_update?.place_id)) {
             throw new Error('business_address_required')

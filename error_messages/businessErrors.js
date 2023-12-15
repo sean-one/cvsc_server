@@ -1,9 +1,15 @@
 const businessErrors = {
-    // if business not found at get('single/:business_id)
+    // if business not found at get('/:business_id)
     business_not_found: {
         status: 404,
         message: 'Unable to find business.',
         type: 'business_error'
+    },
+    // if no changes are found at .put('/:business_id')
+    no_changes: {
+        status: 400,
+        message: 'no updates or changes made',
+        type: 'server'
     },
     // getBusinessManagement
     string_to_uuid: {
