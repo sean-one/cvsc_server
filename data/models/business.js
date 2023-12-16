@@ -1,6 +1,4 @@
 const db = require('../dbConfig');
-// const googleMapsClient = require('../../helpers/geocoder');
-// const { Client } = require('@googlemaps/google-maps-services-js');
 const { deleteImageS3 } = require('../../s3');
 
 module.exports = {
@@ -187,44 +185,53 @@ async function addBusiness(business) {
 }
 
 // .put('/business/update/:business_id) - updates existing business
-async function updateBusiness(business_id, changes, user_id) {
+async function updateBusiness(business_id, changes) {
     try {
-        const { role_type } = await db('roles').where({ business_id: business_id, user_id: user_id }).first()
-        const { place_id } = await db('businesses').where({ id: business_id }).first()
-        
-        console.log(`current place_id: ${place_id}`)
-        if(role_type === process.env.ADMIN_ACCOUNT) {
-            if(changes?.business_type && (changes?.business_type === 'venue' || changes?.business_type === 'both') && (!!changes?.place_id && !!place_id)) {
-                throw new Error('missing_location')
+        return await db.transaction(async trx => {
+            
+            // remove business from any events listed as 'dispensary'
+            if (changes?.business_type === 'brand') {
+                console.log('updating events with business as dispensary')
+                await db('events')
+                .transacting(trx)
+                .where({ venue_id: business_id})
+                .update({ venue_id: null, active_event: false })
             }
             
-        }
-        
-        if(Object.keys(changes).length > 0) {
-            await db('businesses').where({ id: business_id }).update(changes)
-        }
+            // remove business from any events listed as 'brand'
+            if (changes?.business_type === 'venue') {
+                console.log('updating events with business as brand')
+                await db('events')
+                    .transacting(trx)
+                    .where({ brand_id: business_id })
+                    .update({ brand_id: null, active_event: false })
+            }
 
-        return db('businesses')
-            .where({ 'businesses.id': business_id})
-            .select([
-                'businesses.id',
-                'businesses.business_name',
-                'businesses.formatted_address',
-                'businesses.place_id',
-                'businesses.business_avatar',
-                'businesses.business_description',
-                'businesses.business_type',
-                'businesses.business_request_open',
-                'businesses.active_business',
-                'businesses.business_admin',
-                'businesses.business_email',
-                'businesses.business_phone',
-                'businesses.business_instagram',
-                'businesses.business_facebook',
-                'businesses.business_website',
-                'businesses.business_twitter',
-            ])
-            .first()
+            await db('businesses').transacting(trx).where({ id: business_id }).update(changes)
+        
+            return db('businesses')
+                .transacting(trx)
+                .where({ 'businesses.id': business_id})
+                .select([
+                    'businesses.id',
+                    'businesses.business_name',
+                    'businesses.formatted_address',
+                    'businesses.place_id',
+                    'businesses.business_avatar',
+                    'businesses.business_description',
+                    'businesses.business_type',
+                    'businesses.business_request_open',
+                    'businesses.active_business',
+                    'businesses.business_admin',
+                    'businesses.business_email',
+                    'businesses.business_phone',
+                    'businesses.business_instagram',
+                    'businesses.business_facebook',
+                    'businesses.business_website',
+                    'businesses.business_twitter',
+                ])
+                .first()
+        })
     } catch (error) {
         throw error
     }

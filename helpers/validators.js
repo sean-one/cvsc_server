@@ -5,7 +5,7 @@ const eventsDB = require('../data/models/event');
 const rolesDB = require('../data/models/roles');
 
 // CUSTOM REGEX PATTERNS
-const googlePlaceIdFormat = /^[\w-]+$/;
+const googlePlaceIdFormat = /^[A-Za-z0-9_\-+\.]{20,}$/;
 const phonePattern = /^\d{10}$/;
 const instagramPattern = /^[a-zA-Z0-9._]{1,30}$/;
 const twitterPattern = /^[a-zA-Z0-9_]{1,15}$/;

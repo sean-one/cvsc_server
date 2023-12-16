@@ -218,40 +218,64 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
             'business_website'
         ];
 
+        // removes any unknown fields
         const business_update = createUpdateObject(req.body, fieldsToInclude);
-
-        if (Object.keys(business_update).length === 0) {
-            throw new Error('no_changes')
-        }
         
+        // if place_id is present validate it with google
+        if (business_update?.place_id) {
+            try {
+                const geocode = await updatedGoogleMapsClient.geocode({
+                    params: { place_id: business_update.place_id, key: process.env.GEOCODER_API_KEY },
+                    timeout: 1000
+                })
+
+                business_update.formatted_address = geocode.data.results[0].formatted_address
+            } catch (error) {
+                if (error?.response?.status === 400) {
+                    throw new Error('invalid_place_id')
+                }
+
+                if (error?.response?.status === 403) {
+                    throw new Error('geocode_error')
+                }
+            }
+        }
+
         // if attempting to change from business type other then brand, an address must be attached or already on the business
-        if (business_update?.business_type !== 'brand' && (!current_business?.place_id && !business_update?.place_id)) {
-            throw new Error('business_address_required')
+        if (business_update?.business_type) { // Check if business_type is being updated
+            if (((business_update?.business_type === 'venue') || (business_update?.business_type === 'both')) && (!current_business?.place_id && !business_update?.place_id)) {
+                throw new Error('business_address_required');
+            }
         }
 
         // if there is an image to update resize, save and delete previous
-        if (req.file && req.business_role === process.env.ADMIN_ACCOUNT) {
-            // get current image for delete
-            const { business_avatar } = await db.findBusinessById(business_id)
+        if (req.file) {
             // resize the image
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).toBuffer()
 
             // upload the image to s3
             const image_key = await uploadImageS3Url(req.file)
 
-            if (!check_link.test(business_avatar)) {
-                await deleteImageS3(business_avatar)
+            // check the current_business.business_avatar to see if it is saved on the s3 bucket
+            // if it is delete it from the s3 bucket
+            if (!check_link.test(current_business?.business_avatar)) {
+                await deleteImageS3(current_business?.business_avatar)
             }
 
+            // update business_update with image_key from s3 image upload
             business_update['business_avatar'] = image_key
         }
 
-        const updated_business = await db.updateBusiness(business_id, business_update, req.user_decoded)
+        // if there are no changes in the update there is no need to hit the database
+        if (Object.keys(business_update).length === 0) {
+            throw new Error('no_changes')
+        }
+
+        const updated_business = await db.updateBusiness(business_id, business_update)
 
         res.status(201).json(updated_business)
 
     } catch (error) {
-        console.log(error)
         if (error.constraint) {
             next({
                 status: businessErrors[error.constraint]?.status,

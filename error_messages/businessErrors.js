@@ -11,6 +11,18 @@ const businessErrors = {
         message: 'no updates or changes made',
         type: 'server'
     },
+    // if there is an error with geocode place_id request
+    invalid_place_id: {
+        status: 400,
+        message: 'Invalid request, invalid place_id parameter',
+        type: 'server'
+    },
+    // if there is an error geocode api key
+    geocode_error: {
+        status: 403,
+        message: 'provided api key is invalid',
+        type: 'server'
+    },
     // getBusinessManagement
     string_to_uuid: {
         status: 400,
