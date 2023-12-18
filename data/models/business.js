@@ -339,22 +339,28 @@ async function removeBusiness(business_id) {
             .where({ id: business_id })
             .select([ 'businesses.business_avatar' ])
             .first()
-
+        
         const deleted_business = await db.transaction(async trx => {
             
+            // remove business as venue from events
             await db('events')
                 .transacting(trx)
                 .where({ venue_id: business_id })
-                .orWhere({ brand_id: business_id })
-                .update({ active_event: false })
-
-            // delete all from roles
+                .update({ venue_id: null, active_event: false })
+            
+            // remove business as brand from events
+            await db('events')
+                .transacting(trx)
+                .where({ brand_id: business_id })
+                .update({ brand_id: null, active_event: false })
+            
+            // remove all business roles
             await db('roles')
                 .transacting(trx)
                 .where({ business_id: business_id})
                 .del()
             
-            // delete from the businesses table
+            // delete businesses
             return await db('businesses')
                 .transacting(trx)
                 .where({ id: business_id })
@@ -362,8 +368,8 @@ async function removeBusiness(business_id) {
 
         })
 
-        if(deleted_business >= 1) {
-            if(!check_link.test(business_avatar) && business_avatar !== null) {
+        if (deleted_business >= 1) {
+            if (!check_link.test(business_avatar) && business_avatar !== null) {
                 await deleteImageS3(business_avatar)
             }
         }

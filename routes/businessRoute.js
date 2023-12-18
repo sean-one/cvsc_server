@@ -184,6 +184,7 @@ router.put('/:business_id/status/toggle', [validToken, uuidValidation, formatVal
 });
 
 // router.put('/:business_id/transfer')
+// router.put('/:business_id/address/remove')
 
 // useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
 router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, updateBusinessValidator, validateImageFile, result], async (req, res, next) => {

@@ -36,6 +36,7 @@ const isUsernameValid = (value) => {
 
     return true;
 };
+
 // registerUserValidator
 const isUsernameUnique = async (value) => {
     const found = await userDB.checkUsernameDuplicate(value)
@@ -46,6 +47,7 @@ const isUsernameUnique = async (value) => {
     
     return true
 };
+
 // loginUserValidator, registerUserValidator
 const validatePassword = (value) => {
     if(value.length < 8) {
@@ -62,6 +64,7 @@ const validatePassword = (value) => {
 
     return true
 };
+
 // newBusinessValidator
 const isBusinessNameUnique = async (value) => {
     const isDuplicate = await businessDB.checkBusinessNameDuplicate(value)
@@ -72,6 +75,7 @@ const isBusinessNameUnique = async (value) => {
     
     return true
 };
+
 // updateBusinessValidator
 const isBusinessAdmin = async (value, { req }) => {
     const { business_id } = req.params;
@@ -208,6 +212,7 @@ const formatValidationCheck = async(req, res, next) => {
 
     next();
 }
+
 // .post('/register')
 const validateImageFile = async (req, res, next) => {
     const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
@@ -228,6 +233,7 @@ const validateImageFile = async (req, res, next) => {
     }
 
 };
+
 // .put('BUSINESSES/:business_id/status/toggle)
 const validateBusinessAdmin = async (req, res, next) => {
     const user_id = req.user_decoded
@@ -427,7 +433,6 @@ const validateEventBusinessRoles = async (req, res, next) => {
         })
     }
 }
-
 
 // .post('/register')
 const registerUserValidator = [
