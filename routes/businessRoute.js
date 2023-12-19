@@ -301,30 +301,17 @@ router.delete('/:business_id', [validToken, validateBusinessAdmin, result], asyn
         const { business_id } = req.params;
         const deleted_business = await db.removeBusiness(business_id)
 
-        if (deleted_business >= 1) {
-
+        if (deleted_business) {
             res.status(204).json(deleted_business);
-
         } else {
-
-            const error = new Error('invalid id')
-            error.message = 'not found';
-            error.status = 404;
-            throw error;
-
+            throw new Error('delete_failed');
         }
-
     } catch (error) {
-
-        console.log(error)
-        if (error.errors) {
-
-            res.status(400).json({ message: 'bad request', path: error.path, error: `${error.params.path} failed validation` });
-
-        } else {
-
-            next(error)
-        }
+        next({
+            status: businessErrors[error.message]?.status,
+            message: businessErrors[error.message]?.message,
+            type: businessErrors[error.message]?.type,
+        })
     }
 });
 

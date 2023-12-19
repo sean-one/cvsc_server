@@ -84,6 +84,12 @@ const businessErrors = {
         status: 400,
         message: 'invalid toggle type request',
         type: 'server'
+    },
+    // .delete('/:business_id')
+    delete_failed: {
+        status: 400,
+        message: 'business delete failed',
+        type: 'server'
     }
 }
 
