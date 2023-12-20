@@ -321,7 +321,6 @@ async function removeBusinessByType(business_id, business_type) {
 }
 
 
-
 //! VALIDATION HELPERS - validators.js
 // isEventNameUnique
 async function checkEventName(eventname) {

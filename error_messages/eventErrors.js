@@ -29,6 +29,12 @@ const eventErrors = {
         message: 'user not found',
         type: 'server'
     },
+    // .get('EVENTS/user/:user_id')
+    invalid_user: {
+        status: 400,
+        message: 'invalid matching user request',
+        type: 'server'
+    },
     // event model - createEvent, updateEvent
     invalid_time_format: {
         // invalid formatting of time on insert
