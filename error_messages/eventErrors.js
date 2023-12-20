@@ -1,8 +1,8 @@
 const eventErrors = {
-    //! event delete route
+    // .get('EVENTS/:event_id'), .delete('EVENTS/:event_id')
     event_not_found: {
         status: 404,
-        message: 'event not found',
+        message: 'unable to find event by event id',
         type: 'server'
     },
     // event model - createEvent, updateEvent
