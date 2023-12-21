@@ -298,7 +298,7 @@ const validateRoleDelete = async (req, res, next) => {
     if (!role_user_id) {
         return next({
             status: 404,
-            message: 'role not found',
+            message: 'unable to find role by identifier',
             type: 'server'
         })
     }

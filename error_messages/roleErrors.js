@@ -5,6 +5,12 @@ const roleErrors = {
         message: 'user business role not found',
         type: 'server'
     },
+    // .get('ROLES/users/:user_id') - user_id in url param does not match user id in token
+    invalid_user: {
+        status: 400,
+        message: 'invalid matching user request',
+        type: 'server'
+    },
     roles_user_id_business_id_unique: {
         status: 400,
         message: 'request already pending',

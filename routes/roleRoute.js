@@ -59,7 +59,9 @@ router.get('/businesses/:business_id', [validToken, uuidValidation, formatValida
 // useRolesApi - useUserRolesQuery
 router.get('/users/:user_id', [validToken], async (req, res, next) => {
     try {
-        const user_id = req.user_decoded
+        const { user_id } = req.params
+
+        if (req.user_decoded !== user_id) { throw new Error('invalid_user') }
 
         const user_roles = await db.getAllUserRoles(user_id)
 

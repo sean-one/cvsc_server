@@ -29,7 +29,7 @@ const eventErrors = {
         message: 'user not found',
         type: 'server'
     },
-    // .get('EVENTS/user/:user_id')
+    // .get('EVENTS/user/:user_id') - user_id in url param does not match user id in token
     invalid_user: {
         status: 400,
         message: 'invalid matching user request',
