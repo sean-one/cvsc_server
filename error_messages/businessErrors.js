@@ -23,19 +23,19 @@ const businessErrors = {
         message: 'provided api key is invalid',
         type: 'server'
     },
-    // getBusinessManagement
+    // .get('/managed') - user id invalid format
     string_to_uuid: {
         status: 400,
         message: 'invalid user id credentials',
         type: 'server'
     },
-    // getBusinessManagement
+    // .get('/managed') - no roles with manager or admin
     non_manager: {
         status: 404,
         message: 'no managing businesses found',
         type: 'server'
     },
-    // getBusinessManagement
+    // .get('/managed') - fallback for server error
     server_error: {
         status: 500,
         message: 'server error',
