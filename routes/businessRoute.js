@@ -295,7 +295,7 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
     }
 });
 
-//! useRemoveBusinessMutation - removeBusiness - useBusinessApi - DELETE BUSINESS
+// useRemoveBusinessMutation - removeBusiness - useBusinessApi - DELETE BUSINESS
 router.delete('/:business_id', [validToken, validateBusinessAdmin, result], async (req, res, next) => {
     try {
         const { business_id } = req.params;
