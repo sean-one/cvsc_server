@@ -308,12 +308,14 @@ const validateRoleDelete = async (req, res, next) => {
         next()
     } else {
         const requestUserRole = await rolesDB.getUserBusinessRole(business_id, user_id)
-        console.log(requestUserRole)
+        
         if (requestUserRole !== undefined && role_role_type < requestUserRole.role_type) {
+            
             next()
         } else {
+            
             return next({
-                status: 403,
+                status: 400,
                 message: 'invalid role permissions',
                 type: 'server'
             })
@@ -341,11 +343,21 @@ const validateRoleAction = async (req, res, next) => {
     if (!business_id) {
         return next({
             status: 404,
-            message: 'role not found',
+            message: 'unable to find role by identifier',
+            type: 'server'
+        })
+    }
+    // if role is valid and business_id exist check active_business
+    const { active_business } = await businessDB.getBusinessById(business_id)
+    if (active_business === undefined || !active_business) {
+        return next({
+            status: 400,
+            message: 'action failed - business status is inactive',
             type: 'server'
         })
     }
     
+    // validate role management
     const isBusinessAdmin = await rolesDB.validateBusinessAdmin(business_id, user_id)
     const isBusinessManager = await rolesDB.validateBusinessManagement(business_id, user_id)
 
@@ -359,7 +371,7 @@ const validateRoleAction = async (req, res, next) => {
 
     else {
         return next({
-            status: 403,
+            status: 400,
             message: 'invalid business permissions',
             type: 'server'
         })
