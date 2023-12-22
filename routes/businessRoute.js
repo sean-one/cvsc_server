@@ -162,12 +162,12 @@ router.put('/:business_id/status/toggle', [validToken, uuidValidation, formatVal
 
         if (toggleType === 'active') {
             const updatedBusiness = await db.toggleActiveBusiness(business_id)
-            res.status(201).json(updatedBusiness)
+            res.status(201).json({ ...updatedBusiness, toggleType: toggleType })
         }
 
         else if (toggleType === 'request') {
             const updatedBusiness = await db.toggleBusinessRequest(business_id)
-            res.status(201).json(updatedBusiness)
+            res.status(201).json({ ...updatedBusiness, toggleType: toggleType })
         }
 
         else {
