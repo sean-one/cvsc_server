@@ -150,11 +150,33 @@ async function downgradeManagerRole(role_id, admin_id) {
 
 // .delete('ROLES/:role_id') - delete role by user or by manager
 async function deleteRole(role_id) {
-    const { business_id, user_id } = await db('roles').where({ id: role_id }).first();
-    
-    await db('roles').where({ id: role_id }).del()
+    try {
+        return await db.transaction(async trx => {
+            const { business_id, user_id } = await db('roles')
+                .transacting(trx)    
+                .where({ id: role_id })
+                .first();
+            
+            await db('events')
+                .transacting(trx)
+                .where({ created_by: user_id, brand_id: business_id })
+                .update({ brand_id: null, active_event: false })
+            
+            await db('events')
+                .transacting(trx)
+                .where({ created_by: user_id, venue_id: business_id })
+                .update({ venue_id: null, active_event: false })
 
-    return { business_id, user_id }
+            await db('roles')
+                .transacting(trx)
+                .where({ id: role_id })
+                .del()
+        
+            return { business_id, user_id }
+        })
+    } catch (error) {
+        throw error
+    }
 }
 
 
