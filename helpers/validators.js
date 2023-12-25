@@ -89,6 +89,7 @@ const isBusinessAdmin = async (value, { req }) => {
     return true
 }
 
+// newEventValidator
 const isEventNameUnique = async (value) => {
     const found = await eventsDB.checkEventName(value)
     
@@ -99,6 +100,7 @@ const isEventNameUnique = async (value) => {
     return true
 }
 
+// newEventValidator
 function isValidDate(value) {
     // date pater should be yyyy-m-d
     const datePattern = /^\d{4}-\d{1,2}-\d{1,2}$/;
@@ -142,6 +144,7 @@ function isValidDate(value) {
     return true
 }
 
+// newEventValidator
 function isValidTime(value) {
     const timePattern = /^\d{4}$/;
     
@@ -439,9 +442,9 @@ const validateEventBusinessRoles = async (req, res, next) => {
         next()
     } else {
         next({
-            status: 403,
+            status: 400,
             message: 'must have creator permission for at least one business',
-            type: 'role_rights'
+            type: 'server'
         })
     }
 }
@@ -543,7 +546,7 @@ const updateBusinessValidator = [
         .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )'),
     check('business_website').trim().optional().isURL(),
 ]
-
+// .post('EVENTS/')
 const newEventValidator = [
     check('eventname').trim().not().isEmpty().withMessage('eventname is required')
         .isLength({ min: 4, max: 50}).withMessage('event name at least 4 characters, no more then 50')
