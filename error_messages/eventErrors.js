@@ -11,24 +11,6 @@ const eventErrors = {
         message: 'eventname already exist',
         type: 'eventname'
     },
-    //! constrain error from event model
-    events_venue_id_foreign: {
-        status: 404,
-        message: 'venue not found',
-        type: 'venue_id'
-    },
-    //! constrain error from event model
-    events_brand_id_foreign: {
-        status: 404,
-        message: 'brand not found',
-        type: 'brand_id'
-    },
-    //! constrain error from event model
-    events_created_by_foreign: {
-        status: 404,
-        message: 'user not found',
-        type: 'server'
-    },
     // .get('EVENTS/user/:user_id') - user_id in url param does not match user id in token
     invalid_user: {
         status: 400,
@@ -60,17 +42,35 @@ const eventErrors = {
         message: 'unauthorized admin',
         type: 'server'
     },
-    //! used in event routes
+    // .post('EVENTS/) - image missing from request
     missing_image: {
         status: 400,
-        message: 'image error',
-        type: 'media_error'
+        message: 'Image required',
+        type: 'eventmedia'
     },
     //! used in event routes
     upload_error: {
         status: 400,
         message: 'image upload error',
         type: 'media_error'
+    },
+    //! constrain error from event model
+    events_venue_id_foreign: {
+        status: 404,
+        message: 'venue not found',
+        type: 'venue_id'
+    },
+    //! constrain error from event model
+    events_brand_id_foreign: {
+        status: 404,
+        message: 'brand not found',
+        type: 'brand_id'
+    },
+    //! constrain error from event model
+    events_created_by_foreign: {
+        status: 404,
+        message: 'user not found',
+        type: 'server'
     },
 }
 
