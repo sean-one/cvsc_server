@@ -94,7 +94,7 @@ const isEventNameUnique = async (value) => {
     const found = await eventsDB.checkEventName(value)
     
     if(found !== undefined) {
-        throw new Error('event name already in use (duplicate)')
+        throw new Error('that event name is already being used')
     }
     
     return true
@@ -107,7 +107,7 @@ function isValidDate(value) {
     
     // Check if the input matches the expected format "yyyy-m-d"
     if (!datePattern.test(value)) {
-        throw new Error('event date format error')
+        throw new Error('an event date formatting error has occured')
     }
     
     // Extract year, month, and day from the input
@@ -123,14 +123,14 @@ function isValidDate(value) {
     parsedDate.getDate() === day;
     
     if (!isValid) {
-        throw new Error('invalid date')
+        throw new Error('event date is invalid')
     }
     
     // Check if the date is not in the past
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (parsedDate < today) {
-        throw new Error('event date can not be in the past');
+        throw new Error('events must not be in the past');
     }
     
     // Check if the date is within the next 60 days
@@ -138,7 +138,7 @@ function isValidDate(value) {
     futureDate.setDate(futureDate.getDate() + 60);
     futureDate.setHours(0, 0, 0, 0);
     if (parsedDate > futureDate) {
-        throw new Error('events may only be 60 days out')
+        throw new Error('events must take place within the next 60 days')
     }
     
     return true
@@ -150,7 +150,7 @@ function isValidTime(value) {
     
     // Check if the input matches the expected format "HHmm"
     if (!timePattern.test(value)) {
-        throw new Error('time format error')
+        throw new Error('an event time formatting error has occured')
     }
     
     // Extract hours and minutes from the input
@@ -161,7 +161,7 @@ function isValidTime(value) {
     if(Number.isInteger(hours) && Number.isInteger(minutes) && hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
         return true;
     } else {
-        throw new Error('invalid time')
+        throw new Error('submitted time format error')
     }
 }
 
@@ -216,7 +216,7 @@ const formatValidationCheck = async(req, res, next) => {
     next();
 }
 
-// .post('/register')
+// .post('/register'), .post('EVENTS/')
 const validateImageFile = async (req, res, next) => {
     const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
     if(!req.file) {
@@ -227,7 +227,7 @@ const validateImageFile = async (req, res, next) => {
         if(!exceptedFileTypes.includes(fileExtension)) {
             next({
                 status: 400,
-                message: 'only .png, .jpg, .jpeg & .webp file types',
+                message: 'file types must be .png, .jpg, .jpeg & .webp',
                 type: 'media_error'
             })
         }
@@ -270,6 +270,7 @@ const validateRoleRequest = async (req, res, next) => {
     // validate the business_request_open is true
     const isAcceptingRequest = await businessDB.validateBusinessRequestOpen(business_id)
 
+    //! this should be split up into two 400 bad request if closed & 404 if business not found
     if (!isAcceptingRequest) {
         next({
             status: 404,
@@ -284,7 +285,7 @@ const validateRoleRequest = async (req, res, next) => {
         next({
             status: 400,
             message: 'duplicate request not allowed',
-            type: 'credentials'
+            type: 'server'
         })
     }
 
@@ -392,7 +393,7 @@ const validateBusinessManagement = async (req, res, next) => {
         return next({
             status: 403,
             message: 'invalid role rights',
-            type: 'credentials'
+            type: 'server'
         })
     } else {
         next()
@@ -444,7 +445,7 @@ const validateEventBusinessRoles = async (req, res, next) => {
         next({
             status: 400,
             message: 'must have creator permission for at least one business',
-            type: 'server'
+            type: 'role_rights'
         })
     }
 }
@@ -546,22 +547,23 @@ const updateBusinessValidator = [
         .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )'),
     check('business_website').trim().optional().isURL(),
 ]
+
 // .post('EVENTS/')
 const newEventValidator = [
-    check('eventname').trim().not().isEmpty().withMessage('eventname is required')
-        .isLength({ min: 4, max: 50}).withMessage('event name at least 4 characters, no more then 50')
+    check('eventname').trim().not().isEmpty().withMessage('an eventname is required')
+        .isLength({ min: 4, max: 50}).withMessage('an event name must be between 4 and 50 characters')
         .custom(isEventNameUnique),
-    check('eventdate').trim().not().isEmpty().withMessage('event date is required')
+    check('eventdate').trim().not().isEmpty().withMessage('an event date is required')
         .custom(isValidDate),
-    check('eventstart').trim().not().isEmpty().withMessage('event start time is required')
+    check('eventstart').trim().not().isEmpty().withMessage('an event starting time is required')
         .custom(isValidTime),
-    check('eventend').trim().not().isEmpty().withMessage('event end time is required')
+    check('eventend').trim().not().isEmpty().withMessage('an event ending time is required')
         .custom(isValidTime),
-    check('venue_id').trim().not().isEmpty().withMessage('event location is required')
-        .matches(uuidPattern).withMessage('venue not found'),
+    check('venue_id').trim().not().isEmpty().withMessage('an event location is required')
+        .matches(uuidPattern).withMessage('business identifier is inproperly formatted'),
     check('details').trim().not().isEmpty().withMessage('event details are required'),
     check('brand_id').trim().not().isEmpty().withMessage('event branding is required')
-        .matches(uuidPattern).withMessage('business not found'),
+        .matches(uuidPattern).withMessage('business identifier is inproperly formatted'),
 ]
 
 const updateEventValidator =[

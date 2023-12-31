@@ -17,12 +17,11 @@ const eventErrors = {
         message: 'invalid matching user request',
         type: 'server'
     },
-    // event model - createEvent, updateEvent
+    // event model / createEvent, updateEvent - invalid formatting of time of db insert
     invalid_time_format: {
-        // invalid formatting of time on insert
         status: 400,
         message: 'please be sure time has correct formatting',
-        type: 'time_format'
+        type: 'server'
     },
     // event model - updateEvent
     invalid_business_id: {
