@@ -121,15 +121,7 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
         }
 
         // only fields to include in update object
-        const fieldsToInclude = [
-            'eventname',
-            'eventdate',
-            'eventstart',
-            'eventend',
-            'venue_id',
-            'details',
-            'brand_id'
-        ]
+        const fieldsToInclude = ['eventname', 'eventdate', 'eventstart', 'eventend', 'venue_id', 'details', 'brand_id']
 
         const event_update = createUpdateObject(req.body, fieldsToInclude)
 
@@ -140,6 +132,8 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
 
             // upload to s3 and get key
             const image_key = await uploadImageS3Url(req.file)
+
+            if (!image_key) throw new Error('upload_error')
 
             if (!check_link.test(eventmedia)) {
                 // if on s3 remove from bucket

@@ -566,9 +566,10 @@ const newEventValidator = [
         .matches(uuidPattern).withMessage('business identifier is inproperly formatted'),
 ]
 
+// .put('EVENTS/:event_id)
 const updateEventValidator =[
     check('eventname').trim().optional()
-        .isLength({ min: 2, max: 50}).withMessage('event name must be at least 2 characters, and no more then 50')
+        .isLength({ min: 2, max: 50 }).withMessage('an event name must be between 4 and 50 characters')
         .custom(isEventNameUnique),
     check('eventdate').trim().optional()
         .custom(isValidDate),
@@ -577,10 +578,10 @@ const updateEventValidator =[
     check('eventend').trim().optional()
         .custom(isValidTime),
     check('venue_id').trim().optional()
-        .matches(uuidPattern).withMessage('venue not found'),
+        .matches(uuidPattern).withMessage('event business venue is incorrectly formatted'),
     check('details').trim().optional(),
     check('brand_id').trim().optional()
-        .matches(uuidPattern).withMessage('business not found'),
+        .matches(uuidPattern).withMessage('event business brand is incorrectly formatted'),
 ]
 
 const result = (req, res, next) => {

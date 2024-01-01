@@ -47,10 +47,10 @@ const eventErrors = {
         message: 'Image required',
         type: 'eventmedia'
     },
-    //! used in event routes
+    // .post('EVENTS'/) .put('EVENTS/:event_id') - error uploading image to s3 bucket
     upload_error: {
         status: 400,
-        message: 'image upload error',
+        message: 'an error occured during image upload',
         type: 'media_error'
     },
     //! constrain error from event model
