@@ -410,8 +410,8 @@ const validateEventCreator = async (req, res, next) => {
         next()
     } else {
         next({
-            status: 403,
-            message: 'invalid event permission',
+            status: 400,
+            message: 'invalid event creator permission',
             type: 'server'
         })
     }
