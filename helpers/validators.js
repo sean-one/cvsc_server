@@ -520,6 +520,7 @@ const newBusinessValidator = [
         .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )'),
     check('business_website').trim().optional().isURL(),
 ]
+
 // put('BUSINESSES/:business_id)
 const updateBusinessValidator = [
     check('business_description').trim().optional(),
