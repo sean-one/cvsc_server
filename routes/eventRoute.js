@@ -14,6 +14,7 @@ const {
     uuidValidation,
     result,
     validateBusinessManagement,
+    validateEventBusinessRemove,
     formatValidationCheck,
     validateEventBusinessRoles
 } = require('../helpers/validators');
@@ -24,7 +25,7 @@ const upload = multer({ storage: storage })
 const router = express.Router();
 
 // useRemoveEventBusinessMutation - removes a business id from venue_id and or brand_id & sets active_event to false
-router.put('/:event_id/remove/:business_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
+router.put('/:event_id/remove/:business_id', [validToken, uuidValidation, formatValidationCheck, validateEventBusinessRemove, result], async (req, res, next) => {
     try {
         const { event_id, business_id } = req.params
 
@@ -33,8 +34,7 @@ router.put('/:event_id/remove/:business_id', [validToken, uuidValidation, format
         res.status(202).json({ event_id: event_id, business_id: business_id })
 
     } catch (error) {
-        console.log('INSIDE THE ROUTE CATCH')
-        console.log(error)
+        // 'token' - 401, 403 / 'server' - 403 / *path - 400
         next({
             status: eventErrors[error.message]?.status,
             type: eventErrors[error.message]?.type,
