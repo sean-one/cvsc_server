@@ -174,22 +174,22 @@ const existenceChecks = oneOf([
     check('user_id').exists(),
     check('event_id').exists(),
     check('role_id').exists(),
-], 'invalid / missing id in request');
+], 'invalid and/or missing identifier in request');
 
 // check format IF EXISTS for business_id, user_id, event_id and role_id - 
 const formatValidations = [
     check('business_id').if(check('business_id').exists()).trim()
         .matches(uuidPattern)
-        .withMessage('invalid business format error'),
+        .withMessage('business identifier is incorrectly formatted'),
     check('user_id').if(check('user_id').exists()).trim()
         .matches(uuidPattern)
-        .withMessage('invalid user format error'),
+        .withMessage('user identifier is incorrectly formatted'),
     check('event_id').if(check('event_id').exists()).trim()
         .matches(uuidPattern)
-        .withMessage('invalid event format error'),
+        .withMessage('event identifier is incorrectly formatted'),
     check('role_id').if(check('role_id').exists()).trim()
         .matches(uuidPattern)
-        .withMessage('invalid role format error'),
+        .withMessage('role identifier is incorrectly formatted'),
 ];
 
 // validates that at least one of business_id, user_id, event_id or role_id is present and all present are formated as uuid

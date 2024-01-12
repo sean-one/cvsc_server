@@ -16,10 +16,11 @@ const roleErrors = {
         message: 'request already pending',
         type: 'duplicate'
     },
+    // error from database uuid incorrectly formatted
     string_to_uuid: {
-        status: 404,
-        message: 'invalid business id',
-        type: 'business not found'
+        status: 400,
+        message: 'identifier is incorrectly formatted',
+        type: 'server'
     },
     business_request_closed: {
         status: 400,

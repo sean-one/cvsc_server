@@ -39,6 +39,7 @@ async function getBusinessRoles(business_id) {
 }
 
 // .get('ROLES/users/:user_id') - returns array of ALL roles (active/inactive) for a selected user id
+// if NO ROLES or NO USER ID is found -> will return 200 and an empty array []
 async function getAllUserRoles(user_id) {
     return db('roles')
         .where({ user_id: user_id })

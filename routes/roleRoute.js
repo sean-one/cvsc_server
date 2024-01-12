@@ -57,7 +57,7 @@ router.get('/businesses/:business_id', [validToken, uuidValidation, formatValida
 })
 
 // useRolesApi - useUserRolesQuery
-router.get('/users/:user_id', [validToken], async (req, res, next) => {
+router.get('/users/:user_id', [validToken, uuidValidation, result], async (req, res, next) => {
     try {
         const { user_id } = req.params
 
@@ -68,7 +68,6 @@ router.get('/users/:user_id', [validToken], async (req, res, next) => {
         res.status(200).json(user_roles)
 
     } catch (error) {
-
         next({
             status: roleErrors[error.message]?.status,
             message: roleErrors[error.message]?.message,
