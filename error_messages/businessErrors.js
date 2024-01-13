@@ -26,19 +26,19 @@ const businessErrors = {
     // .get('/managed') - user id invalid format
     string_to_uuid: {
         status: 400,
-        message: 'invalid user id credentials',
+        message: 'invalid identifying format',
         type: 'server'
     },
     // .get('/managed') - no roles with manager or admin
     non_manager: {
         status: 404,
-        message: 'no managing businesses found',
+        message: 'no business management roles found',
         type: 'server'
     },
     // .get('/managed') - fallback for server error
     server_error: {
-        status: 500,
-        message: 'server error',
+        status: 400,
+        message: 'a server error has occured',
         type: 'server'
     },
     businesses_business_name_unique: {

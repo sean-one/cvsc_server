@@ -15,7 +15,7 @@ const {
 
 const router = express.Router();
 
-// useRolesApi - useManagementRole, useUserBusinessRole
+// useRolesApi - useUserBusinessRole
 router.get('/businesses/:business_id/user-role', [validToken, uuidValidation, formatValidationCheck], async (req, res, next) => {
     try {
         const user_id = req.user_decoded;
