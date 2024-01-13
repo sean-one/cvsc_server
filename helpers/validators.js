@@ -270,11 +270,10 @@ const validateRoleRequest = async (req, res, next) => {
     // validate the business_request_open is true
     const isAcceptingRequest = await businessDB.validateBusinessRequestOpen(business_id)
 
-    //! this should be split up into two 400 bad request if closed & 404 if business not found
     if (!isAcceptingRequest) {
         next({
-            status: 404,
-            message: 'business not found or business request is closed',
+            status: 400,
+            message: 'business request is closed or not found',
             type: 'server'
         })
     }
@@ -284,7 +283,7 @@ const validateRoleRequest = async (req, res, next) => {
     if(hasDuplicate) {
         next({
             status: 400,
-            message: 'duplicate request not allowed',
+            message: 'duplicate business request are not allowed',
             type: 'server'
         })
     }

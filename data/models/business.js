@@ -19,7 +19,7 @@ module.exports = {
 // .get('BUSINESSES/)
 function getAllBusinesses() {
     return db('businesses')
-        // .where({ active_bus  iness: true })
+        // .where({ active_business: true })
         .leftJoin('users', 'businesses.business_admin', '=', 'users.id')
         .select(
             [

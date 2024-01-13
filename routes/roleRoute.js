@@ -84,16 +84,10 @@ router.post('/businesses/:business_id/role-requests', [validToken, uuidValidatio
     
         const role_request = await db.createRoleRequest(business_id, req.user_decoded)
 
-        if(role_request[0]?.business_id) return res.status(201).json(role_request[0])
+        res.status(201).json(role_request)
 
     } catch (error) {
-        if(error.constraint === 'roles_user_id_business_id_unique') {
-            next({
-                status: roleErrors[error.constraint]?.status,
-                message: roleErrors[error.constraint]?.message,
-                type: roleErrors[error.constraint]?.type,
-            })
-        }
+        // console.log(error)
         if(error?.message) {
             next({
                 status: roleErrors[error.message]?.status,
@@ -101,15 +95,6 @@ router.post('/businesses/:business_id/role-requests', [validToken, uuidValidatio
                 type: roleErrors[error.message]?.type,
             })
         }
-        // catch if business id is not uuid format
-        if(error?.routine === 'string_to_uuid') {
-            next({
-                status: roleErrors[error.routine]?.status,
-                message: roleErrors[error.routine]?.message,
-                type: roleErrors[error.routine]?.type,
-            })
-        }
-
         // console.log(error)
     }
 

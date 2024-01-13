@@ -58,24 +58,29 @@ async function getAllUserRoles(user_id) {
 
 // .post('ROLES/businesses/:business_id/role-requests') - creates a new role request with business and user ids
 async function createRoleRequest(business_id, user_id) {
-    const created_role = await db('roles')
-        .insert({
-            user_id: user_id,
-            business_id: business_id
-        }, ['id'])
-
-    return await db('roles')
-        .where({ 'roles.id': created_role[0].id })
-        .join('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.id',
-                'roles.business_id',
-                'businesses.business_name',
-                'roles.role_type',
-                'roles.active_role'
-            ]
-        )
+    try {
+        const [created_role] = await db('roles')
+            .insert({
+                user_id: user_id,
+                business_id: business_id
+            }, ['id'])
+    
+        return await db('roles')
+            .where({ 'roles.id': created_role.id })
+            .join('businesses', 'roles.business_id', '=', 'businesses.id')
+            .select(
+                [
+                    'roles.id',
+                    'roles.business_id',
+                    'businesses.business_name',
+                    'roles.role_type',
+                    'roles.active_role'
+                ]
+            )
+            .first()
+    } catch (error) {
+        throw new Error('db_insert_error');
+    }
 
 }
 

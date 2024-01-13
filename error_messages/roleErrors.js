@@ -11,39 +11,37 @@ const roleErrors = {
         message: 'invalid matching user request',
         type: 'server'
     },
-    roles_user_id_business_id_unique: {
-        status: 400,
-        message: 'request already pending',
-        type: 'duplicate'
-    },
-    // error from database uuid incorrectly formatted
-    string_to_uuid: {
-        status: 400,
-        message: 'identifier is incorrectly formatted',
-        type: 'server'
-    },
-    business_request_closed: {
-        status: 400,
-        message: 'business not currently excepting request',
-        type: 'business request closed'
-    },
     missing_input: {
         status: 400,
         message: 'missing business id',
         type: 'missing_input'
     },
+    // createRoleRequest insert error
+    db_insert_error: {
+        status: 404,
+        message: 'foriegn identifiers not found',
+        type: 'server'
+    },
     roles_business_id_foreign: {
         status: 404,
-        message: 'business not found'
+        message: 'business identifier not found',
+        type: 'server'
     },
     roles_user_id_foreign: {
         status: 404,
-        message: 'user not found'
+        message: 'user identifier not found',
+        type: 'server'
     },
     delete_error: {
         status: 400,
-        message: 'bad request error'
+        message: 'bad request error',
+        type: 'server'
     }
 }
+
+// database server errors
+//   - roles_user_id_business_id_unique
+//   - string_to_uuid
+//   - business_request_closed
 
 module.exports = roleErrors;
