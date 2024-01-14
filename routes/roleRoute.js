@@ -15,29 +15,6 @@ const {
 
 const router = express.Router();
 
-// useRolesApi - useUserBusinessRole
-router.get('/businesses/:business_id/user-role', [validToken, uuidValidation, formatValidationCheck], async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded;
-        const { business_id } = req.params;
-    
-        const user_business_role = await db.getUserBusinessRole(business_id, user_id)
-
-        if (user_business_role === undefined) {
-            throw new Error('role_not_found')
-        }
-        
-        res.status(200).json(user_business_role)
-    } catch (error) {
-        next({
-            status: roleErrors[error.message]?.status,
-            message: roleErrors[error.message]?.message,
-            type: roleErrors[error.message]?.type,
-        })
-        
-    }
-})
-
 // useRolesApi - useBusinessRolesQuery
 router.get('/businesses/:business_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
     try {
@@ -76,11 +53,19 @@ router.get('/users/:user_id', [validToken, uuidValidation, result], async (req, 
         res.status(200).json(user_roles)
 
     } catch (error) {
-        next({
-            status: roleErrors[error.message]?.status,
-            message: roleErrors[error.message]?.message,
-            type: roleErrors[error.message]?.type,
-        })
+        if (error?.routine) {
+            next({
+                status: roleErrors[error?.routine]?.status,
+                message: roleErrors[error?.routine]?.message,
+                type: roleErrors[error?.routine]?.type,
+            })
+        } else {
+            next({
+                status: roleErrors[error.message]?.status,
+                message: roleErrors[error.message]?.message,
+                type: roleErrors[error.message]?.type,
+            })
+        }
 
     }
 })

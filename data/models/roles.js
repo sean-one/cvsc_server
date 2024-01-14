@@ -156,7 +156,6 @@ async function downgradeManagerRole(role_id, admin_id) {
 
 // .delete('ROLES/:role_id') - delete role by user or by manager
 async function deleteRole(role_id) {
-    console.log('inside del role')
     try {
         return await db.transaction(async trx => {
             const { business_id, user_id } = await db('roles')

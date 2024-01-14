@@ -43,6 +43,11 @@ const roleErrors = {
         message: 'user identifier not found',
         type: 'server'
     },
+    string_to_uuid: {
+        status: 400,
+        message: 'role indentifier has invalid formatting',
+        type: 'server'
+    },
     delete_error: {
         status: 400,
         message: 'delete failed - server delete error',

@@ -412,8 +412,8 @@ const validateEventBusinessRemove = async (req, res, next) => {
 
     if (businessRole === undefined || businessRole.active_role === false || businessRole.role_type < process.env.MANAGER_ACCOUNT) {
         return next({
-            status: 403,
-            message: 'invalid permission role',
+            status: 400,
+            message: 'business remove failed - invalid business role',
             type: 'server'
         })
     } else {
