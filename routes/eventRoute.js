@@ -81,6 +81,7 @@ router.get('/user/:user_id', [validToken, uuidValidation, result], async (req, r
 });
 
 // useEventQuery - returns a single event from event id
+// event.edit.view - inside useEffect
 router.get('/:event_id', [uuidValidation, result], async (req, res, next) => {
     try {
         const { event_id } = req.params

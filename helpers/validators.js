@@ -432,7 +432,7 @@ const validateEventCreator = async (req, res, next) => {
     } else {
         next({
             status: 400,
-            message: 'invalid event creator permission',
+            message: 'only event creator can delete an upcoming event',
             type: 'server'
         })
     }
