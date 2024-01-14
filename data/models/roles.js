@@ -181,7 +181,7 @@ async function deleteRole(role_id) {
             return { business_id, user_id }
         })
     } catch (error) {
-        throw error
+        throw new Error('delete_error')
     }
 }
 

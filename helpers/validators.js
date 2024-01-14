@@ -319,7 +319,7 @@ const validateRoleDelete = async (req, res, next) => {
             
             return next({
                 status: 400,
-                message: 'invalid role permissions',
+                message: 'invalid role permissions to update role',
                 type: 'server'
             })
         }

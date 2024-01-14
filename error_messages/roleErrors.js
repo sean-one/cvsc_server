@@ -45,7 +45,7 @@ const roleErrors = {
     },
     delete_error: {
         status: 400,
-        message: 'bad request error',
+        message: 'delete failed - server delete error',
         type: 'server'
     }
 }
