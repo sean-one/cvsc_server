@@ -42,16 +42,24 @@ router.get('/businesses/:business_id/user-role', [validToken, uuidValidation, fo
 router.get('/businesses/:business_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
     try {
         const { business_id } = req.params
-        const business_roles = await db.getBusinessRoles(business_id)
+        const business_roles = await db.getBusinessRoles('business_id')
         
         res.status(200).json(business_roles);
         
     } catch (error) {
-        next({
-            status: roleErrors[error.message]?.status,
-            message: roleErrors[error.message]?.message,
-            type: roleErrors[error.message]?.type,
-        })
+        if (error?.routine) {
+            next({
+                status: roleErrors['get_business_roles_error']?.status,
+                message: roleErrors['get_business_roles_error']?.message,
+                type: roleErrors['get_business_roles_error']?.type,
+            })
+        } else {
+            next({
+                status: roleErrors[error.message]?.status,
+                message: roleErrors[error.message]?.message,
+                type: roleErrors[error.message]?.type,
+            })
+        }
 
     }
 })

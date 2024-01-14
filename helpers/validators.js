@@ -386,12 +386,12 @@ const validateBusinessManagement = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params
     
-    const businessRole = await rolesDB.getUserBusinessRole(business_id, user_id)
+    const isBusinessManager = await rolesDB.validateBusinessManagement(business_id, user_id)
 
-    if (businessRole === undefined || businessRole.active_role === false || businessRole.role_type < process.env.MANAGER_ACCOUNT) {
+    if (!isBusinessManager) {
         return next({
-            status: 403,
-            message: 'invalid role rights',
+            status: 404,
+            message: 'business management role not found',
             type: 'server'
         })
     } else {

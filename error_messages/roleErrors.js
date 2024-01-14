@@ -22,6 +22,11 @@ const roleErrors = {
         message: 'foriegn identifiers not found',
         type: 'server'
     },
+    get_business_roles_error: {
+        status: 400,
+        message: 'business identifier formatting error',
+        type: 'server'
+    },
     roles_business_id_foreign: {
         status: 404,
         message: 'business identifier not found',
