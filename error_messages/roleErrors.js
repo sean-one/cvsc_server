@@ -27,6 +27,12 @@ const roleErrors = {
         message: 'business identifier formatting error',
         type: 'server'
     },
+    // roleAction - role action may only be ['approve', 'upgrade', 'downgrade']
+    invalid_action: {
+        status: 400,
+        message: 'invalid or unknown requested action type',
+        type: 'server'
+    },
     roles_business_id_foreign: {
         status: 404,
         message: 'business identifier not found',

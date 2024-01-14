@@ -336,7 +336,7 @@ const validateRoleAction = async (req, res, next) => {
     if (!validActionTypes.includes(action_type)) {
         return next({
             status: 400,
-            message: 'invalid action type',
+            message: 'invalid or unknown requested action type',
             type: 'server'
         });
     }
@@ -355,7 +355,7 @@ const validateRoleAction = async (req, res, next) => {
     if (active_business === undefined || !active_business) {
         return next({
             status: 400,
-            message: 'action failed - business status is inactive',
+            message: 'business currently not accepting new role request',
             type: 'server'
         })
     }
@@ -375,7 +375,7 @@ const validateRoleAction = async (req, res, next) => {
     else {
         return next({
             status: 400,
-            message: 'invalid business permissions',
+            message: 'invalid business role permissions for that action',
             type: 'server'
         })
     }

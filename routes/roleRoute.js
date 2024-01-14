@@ -42,7 +42,7 @@ router.get('/businesses/:business_id/user-role', [validToken, uuidValidation, fo
 router.get('/businesses/:business_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, result], async (req, res, next) => {
     try {
         const { business_id } = req.params
-        const business_roles = await db.getBusinessRoles('business_id')
+        const business_roles = await db.getBusinessRoles(business_id)
         
         res.status(200).json(business_roles);
         
@@ -113,6 +113,7 @@ router.put('/:role_id/actions', [validToken, uuidValidation, formatValidationChe
     try {
         const { action_type } = req.body
         const { role_id } = req.params
+        // user making request must have manager rights
         const management_id = await req.user_decoded
     
         // approve business creator role request
