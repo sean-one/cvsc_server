@@ -517,7 +517,7 @@ const updateUserValidator = [
 // .post('BUSINESSES/')
 const newBusinessValidator = [
     check('business_name').trim().not().isEmpty().withMessage('business name is required')
-        .isLength({ min: 4, max: 25 }).withMessage('business name must be between 4 and 25 characters')
+        .isLength({ min: 4, max: 50 }).withMessage('business name must be between 4 and 50 characters')
         .custom(isBusinessNameUnique),
     check('business_description').trim().not().isEmpty().withMessage('business description is required'),
     check('business_type').trim().not().isEmpty().withMessage('business type required')

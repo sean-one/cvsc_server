@@ -2,8 +2,8 @@ const businessErrors = {
     // if business not found at get('/:business_id)
     business_not_found: {
         status: 404,
-        message: 'Unable to find business.',
-        type: 'business_error'
+        message: 'unable to locate business by identifier',
+        type: 'server'
     },
     // if no changes are found at .put('/:business_id')
     no_changes: {
@@ -41,14 +41,17 @@ const businessErrors = {
         message: 'a server error has occured',
         type: 'server'
     },
+    // business database error.contraint
     businesses_business_name_unique: {
         status: 409,
         message: 'business name already registered',
         type: 'business_name'
     },
+    // business database error.constraint
     businesses_business_admin_foreign: {
-        status: 404,
-        message: 'user not found'
+        status: 400,
+        message: 'unable to locate user admin by identifier',
+        type: 'server'
     },
     // .put('/update/:business_id')
     business_address_required: {
@@ -59,7 +62,7 @@ const businessErrors = {
     // .post('/create')
     missing_image: {
         status: 400,
-        message: 'Business branding (logo) required',
+        message: 'a business logo is required to create a new business',
         type: 'business_avatar'
     },
     invalid_business_type: {
