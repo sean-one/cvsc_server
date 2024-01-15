@@ -246,7 +246,7 @@ const validateBusinessAdmin = async (req, res, next) => {
     if(currentBusiness === undefined) {
         next({
             status: 404,
-            message: 'business not found',
+            message: 'unable to locate business by identifier',
             type: 'server'
         })
     } else {
@@ -391,7 +391,7 @@ const validateBusinessManagement = async (req, res, next) => {
     if (!isBusinessManager) {
         return next({
             status: 404,
-            message: 'business management role not found',
+            message: 'valid business permission role not found',
             type: 'server'
         })
     } else {
