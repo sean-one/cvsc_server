@@ -368,13 +368,15 @@ async function removeBusiness(business_id) {
 
         })
 
-        if (deleted_business > 0) {
+        const success = deleted_business > 0
+
+        if (success) {
             if (!check_link.test(business_avatar) && business_avatar !== null) {
                 await deleteImageS3(business_avatar)
             }
         }
 
-        return deleted_business > 0;
+        return { success, business_id };
 
     } catch (error) {
         throw error

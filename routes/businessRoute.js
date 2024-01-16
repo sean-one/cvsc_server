@@ -301,8 +301,8 @@ router.delete('/:business_id', [validToken, validateBusinessAdmin, result], asyn
         const { business_id } = req.params;
         const deleted_business = await db.removeBusiness(business_id)
 
-        if (deleted_business) {
-            res.status(204).json(deleted_business);
+        if (deleted_business.success) {
+            res.status(200).json(deleted_business);
         } else {
             throw new Error('delete_failed');
         }
