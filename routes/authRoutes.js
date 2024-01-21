@@ -10,7 +10,7 @@ const authErrors = require('../error_messages/authErrors');
 const { createAccessToken, createRefreshToken } = require('../helpers/jwt_helper');
 const { uploadImageS3Url } = require('../s3');
 const { hashPassword } = require('../helpers/bcrypt_helper');
-const rolesDB = require('../data/models/roles');
+// const rolesDB = require('../data/models/roles');
 const userDB = require('../data/models/user');
 
 const { loginUserValidator, registerUserValidator, result, validateImageFile } = require('../helpers/validators')
@@ -50,8 +50,8 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
             await userDB.addRefreshToken(user.id, refreshToken)
 
             res.cookie('jwt', refreshToken)
-
-            res.status(201).json({ user: user, roles: [] })
+            console.log(user)
+            res.status(201).json(user)
         })
 
     } catch (error) {
@@ -71,14 +71,14 @@ router.post('/login', loginUserValidator, result, passport.authenticate('local',
 }), async (req, res) => {
     
     const user = req.user
-    const user_roles = await rolesDB.getAllUserRoles(user.id)
+    // const user_roles = await rolesDB.getAllUserRoles(user.id)
     
     res.cookie('jwt', user.refreshToken)
     // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
     
     delete user['refreshToken']
 
-    res.status(200).json({ user: user, roles: user_roles })
+    res.status(200).json(user)
 })
 
 router.get('/refresh', async (req, res) => {
@@ -100,11 +100,11 @@ router.get('/refresh', async (req, res) => {
             // get user information
             const accessToken = createAccessToken(decoded.user)
             // find active roles attached to user
-            const user_roles = await rolesDB.getAllUserRoles(decoded.user)
+            // const user_roles = await rolesDB.getAllUserRoles(decoded.user)
             // set the accesstoken to the user details
             user_found.accessToken = accessToken
            
-            res.json({ user: user_found, roles: user_roles })
+            res.json(user_found)
         }
     )
 })
