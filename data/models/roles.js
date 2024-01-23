@@ -3,6 +3,7 @@ const db = require('../dbConfig');
 module.exports = {
     getBusinessRoles,
     getAllUserRoles,
+    getUserAccountRole,
     createRoleRequest,
     approveRoleRequest,
     upgradeCreatorRole,
@@ -54,6 +55,19 @@ async function getAllUserRoles(user_id) {
             ]
         )
         .orderBy('roles.role_type', 'desc')
+}
+
+// .get('ROLES/users/:user_id/account-role) - returns highest active role type for a user
+async function getUserAccountRole(user_id) {
+    return db('roles')
+        .where({ user_id: user_id, active_role: true })
+        .select(
+            [
+                'roles.role_type',
+            ]
+        )
+        .orderBy('roles.role_type', 'desc')
+        .first()
 }
 
 // .post('ROLES/businesses/:business_id/role-requests') - creates a new role request with business and user ids

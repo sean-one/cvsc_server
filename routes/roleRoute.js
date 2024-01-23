@@ -70,6 +70,25 @@ router.get('/users/:user_id', [validToken, uuidValidation, result], async (req, 
     }
 })
 
+router.get('/users/:user_id/account-role', [validToken, uuidValidation, result], async (req, res, next) => {
+    try {
+        const { user_id } = req.params
+
+        if (req.user_decoded !== user_id) { throw new Error('invalid_user') }
+
+        const account_role = await db.getUserAccountRole(user_id)
+        console.log('ACCOUNT ROLE', account_role)
+
+        res.status(200).json(account_role)
+    } catch (error) {
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
+    }
+})
+
 // useRolesApi - useCreateRoleMutation
 router.post('/businesses/:business_id/role-requests', [validToken, uuidValidation, formatValidationCheck, validateRoleRequest, result], async (req, res, next) => {
     try {
