@@ -607,7 +607,6 @@ const updateEventValidator =[
 ]
 
 const result = (req, res, next) => {
-    console.log('hit the result middleware')
     const result = validationResult(req);
     const hasError = !result.isEmpty();
     

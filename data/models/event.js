@@ -91,39 +91,44 @@ function getUserEvents(user_id) {
 }
 
 //! main calendar event call
-function getAllEvents() {
-    return db('events')
-        // Ensure eventdate and eventstart are in the future
-        .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
-        // Remove inactive events from event list return
-        .andWhere({ active_event: true })
-        .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
-        .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
-        .join('users', 'events.created_by', '=', 'users.id')
-        .select([
-            'events.id as event_id',
-            'events.eventname',
-            'events.eventdate',
-            'events.eventstart',
-            'events.eventend',
-            'events.eventmedia',
-            'events.details',
-            'events.active_event',
-
-            'venue.id as venue_id',
-            'venue.business_name as venue_name',
-            'venue.business_avatar as venue_logo',
-            'venue.formatted_address as venue_location',
-
-            'brand.id as brand_id',
-            'brand.business_avatar as brand_logo',
-            'brand.business_name as brand_name',
-
-            'events.created_by',
-            'users.username as event_creator'
-        ])
-        // Order by combined timestamp of eventdate and reformatted eventstart
-        .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
+async function getAllEvents() {
+    try {
+        return await db('events')
+            // Ensure eventdate and eventstart are in the future
+            .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+            // Remove inactive events from event list return
+            .andWhere({ active_event: true })
+            .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
+            .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
+            .join('users', 'events.created_by', '=', 'users.id')
+            .select([
+                'events.id as event_id',
+                'events.eventname',
+                'events.eventdate',
+                'events.eventstart',
+                'events.eventend',
+                'events.eventmedia',
+                'events.details',
+                'events.active_event',
+    
+                'venue.id as venue_id',
+                'venue.business_name as venue_name',
+                'venue.business_avatar as venue_logo',
+                'venue.formatted_address as venue_location',
+    
+                'brand.id as brand_id',
+                'brand.business_avatar as brand_logo',
+                'brand.business_name as brand_name',
+    
+                'events.created_by',
+                'users.username as event_creator'
+            ])
+            // Order by combined timestamp of eventdate and reformatted eventstart
+            .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
+    } catch (error) {
+        console.error('Error fetching events:', error);
+        throw new Error('server_error');
+    }
 }
 
 // .get('EVENTS/:event_id') & validateEventUpdate

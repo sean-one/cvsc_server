@@ -53,6 +53,12 @@ const eventErrors = {
         message: 'an error occured during image upload',
         type: 'media_error'
     },
+    server_error: {
+        status: 500,
+        message: 'an internal server error occurred',
+        type: 'server'
+
+    },
     //! constrain error from event model
     events_venue_id_foreign: {
         status: 404,
