@@ -18,6 +18,7 @@ module.exports = {
 };
 
 // .get('EVENTS/business/:business_id') - returns array of ACTIVE events for specific business id
+//! username
 async function getBusinessEvents(business_id) {
     try {
         return await db('events')
@@ -64,6 +65,7 @@ async function getBusinessEvents(business_id) {
 }
 
 // .get('EVENTS/event-related/:event_id) - returns array of ACTIVE events for specific event id (all events that include venue and brand)
+//! username
 async function getEventRelatedEvents(event_id) {
     try {
         const { venue_id, brand_id } = await db('events').where({ 'events.id': event_id }).first()
@@ -83,6 +85,7 @@ async function getEventRelatedEvents(event_id) {
             .andWhereNot('events.id', event_id)
             .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
             .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
+            .leftJoin('users', 'events.created_by', '=', 'users.id')
             .select(
                 [
                     'events.id as event_id',
@@ -104,6 +107,7 @@ async function getEventRelatedEvents(event_id) {
                     'brand.business_name as brand_name',
 
                     'events.created_by',
+                    'users.username as event_creator'
                 ]
             )
             .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`)
@@ -115,6 +119,7 @@ async function getEventRelatedEvents(event_id) {
 }
 
 // .get('EVENTS/user/:user_id')
+//! username
 async function getUserEvents(user_id) {
     try {
         return await db('events')
@@ -122,6 +127,7 @@ async function getUserEvents(user_id) {
             .andWhere('events.eventdate', '>=', new Date())
             .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
             .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
+            .leftJoin('users', 'events.created_by', '=', 'users.id')
             .select(
                 [
                     'events.id as event_id',
@@ -143,6 +149,7 @@ async function getUserEvents(user_id) {
                     'brand.business_name as brand_name',
     
                     'events.created_by',
+                    'users.username as event_creator'
                 ]
             )
             .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`)
@@ -153,6 +160,7 @@ async function getUserEvents(user_id) {
 }
 
 //! main calendar event call
+//! username
 async function getAllEvents() {
     try {
         return await db('events')
@@ -193,13 +201,15 @@ async function getAllEvents() {
     }
 }
 
-// .get('EVENTS/:event_id') & validateEventUpdate
+// .get('EVENTS/:event_id') & validateEventUpdate - retuns an ACTIVE or INACTIVE event by id
+//! username
 async function getEventById(eventId) {
     try {
         return await db('events')
             .where({ 'events.id': eventId })
             .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
             .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
+            .leftJoin('users', 'events.created_by', '=', 'users.id')
             .select(
                 [
                     'events.id as event_id',
@@ -221,6 +231,7 @@ async function getEventById(eventId) {
                     'brand.business_name as brand_name',
     
                     'events.created_by',
+                    'users.username as event_creator'
                 ]
             )
             .first()
@@ -231,6 +242,7 @@ async function getEventById(eventId) {
 }
 
 // .post('EVENTS/') - create new event
+//! username
 async function createEvent(event) {
     return await db('events').insert(event, ['id'])
         .then(eventId => {
@@ -239,6 +251,7 @@ async function createEvent(event) {
                 .where('events.id', id)
                 .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
                 .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
+                .join('users', 'events.created_by', '=', 'users.id')
                 .select(
                     [
                         'events.id as event_id',
@@ -260,6 +273,7 @@ async function createEvent(event) {
                         'brand.business_name as brand_name',
 
                         'events.created_by',
+                        'users.username as event_creator'
                     ]
                 )
                 .first()
@@ -285,6 +299,7 @@ async function createEvent(event) {
 }
 
 // .put('EVENTS/:event_id') - update event
+//! username
 async function updateEvent(event_id, eventChanges) {
     try {
         const updated_event = await db('events').where({ id: event_id }).update(eventChanges, ['id', 'brand_id', 'venue_id'])
@@ -298,6 +313,7 @@ async function updateEvent(event_id, eventChanges) {
             .where('events.id', id)
             .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
             .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
+            .join('users', 'events.created_by', '=', 'users.id')
             .select(
                 [
                     'events.id as event_id',
@@ -319,6 +335,7 @@ async function updateEvent(event_id, eventChanges) {
                     'brand.business_name as brand_name',
 
                     'events.created_by',
+                    'users.username as event_creator'
                 ]
             )
             .first()
