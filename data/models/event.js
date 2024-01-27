@@ -18,7 +18,6 @@ module.exports = {
 };
 
 // .get('EVENTS/business/:business_id') - returns array of ACTIVE events for specific business id
-//! username
 async function getBusinessEvents(business_id) {
     try {
         return await db('events')
@@ -65,7 +64,6 @@ async function getBusinessEvents(business_id) {
 }
 
 // .get('EVENTS/event-related/:event_id) - returns array of ACTIVE events for specific event id (all events that include venue and brand)
-//! username
 async function getEventRelatedEvents(event_id) {
     try {
         const { venue_id, brand_id } = await db('events').where({ 'events.id': event_id }).first()
@@ -119,7 +117,6 @@ async function getEventRelatedEvents(event_id) {
 }
 
 // .get('EVENTS/user/:user_id')
-//! username
 async function getUserEvents(user_id) {
     try {
         return await db('events')
@@ -160,7 +157,6 @@ async function getUserEvents(user_id) {
 }
 
 //! main calendar event call
-//! username
 async function getAllEvents() {
     try {
         return await db('events')
@@ -202,7 +198,6 @@ async function getAllEvents() {
 }
 
 // .get('EVENTS/:event_id') & validateEventUpdate - retuns an ACTIVE or INACTIVE event by id
-//! username
 async function getEventById(eventId) {
     try {
         return await db('events')
@@ -242,7 +237,6 @@ async function getEventById(eventId) {
 }
 
 // .post('EVENTS/') - create new event
-//! username
 async function createEvent(event) {
     return await db('events').insert(event, ['id'])
         .then(eventId => {
@@ -299,7 +293,6 @@ async function createEvent(event) {
 }
 
 // .put('EVENTS/:event_id') - update event
-//! username
 async function updateEvent(event_id, eventChanges) {
     try {
         const updated_event = await db('events').where({ id: event_id }).update(eventChanges, ['id', 'brand_id', 'venue_id'])
