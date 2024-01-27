@@ -53,6 +53,7 @@ const eventErrors = {
         message: 'an error occured during image upload',
         type: 'media_error'
     },
+    // event models generic try catch error
     server_error: {
         status: 500,
         message: 'an internal server error occurred',

@@ -51,8 +51,6 @@ router.get('/business/:business_id', [uuidValidation, result], async (req, res, 
 
         res.status(200).json(business_events)
     } catch (error) {
-        console.log('INSIDE THE BUSINESS EVENTS ROUTE ERROR')
-        console.log(error)
         next({
             status: eventErrors[error.message]?.status,
             message: eventErrors[error.message]?.message,
@@ -60,6 +58,23 @@ router.get('/business/:business_id', [uuidValidation, result], async (req, res, 
         })
     }
 });
+
+// useEventRelatedEventsQuery - returns all the events for an event id (all events that include event venue and event brand)
+router.get('/event-related/:event_id', [uuidValidation, result], async (req, res, next) => {
+    try {
+        const { event_id } = req.params;
+        
+        const event_related_events = await db.getEventRelatedEvents(event_id)
+
+        res.status(200).json(event_related_events)
+    } catch (error) {
+        next({
+            status: eventErrors[error.message]?.status,
+            message: eventErrors[error.message]?.message,
+            type: eventErrors[error.message]?.type
+        })
+    }
+})
 
 // useUserEventsQuery - returns all the events for a user id
 router.get('/user/:user_id', [validToken, uuidValidation, result], async (req, res, next) => {
