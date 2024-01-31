@@ -1,5 +1,18 @@
 const db = require('../dbConfig');
 
+function getAccountType(accountNumber) {
+    switch (accountNumber) {
+        case process.env.CREATOR_ACCOUNT:
+            return 'creator';
+        case process.env.MANAGER_ACCOUNT:
+            return 'manager';
+        case process.env.ADMIN_ACCOUNT:
+            return 'admin';
+        default:
+            return 'basic';
+    }
+}
+
 module.exports = {
     getBusinessRoles,
     getAllUserRoles,
@@ -42,32 +55,55 @@ async function getBusinessRoles(business_id) {
 // .get('ROLES/users/:user_id') - returns array of ALL roles (active/inactive) for a selected user id
 // if NO ROLES or NO USER ID is found -> will return 200 and an empty array []
 async function getAllUserRoles(user_id) {
-    return db('roles')
-        .where({ user_id: user_id })
-        .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
-        .select(
-            [
-                'roles.id',
-                'roles.business_id',
-                'roles.role_type',
-                'roles.active_role',
-                'businesses.business_name'
-            ]
-        )
-        .orderBy('roles.role_type', 'desc')
+    try {
+        const roles = await db('roles')
+            .where({ user_id: user_id })
+            .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
+            .select(
+                [
+                    'roles.id',
+                    'roles.business_id',
+                    'roles.role_type',
+                    'roles.active_role',
+                    'businesses.business_name'
+                ]
+            )
+            .orderBy('roles.role_type', 'desc')
+        
+        return roles.map(role => ({
+            ...role,
+            role_type: getAccountType(role.role_type)
+        }))
+    } catch (error) {
+        console.error(`Error fetching user roles, ${error}`)
+        throw new Error('server_error')
+    }
 }
 
 // .get('ROLES/users/:user_id/account-role) - returns highest active role type for a user
 async function getUserAccountRole(user_id) {
-    return db('roles')
-        .where({ user_id: user_id, active_role: true })
-        .select(
-            [
-                'roles.role_type',
-            ]
-        )
-        .orderBy('roles.role_type', 'desc')
-        .first()
+    try {
+        // IF ROLES ARE NOT FOUND, BASIC ACCOUNT TYPE RETURNED AS SUCCESS 
+        const role = await db('roles')
+            .where({ user_id: user_id, active_role: true })
+            .select(
+                [
+                    'roles.role_type',
+                ]
+            )
+            .orderBy('roles.role_type', 'desc')
+            .first()
+        
+        return role ? { ...role, role_type: getAccountType(role.role_type) } : { role_type: 'basic' }
+    } catch (error) {
+        // 'INVALID TEXT REPRESENTATION from postgresql error.code
+        if (error?.code === '22P02') {
+            throw new Error('server_error')
+        } else {
+            console.error(`Error fetching user account role - code: ${error?.code}, routine: ${error?.routine}`)
+            throw new Error('server_error')
+        }
+    }
 }
 
 // .post('ROLES/businesses/:business_id/role-requests') - creates a new role request with business and user ids

@@ -52,6 +52,11 @@ const roleErrors = {
         status: 400,
         message: 'delete failed - server delete error',
         type: 'server'
+    },
+    server_error: {
+        status: 400,
+        message: 'an internal server error occurred',
+        type: 'server'
     }
 }
 
