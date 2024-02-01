@@ -38,7 +38,7 @@ const businessErrors = {
     // .get('/managed') - fallback for server error
     server_error: {
         status: 400,
-        message: 'a server error has occured',
+        message: 'an internal server error has occured',
         type: 'server'
     },
     // business database error.contraint

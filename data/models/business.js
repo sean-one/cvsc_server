@@ -17,31 +17,38 @@ module.exports = {
 };
 
 // .get('BUSINESSES/)
-function getAllBusinesses() {
-    return db('businesses')
-        // .where({ active_business: true })
-        .leftJoin('users', 'businesses.business_admin', '=', 'users.id')
-        .select(
-            [
-                'businesses.id',
-                'businesses.business_name',
-                'businesses.formatted_address',
-                'businesses.place_id',
-                'businesses.business_avatar',
-                'businesses.business_description',
-                'businesses.business_type',
-                'businesses.business_request_open',
-                'businesses.active_business',
-                'businesses.business_admin',
-                'users.username as admin_user',
-                'businesses.business_email',
-                'businesses.business_phone',
-                'businesses.business_instagram',
-                'businesses.business_facebook',
-                'businesses.business_website',
-                'businesses.business_twitter',
-            ]
-        )
+async function getAllBusinesses() {
+    try {
+        const all_business_list = await db('businesses')
+            // .where({ active_business: true })
+            .leftJoin('users', 'businesses.business_admin', '=', 'users.id')
+            .select(
+                [
+                    'businesses.id',
+                    'businesses.business_name',
+                    'businesses.formatted_address',
+                    'businesses.place_id',
+                    'businesses.business_avatar',
+                    'businesses.business_description',
+                    'businesses.business_type',
+                    'businesses.business_request_open',
+                    'businesses.active_business',
+                    'businesses.business_admin',
+                    'users.username as admin_user',
+                    'businesses.business_email',
+                    'businesses.business_phone',
+                    'businesses.business_instagram',
+                    'businesses.business_facebook',
+                    'businesses.business_website',
+                    'businesses.business_twitter',
+                ]
+            )
+        
+        return all_business_list;
+    } catch (error) {
+        console.error(`Error fetching list of businesses, ${error}`)
+        throw new Error('server_error')
+    }
 }
 
 // .put('BUSINESSES/:business_id)
