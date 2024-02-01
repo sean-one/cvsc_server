@@ -36,20 +36,31 @@ module.exports = {
 
 // .get('ROLES/businesses/:business_id') - returns array of roles for a selected business (ACTIVE/INACTIVE)
 async function getBusinessRoles(business_id) {
-    return db('roles')
-        .where({ 'roles.business_id': business_id })
-        .leftJoin('users', 'roles.user_id', '=', 'users.id')
-        .select(
-            [
-                'roles.id',
-                'roles.user_id',
-                'users.username',
-                'roles.business_id',
-                'roles.role_type',
-                'roles.active_role',
-                'roles.approved_by',
-            ]
-        )
+    try {
+        const business_roles = await db('roles')
+            .where({ 'roles.business_id': business_id })
+            .leftJoin('users', 'roles.user_id', '=', 'users.id')
+            .select(
+                [
+                    'roles.id',
+                    'roles.user_id',
+                    'users.username',
+                    'roles.business_id',
+                    'roles.role_type',
+                    'roles.active_role',
+                    'roles.approved_by',
+                ]
+            )
+        
+            return business_roles.map(role => ({
+                ...role,
+                role_type: getAccountType(role.role_type)
+            }))
+
+    } catch (error) {
+        console.error(`Error fetching business roles, ${error}`)
+        throw new Error('server_error')
+    }
 }
 
 // .get('ROLES/users/:user_id') - returns array of ALL roles (active/inactive) for a selected user id
@@ -115,7 +126,7 @@ async function createRoleRequest(business_id, user_id) {
                 business_id: business_id
             }, ['id'])
     
-        return await db('roles')
+        const new_role = await db('roles')
             .where({ 'roles.id': created_role.id })
             .join('businesses', 'roles.business_id', '=', 'businesses.id')
             .select(
@@ -128,6 +139,8 @@ async function createRoleRequest(business_id, user_id) {
                 ]
             )
             .first()
+        
+        return { ...new_role, role_type: getAccountType(new_role.role_type) }
     } catch (error) {
         throw new Error('db_insert_error');
     }
