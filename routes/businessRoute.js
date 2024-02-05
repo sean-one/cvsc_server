@@ -140,10 +140,9 @@ router.get('/:business_id', [uuidValidation, result], async (req, res, next) => 
 
         if (business === undefined) {
             throw new Error('business_not_found')
+        } else {
+            res.status(200).json(business);
         }
-
-        res.status(200).json(business);
-
     } catch (error) {
         next({
             status: businessErrors[error.message]?.status,

@@ -62,7 +62,7 @@ router.get('/business/:business_id', [uuidValidation, result], async (req, res, 
 router.get('/event-related/:event_id', [uuidValidation, result], async (req, res, next) => {
     try {
         const { event_id } = req.params;
-        
+
         const event_related_events = await db.getEventRelatedEvents(event_id)
 
         res.status(200).json(event_related_events)
