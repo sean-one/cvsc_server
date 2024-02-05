@@ -13,7 +13,6 @@ const {
     validateImageFile,
     uuidValidation,
     result,
-    validateBusinessManagement,
     validateEventBusinessRemove,
     formatValidationCheck,
     validateEventBusinessRoles
@@ -202,7 +201,7 @@ router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, 
 router.get('/', async (req, res, next) => {
     try {
         const events = await db.getAllEvents()
-            
+        
         res.status(200).json(events);
     } catch (error) {
         next({
