@@ -77,7 +77,6 @@ router.get('/users/:user_id/account-role', [validToken, uuidValidation, result],
         if (req.user_decoded !== user_id) { throw new Error('invalid_user') }
 
         const account_role = await db.getUserAccountRole(user_id)
-        console.log('ACCOUNT ROLE', account_role)
 
         res.status(200).json(account_role)
     } catch (error) {
@@ -93,7 +92,6 @@ router.get('/users/:user_id/account-role', [validToken, uuidValidation, result],
 router.post('/businesses/:business_id/role-requests', [validToken, uuidValidation, formatValidationCheck, validateRoleRequest, result], async (req, res, next) => {
     try {
         const { business_id } = req.params
-    
         const role_request = await db.createRoleRequest(business_id, req.user_decoded)
 
         res.status(201).json(role_request)

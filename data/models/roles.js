@@ -134,6 +134,7 @@ async function createRoleRequest(business_id, user_id) {
                     'roles.id',
                     'roles.business_id',
                     'businesses.business_name',
+                    'roles.user_id',
                     'roles.role_type',
                     'roles.active_role'
                 ]
@@ -225,6 +226,10 @@ async function deleteRole(role_id) {
                 .transacting(trx)    
                 .where({ id: role_id })
                 .first();
+            const { business_name } = await db('businesses')
+                .transacting(trx)
+                .where({ id: business_id })
+                .first()
             
             await db('events')
                 .transacting(trx)
@@ -241,7 +246,7 @@ async function deleteRole(role_id) {
                 .where({ id: role_id })
                 .del()
         
-            return { business_id, user_id }
+            return { business_id, user_id, business_name }
         })
     } catch (error) {
         throw new Error('delete_error')
