@@ -53,6 +53,11 @@ const eventErrors = {
         message: 'an error occured during image upload',
         type: 'media_error'
     },
+    delete_error: {
+        status: 400,
+        message: 'event delete failed on server',
+        type: 'server'
+    },
     // event models generic try catch error
     server_error: {
         status: 500,

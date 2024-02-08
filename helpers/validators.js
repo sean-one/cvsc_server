@@ -452,9 +452,6 @@ const validateEventBusinessRoles = async (req, res, next) => {
         current_brand = brand_id;
     }
 
-    console.log(`venue: ${current_venue}`)
-    console.log(`brand: ${current_brand}`)
-
     const { venue_id = current_venue, brand_id = current_brand } = req.body;
 
     const isVenueCreator = await rolesDB.checkForRole(venue_id, user_id);

@@ -356,25 +356,42 @@ async function updateEvent(event_id, eventChanges) {
 
 // .put('EVENTS/businesses/:business_id/events/:event_id')
 async function removeEventBusiness(event_id, business_id) {
-    let eventUpdates = { active_event: false }
-    const current_event = await db('events').where({ id: event_id }).select(['venue_id', 'brand_id']).first()
-
-    if (current_event.venue_id === business_id) {
-        eventUpdates.venue_id = null
+    try {
+        let eventUpdates = { active_event: false }
+        const current_event = await db('events').where({ id: event_id }).select(['venue_id', 'brand_id']).first()
+    
+        if (current_event.venue_id === business_id) {
+            eventUpdates.venue_id = null
+        }
+    
+        if (current_event.brand_id === business_id) {
+            eventUpdates.brand_id = null
+        }
+    
+        await db('events')
+            .where({ id: event_id })
+            .update(eventUpdates, ['events.id as event_id'])
+        
+        console.log(`made it to the end of the removeEventBusiness db model`)
+        return { event_id, business_id }
+    } catch (error) {
+        console.log('ERROR IN DB removeEventBusiness')
+        console.log(error)
+        throw new Error('delete_error')
     }
-
-    if (current_event.brand_id === business_id) {
-        eventUpdates.brand_id = null
-    }
-
-    return db('events')
-        .where({ id: event_id })
-        .update(eventUpdates, ['events.id as event_id'])
 }
 
 // .delete('EVENTS/:event_id')
-function removeEvent(event_id) {
-    return db('events').where({ id: event_id }).first().del()
+async function removeEvent(event_id) {
+    try {
+        const { id: deleted_event_id, venue_id, brand_id, created_by } = await db('events').where({ id: event_id }).first()
+        await db('events').where({ id: event_id }).first().del()
+
+        return { deleted_event_id, venue_id, brand_id, created_by }
+        
+    } catch (error) {
+        throw new Error('delete_error')
+    }
 }
 
 // when a business adjust its business type between brand and venue,

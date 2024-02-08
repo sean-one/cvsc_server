@@ -27,10 +27,11 @@ const router = express.Router();
 router.put('/:event_id/remove/:business_id', [validToken, uuidValidation, formatValidationCheck, validateEventBusinessRemove, result], async (req, res, next) => {
     try {
         const { event_id, business_id } = req.params
+        const deleted_business = await db.removeEventBusiness(event_id, business_id)
 
-        await db.removeEventBusiness(event_id, business_id)
-
-        res.status(202).json({ event_id: event_id, business_id: business_id })
+        console.log('sending the deleted business return')
+        console.log(deleted_business)
+        res.status(201).json(deleted_business)
 
     } catch (error) {
         // 'token' - 401, 403 / 'server' - 403 / *path - 400
