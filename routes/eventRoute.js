@@ -34,6 +34,7 @@ router.put('/:event_id/remove/:business_id', [validToken, uuidValidation, format
         res.status(201).json(deleted_business)
 
     } catch (error) {
+        console.log(`route catch error: ${error}`)
         // 'token' - 401, 403 / 'server' - 403 / *path - 400
         next({
             status: eventErrors[error.message]?.status,
