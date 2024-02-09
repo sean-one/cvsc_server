@@ -29,12 +29,9 @@ router.put('/:event_id/remove/:business_id', [validToken, uuidValidation, format
         const { event_id, business_id } = req.params
         const deleted_business = await db.removeEventBusiness(event_id, business_id)
 
-        console.log('sending the deleted business return')
-        console.log(deleted_business)
         res.status(201).json(deleted_business)
 
     } catch (error) {
-        console.log(`route catch error: ${error}`)
         // 'token' - 401, 403 / 'server' - 403 / *path - 400
         next({
             status: eventErrors[error.message]?.status,

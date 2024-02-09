@@ -405,7 +405,6 @@ const validateEventBusinessRemove = async (req, res, next) => {
     const { business_id, event_id } = req.params;
 
     const isEventCreator = await eventsDB.validateCreatedBy(event_id, user_id)
-    console.log(isEventCreator)
 
     if (isEventCreator) {
         next()

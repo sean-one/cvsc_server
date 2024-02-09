@@ -372,11 +372,8 @@ async function removeEventBusiness(event_id, business_id) {
             .where({ id: event_id })
             .update(eventUpdates, ['events.id as event_id'])
         
-        console.log(`made it to the end of the removeEventBusiness db model`)
         return { event_id, business_id }
     } catch (error) {
-        console.log('ERROR IN DB removeEventBusiness')
-        console.log(error)
         throw new Error('delete_error')
     }
 }
