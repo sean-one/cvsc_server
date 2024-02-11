@@ -175,18 +175,24 @@ router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, 
     try {
         const check_link = /^(http|https)/g
         const { event_id } = req.params
-        const { eventmedia, eventname, venue_id, brand_id } = await db.getEventById(event_id)
+        const current_event = await db.getEventById(event_id)
+        console.log(current_event)
 
-        const deleteResponse = await db.removeEvent(event_id)
-
-        if (deleteResponse >= 1) {
-            // check for image hosted on s3 and delete if found
-            if (!check_link.test(eventmedia)) await deleteImageS3(eventmedia)
-
-            res.status(200).json({ user_id: req.user_decoded, eventname: eventname, venue_id: venue_id, brand_id: brand_id, event_id: event_id });
-        } else {
+        if(current_event === undefined) {
             throw new Error('event_not_found')
+        } else {
+            const deleteResponse = await db.removeEvent(event_id)
+    
+            if (deleteResponse >= 1) {
+                // check for image hosted on s3 and delete if found
+                if (!check_link.test(current_event?.eventmedia)) await deleteImageS3(current_event?.eventmedia)
+                
+                res.status(200).json({ eventname: current_event?.eventname });
+            } else {
+                throw new Error('event_not_found')
+            }
         }
+
     } catch (error) {
         next({
             status: eventErrors[error.message].status,

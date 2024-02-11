@@ -198,10 +198,10 @@ async function getAllEvents() {
 }
 
 // .get('EVENTS/:event_id') & validateEventUpdate - retuns an ACTIVE or INACTIVE event by id
-async function getEventById(eventId) {
+async function getEventById(event_id) {
     try {
         return await db('events')
-            .where({ 'events.id': eventId })
+            .where({ 'events.id': event_id })
             .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
             .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
             .leftJoin('users', 'events.created_by', '=', 'users.id')
@@ -381,10 +381,7 @@ async function removeEventBusiness(event_id, business_id) {
 // .delete('EVENTS/:event_id')
 async function removeEvent(event_id) {
     try {
-        const { id: deleted_event_id, venue_id, brand_id, created_by } = await db('events').where({ id: event_id }).first()
-        await db('events').where({ id: event_id }).first().del()
-
-        return { deleted_event_id, venue_id, brand_id, created_by }
+        return await db('events').where({ id: event_id }).first().del()
         
     } catch (error) {
         throw new Error('delete_error')

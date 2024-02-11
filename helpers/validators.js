@@ -211,9 +211,9 @@ const formatValidationCheck = async(req, res, next) => {
             message: error.msg,
             type: error.path
         })
+    } else {
+        next();
     }
-
-    next();
 }
 
 // .post('/register'), .post('EVENTS/')
