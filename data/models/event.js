@@ -69,7 +69,8 @@ async function getEventRelatedEvents(event_id) {
         const { venue_id, brand_id } = await db('events').where({ 'events.id': event_id }).first()
         
         return await db('events')
-            .where('events.active_event', true)
+            // Ensure eventdate and eventstart are in the future
+            .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere(function() {
                 if (venue_id !== null) {
                     this.where('events.venue_id', venue_id)
@@ -80,6 +81,7 @@ async function getEventRelatedEvents(event_id) {
                         .orWhere('events.brand_id', brand_id);
                 }
             })
+            .where('events.active_event', true)
             .andWhereNot('events.id', event_id)
             .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
             .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
@@ -108,7 +110,8 @@ async function getEventRelatedEvents(event_id) {
                     'users.username as event_creator'
                 ]
             )
-            .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`)
+            // Order by combined timestamp of eventdate and reformatted eventstart
+            .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 
     } catch (error) {
         console.error('Error fetching event related events', error)

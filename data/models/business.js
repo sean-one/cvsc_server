@@ -342,9 +342,9 @@ async function toggleBusinessRequest(business_id) {
 async function removeBusiness(business_id) {
     try {
         const check_link = /^(http|https)/g
-        const { business_avatar } = await db('businesses')
+        const { business_avatar, business_name } = await db('businesses')
             .where({ id: business_id })
-            .select([ 'businesses.business_avatar' ])
+            .select([ 'businesses.business_avatar', 'businesses.business_name' ])
             .first()
         
         const deleted_business = await db.transaction(async trx => {
@@ -383,7 +383,7 @@ async function removeBusiness(business_id) {
             }
         }
 
-        return { success, business_id };
+        return { success, business_id, business_name };
 
     } catch (error) {
         throw error

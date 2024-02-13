@@ -128,7 +128,7 @@ router.put('/:role_id/actions', [validToken, uuidValidation, formatValidationChe
         // upgrade business creator role to business manager role
         else if (action_type === 'upgrade') {
             const new_manager_role = await db.upgradeCreatorRole(role_id, management_id)
-
+            
             res.status(200).json(new_manager_role)
         }
 
