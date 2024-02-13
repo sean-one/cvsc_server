@@ -72,7 +72,16 @@ exports.up = async function (knex) {
             .inTable('users')
             .notNullable()
             .onDelete('cascade')
-
+        
+        businesses
+            .uuid('admin_fallback')
+            .unsigned()
+            .references('id')
+            .inTable('users')
+            .nullable()
+            .onDelete('SET NULL')
+            .defaultTo(null)
+        
         businesses.timestamps(true, true)
     })
 

@@ -15,6 +15,7 @@ function getAccountType(accountNumber) {
 
 module.exports = {
     getBusinessRoles,
+    getBusinessManagement,
     getAllUserRoles,
     getUserAccountRole,
     createRoleRequest,
@@ -60,6 +61,34 @@ async function getBusinessRoles(business_id) {
     } catch (error) {
         console.error(`Error fetching business roles, ${error}`)
         throw new Error('server_error')
+    }
+}
+
+// .get('ROLES/managers/:business_id') - returns array of roles for all managers of selected business
+async function getBusinessManagement(business_id) {
+    try {
+        const manager_roles = await db('roles')
+            .where({ 'roles.business_id': business_id, role_type: process.env.MANAGER_ACCOUNT })
+            .leftJoin('users', 'roles.user_id', '=', 'users.id')
+            .select(
+                [
+                    'roles.id',
+                    'roles.user_id',
+                    'users.username',
+                    'roles.business_id',
+                    'roles.role_type',
+                    'roles.active_role',
+                    'roles.approved_by',
+                ]
+            )
+
+            return manager_roles.map(role => ({
+                ...role,
+                role_type: getAccountType(role.role_type)
+            }))
+    } catch (error) {
+        console.error(`Error fetching business managers, ${error}`)
+        throw new Error('server_error')        
     }
 }
 

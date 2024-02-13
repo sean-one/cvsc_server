@@ -5,6 +5,7 @@ const roleErrors = require('../error_messages/roleErrors');
 const { validToken } = require('../helpers/jwt_helper');
 const {
     formatValidationCheck,
+    validateBusinessAdmin,
     validateBusinessManagement,
     validateRoleDelete,
     validateRoleAction,
@@ -38,6 +39,22 @@ router.get('/businesses/:business_id', [validToken, uuidValidation, formatValida
             })
         }
 
+    }
+})
+
+// useRolesApi - useBusinessManagerQuery
+router.get('/managers/:business_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessAdmin, result], async (req, res, next) => {
+    try {
+        const { business_id } = req.params
+        const business_management = await db.getBusinessManagement(business_id)
+
+        res.status(200).json(business_management)
+    } catch (error) {
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
     }
 })
 
