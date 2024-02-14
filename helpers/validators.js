@@ -174,6 +174,7 @@ const existenceChecks = oneOf([
     check('user_id').exists(),
     check('event_id').exists(),
     check('role_id').exists(),
+    check('manager_id').exists(),
 ], 'invalid and/or missing identifier in request');
 
 // check format IF EXISTS for business_id, user_id, event_id and role_id - 
@@ -190,6 +191,9 @@ const formatValidations = [
     check('role_id').if(check('role_id').exists()).trim()
         .matches(uuidPattern)
         .withMessage('role identifier is incorrectly formatted'),
+    check('manager_id').if(check('manager_id').exists()).trim()
+        .matches(uuidPattern)
+        .withMessage('manager identifier is incorrectly formatted'),
 ];
 
 // validates that at least one of business_id, user_id, event_id or role_id is present and all present are formated as uuid

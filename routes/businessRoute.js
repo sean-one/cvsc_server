@@ -182,8 +182,26 @@ router.put('/:business_id/status/toggle', [validToken, uuidValidation, formatVal
     }
 });
 
-// router.put('/:business_id/transfer')
 // router.put('/:business_id/address/remove')
+
+// useBusinessTransferMutation - business.admin.view tranfer business account and admin role to manager
+router.put('/:business_id/transfer/:manager_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessAdmin, result], async (req, res, next) => {
+    try {
+        const { business_id, manager_id } = req.params;
+        const user_id = req.user_decoded;
+
+        const transferResponse = await db.transferBusiness(business_id, manager_id, user_id)
+        console.log(transferResponse)
+        res.status(201).json(transferResponse)
+    } catch (error) {
+        next({
+            status: businessErrors[error.message]?.status,
+            message: businessErrors[error.message]?.message,
+            type: businessErrors[error.message]?.type,
+        })
+    }
+})
+
 
 // useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
 router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, updateBusinessValidator, validateImageFile, result], async (req, res, next) => {

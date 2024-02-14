@@ -9,6 +9,7 @@ module.exports = {
     updateBusiness,
     toggleActiveBusiness,
     toggleBusinessRequest,
+    transferBusiness,
     removeBusiness,
 
 
@@ -337,6 +338,33 @@ async function toggleBusinessRequest(business_id) {
                 ]
             )
             .first()
+}
+
+// .put('/:business_id/transfer/:manager_id')
+async function transferBusiness(business_id, manager_id, admin_id) {
+    try {
+        return await db.transaction(async trx => {
+            await db('roles')
+                .transacting(trx)
+                .where({ business_id: business_id, user_id: admin_id})
+                .update({ role_type: process.env.MANAGER_ACCOUNT, approved_by: manager_id})
+            
+            await db('roles')
+                .transacting(trx)
+                .where({ business_id: business_id, user_id: manager_id })
+                .update({ role_type: process.env.ADMIN_ACCOUNT, approved_by: manager_id })
+            
+            await db('businesses')
+                .transacting(trx)
+                .where({ id: business_id })
+                .update({ business_admin: manager_id })
+            
+            return { business_id }
+        })
+    } catch (error) {
+        console.error(`Error during business tranfer, ${error}`)
+        throw new Error('server_error')
+    }
 }
 
 // .delete('/business/remove/:business_id') - removes business account, roles, removes from events and marks inactive
