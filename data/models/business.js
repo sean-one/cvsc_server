@@ -74,7 +74,6 @@ function getBusinessById(business_id) {
                 'businesses.business_facebook',
                 'businesses.business_website',
                 'businesses.business_twitter',
-                'businesses.admin_fallback',
             ]
         )
         .first();
