@@ -358,7 +358,7 @@ async function transferBusiness(business_id, manager_id, admin_id) {
                 .where({ id: business_id })
                 .update({ business_admin: manager_id })
             
-            return { business_id }
+            return { business_id, admin_id }
         })
     } catch (error) {
         console.error(`Error during business tranfer, ${error}`)

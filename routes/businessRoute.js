@@ -191,7 +191,7 @@ router.put('/:business_id/transfer/:manager_id', [validToken, uuidValidation, fo
         const user_id = req.user_decoded;
 
         const transferResponse = await db.transferBusiness(business_id, manager_id, user_id)
-        console.log(transferResponse)
+        
         res.status(201).json(transferResponse)
     } catch (error) {
         next({
