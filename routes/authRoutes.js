@@ -98,11 +98,8 @@ router.get('/refresh', async (req, res) => {
             if(err || user_found.id !== decoded.user) return res.sendStatus(403)
             // get user information
             const accessToken = createAccessToken(decoded.user)
-            // find active roles attached to user
-            // const user_roles = await rolesDB.getAllUserRoles(decoded.user)
             // set the accesstoken to the user details
             user_found.accessToken = accessToken
-           
             res.json(user_found)
         }
     )
