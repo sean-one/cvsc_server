@@ -34,7 +34,7 @@ router.get('/user', [validToken], async (req, res, next) => {
 })
 
 // user.account - update_user
-router.post('/update', [ upload.single('avatar'), uuidValidation, validToken, updateUserValidator, validateImageFile, result ], async (req, res, next) => {
+router.post('/update', [ upload.single('avatar'), validToken, updateUserValidator, validateImageFile, result ], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const user_id = req.user_decoded
@@ -80,6 +80,7 @@ router.post('/update', [ upload.single('avatar'), uuidValidation, validToken, up
         res.status(201).json(user_details)
         
     } catch (error) {
+        console.log(error)
         next({
             status: userErrors[error.message]?.status,
             message: userErrors[error.message]?.message,

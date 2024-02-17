@@ -43,7 +43,8 @@ passport.use(
             
             // no user found - register user
             if (google_user.length === 0) {
-                let username = profile.displayName
+                let username = generateUsername();
+                // let username = profile.displayName
                 
                 // check for username duplicate
                 const found = await dbUser.checkUsernameDuplicate(username)
