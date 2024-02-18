@@ -18,6 +18,7 @@ const { loginUserValidator, registerUserValidator, result, validateImageFile } =
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
+// register.jsx
 router.post('/register', [upload.single('avatar'), registerUserValidator, validateImageFile, result], async (req, res, next) => {
     try {
         
@@ -55,7 +56,7 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
         })
 
     } catch (error) {
-        // console.log(error)
+        console.log(error)
         next({
             status: authErrors[error.message]?.status,
             message: authErrors[error.message]?.message,

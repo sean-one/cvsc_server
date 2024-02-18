@@ -168,7 +168,7 @@ function isValidTime(value) {
 
 //! MIDDLEWARE VALIDATIONS
 //! ======================
-// check that at least one is present (business_id, user_id, event_id or role_id)
+// check that at least one is present (business_id, user_id, event_id, role_id or manager_id)
 const existenceChecks = oneOf([
     check('business_id').exists(),
     check('user_id').exists(),
@@ -478,7 +478,7 @@ const validateEventBusinessRoles = async (req, res, next) => {
 // .post('/register')
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
-        .isLength({ min: 3, max: 50 }).withMessage('invalid username length')
+        .isLength({ min: 4, max: 50 }).withMessage('invalid username length')
         .custom(isUsernameValid)
         .custom(isUsernameUnique)
         .escape(),
@@ -494,7 +494,7 @@ const registerUserValidator = [
 // .post('/login')
 const loginUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
-        .isLength({ min: 3, max: 50 }).withMessage('invalid username length')
+        .isLength({ min: 4, max: 50 }).withMessage('invalid username length')
         .custom(isUsernameValid)
         .escape(),
     check('password').trim().not().isEmpty().withMessage('password is required')
@@ -505,7 +505,7 @@ const loginUserValidator = [
 
 const updateUserValidator = [
     check('username').trim().optional()
-        .isLength({ min: 3, max: 50 }).withMessage('invalid username length')
+        .isLength({ min: 4, max: 50 }).withMessage('invalid username length')
         .custom(isUsernameValid)
         .custom(isUsernameUnique)
         .escape(),
