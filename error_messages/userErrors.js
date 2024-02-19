@@ -27,7 +27,17 @@ const userErrors = {
         status: 500,
         message: 'user delete failed',
         type: 'server'
-    }
+    },
+
+
+
+    
+    // generic server errors
+    create_user_server_error: {
+        status: 400,
+        message: 'server error while creating user',
+        type: 'server'
+    },
 }
 
 module.exports = userErrors;

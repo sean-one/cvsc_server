@@ -17,16 +17,21 @@ module.exports = {
 
 // register - createUser
 async function createUser(user) {
-    return await db('users')
-        .insert(user, [
-            'id',
-            'username',
-            'email',
-            'avatar',
-        ])
+    try {
+        return await db('users')
+            .insert(user, [
+                'id',
+                'username',
+                'email',
+                'avatar',
+            ])
+    } catch (error) {
+        console.error('Error creating new user:', error);
+        throw new Error('create_user_server_error')
+    }
 }
 
-//! passport-config - serialize user
+// passport-config - serialize user
 async function addRefreshToken(id, token) {
     return await db('users')
         .where({ id: id })
@@ -70,7 +75,16 @@ async function findUserById(id) {
 
 // passport-config - deserialize user
 async function getUserAccount(id) {
-    const user = await db('users').where({ 'users.id': id }).select(['users.id', 'users.username', 'users.avatar', 'users.email',]).first()
+    const user = await db('users')
+        .where({ 'users.id': id })
+        .select(
+            [
+                'users.id',
+                'users.username',
+                'users.avatar',
+                'users.email',
+            ]
+        ).first()
     const active_user_roles = await db('roles').where({ 'roles.user_id': id, 'roles.active_role': true }).select(['roles.business_id', 'roles.role_type']).orderBy('role_type', 'desc')
     
     return { user: user, roles: active_user_roles || [] }
@@ -90,7 +104,7 @@ async function findByGoogleId(google_id) {
         )
 }
 
-//! passport-config - check_user
+// passport-config - local strategy - check_user
 function findByUsername(username) {
     return db('users')
         .where({ username: username })

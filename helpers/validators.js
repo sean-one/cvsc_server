@@ -478,12 +478,12 @@ const validateEventBusinessRoles = async (req, res, next) => {
 // .post('/register')
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
-        .isLength({ min: 4, max: 50 }).withMessage('invalid username length')
+        .isLength({ min: 4, max: 50 }).withMessage('invalid username format')
         .custom(isUsernameValid)
         .custom(isUsernameUnique)
         .escape(),
     check('password').trim().not().isEmpty().withMessage('password is required')
-        .isLength({ min: 8, max: 50}).withMessage('invalid password length')
+        .isLength({ min: 8, max: 50}).withMessage('invalid password format')
         .custom(validatePassword)
         .escape(),
     check('email').trim().not().isEmpty().withMessage('email is required')
@@ -494,11 +494,11 @@ const registerUserValidator = [
 // .post('/login')
 const loginUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
-        .isLength({ min: 4, max: 50 }).withMessage('invalid username length')
+        .isLength({ min: 4, max: 50 }).withMessage('invalid username format')
         .custom(isUsernameValid)
         .escape(),
     check('password').trim().not().isEmpty().withMessage('password is required')
-        .isLength({ min: 8, max: 50 }).withMessage('invalid password length')
+        .isLength({ min: 8, max: 50 }).withMessage('invalid password format')
         .custom(validatePassword)
         .escape(),
 ]

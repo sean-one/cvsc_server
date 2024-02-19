@@ -14,11 +14,13 @@ const authErrors = {
         message: 'invalid username format',
         type: 'username'
     },
+    // passport-config - local strategy
     incomplete_input: {
         status: 400,
         message: 'please fill all required inputs',
         type: 'credentials'
     },
+    // passport-config - local strategy
     invalid_credentials: {
         status: 400,
         message: 'invalid username and or password',

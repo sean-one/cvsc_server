@@ -51,12 +51,11 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
             await userDB.addRefreshToken(user.id, refreshToken)
 
             res.cookie('jwt', refreshToken)
-            console.log(user)
+            
             res.status(201).json(user)
         })
 
     } catch (error) {
-        console.log(error)
         next({
             status: authErrors[error.message]?.status,
             message: authErrors[error.message]?.message,
@@ -65,6 +64,7 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
     }
 })
 
+// login.jsx
 router.post('/login', loginUserValidator, result, passport.authenticate('local', {
     failureRedirect: '/auth/login/failed',
     failWithError: true,
@@ -72,6 +72,7 @@ router.post('/login', loginUserValidator, result, passport.authenticate('local',
 }), async (req, res) => {
     
     const user = req.user
+    console.log(req.user)
     
     res.cookie('jwt', user.refreshToken)
     // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
