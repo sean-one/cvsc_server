@@ -16,22 +16,22 @@ const upload = multer({ storage: storage })
 const router = express.Router();
 
 // get user account
-router.get('/user', [validToken], async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded
-        console.log(`user_id: ${user_id}`)
-        const user_details = await db.findUserById(user_id)
+// router.get('/user', [validToken], async (req, res, next) => {
+//     try {
+//         const user_id = req.user_decoded
+//         console.log(`user_id: ${user_id}`)
+//         const user_details = await db.findUserById(user_id)
 
-        res.status(200).json(user_details)
-    } catch (error) {
-        console.log(error)
-        next({
-            status: userErrors[error.message]?.status,
-            message: userErrors[error.message]?.message,
-            type: userErrors[error.message]?.type, 
-        })
-    }
-})
+//         res.status(200).json(user_details)
+//     } catch (error) {
+//         console.log(error)
+//         next({
+//             status: userErrors[error.message]?.status,
+//             message: userErrors[error.message]?.message,
+//             type: userErrors[error.message]?.type, 
+//         })
+//     }
+// })
 
 // user.account - update_user
 router.post('/update', [ upload.single('avatar'), validToken, updateUserValidator, validateImageFile, result ], async (req, res, next) => {
@@ -39,7 +39,10 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
         const check_link = /^(http|https)/g
         const user_id = req.user_decoded
         const user_changes = {}
-        const user = await db.findUserById(user_id)
+        const user = await db.findUserById('7e21c54d-b447-4771-ad82-9bec1d16a111')
+
+        console.log('here is the found user')
+        console.log(user)
 
         if(req.body?.username) {
             user_changes.username = req.body.username
@@ -52,7 +55,6 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
         if(req.body?.password) {
             // hash and save password
             const hash = await hashPassword(req.body.password)
-            console.log(hash)
             user_changes.password = hash
         }
 
@@ -73,11 +75,13 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
             user_changes.avatar = image_key
         }
 
-        if(Object.keys(user_changes).length === 0) throw new Error('empty_object')
-
-        const user_details = await db.updateUser(user_id, user_changes)
-
-        res.status(201).json(user_details)
+        if (Object.keys(user_changes).length !== 0) {
+            const user_details = await db.updateUser(user_id, user_changes)
+    
+            res.status(201).json(user_details)
+        } else {
+            throw new Error('empty_object')
+        }
         
     } catch (error) {
         console.log(error)

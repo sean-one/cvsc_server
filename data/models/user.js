@@ -62,15 +62,20 @@ async function findByRefresh(token) {
 
 // userRoute - '.post(/users/update)'
 async function findUserById(id) {
-    return await db('users')
-        .where({ 'users.id': id })
-        .select([
-            'users.id',
-            'users.username',
-            'users.avatar',
-            'users.email'
-        ])
-        .first()
+    try {
+        return await db('users')
+            .where({ 'users.id': id })
+            .select([
+                'users.id',
+                'users.username',
+                'users.avatar',
+                'users.email'
+            ])
+            .first()
+    } catch (error) {
+        console.error('Error finding user by id:', error)
+        throw new Error('user_find_id_server_error')
+    }
 }
 
 // passport-config - deserialize user

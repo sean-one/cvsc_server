@@ -38,6 +38,11 @@ const userErrors = {
         message: 'server error while creating user',
         type: 'server'
     },
+    user_find_id_server_error: {
+        status: 400,
+        message: 'server error finding user by id',
+        type: 'server'
+    },
 }
 
 module.exports = userErrors;
