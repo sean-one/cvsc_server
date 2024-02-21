@@ -92,6 +92,37 @@ async function updateUser(user_id, updates) {
     }
 }
 
+// authRoute - '/logout' & '/refresh'
+async function findByRefresh(token) {
+    try {
+        return await db('users')
+            .where({ refreshToken: token })
+            .select(
+                [
+                    'users.id',
+                    'users.username',
+                    'users.avatar',
+                    'users.email'
+                ]
+            )
+            .first()
+    } catch (error) {
+        console.error('Error finding user by refresh:', error)
+        throw new Error('user_find_refresh_server_error')
+    }
+}
+
+// authRoute - '/logout'
+async function removeRefreshToken(user_id) {
+    try {
+        return await db('users')
+            .where({ id: user_id })
+            .update({ refreshToken: null })
+    } catch (error) {
+        console.error('Error removing user refresh:', error)
+        throw new Error('user_remove_refresh_server_error')
+    }
+}
 
 
 // passport-config - serialize user
@@ -99,28 +130,6 @@ async function addRefreshToken(id, token) {
     return await db('users')
         .where({ id: id })
         .update({ refreshToken: token })
-}
-
-//! authRoute - '/logout'
-async function removeRefreshToken(user_id) {
-    return await db('users')
-        .where({ id: user_id })
-        .update({ refreshToken: null })
-}
-
-//! authRoute - '/logout' & '/refresh'
-async function findByRefresh(token) {
-    return await db('users')
-        .where({ refreshToken: token })
-        .select(
-            [
-                'users.id',
-                'users.username',
-                'users.avatar',
-                'users.email'
-            ]
-        )
-        .first()
 }
 
 

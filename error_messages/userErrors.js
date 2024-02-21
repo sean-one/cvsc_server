@@ -59,6 +59,16 @@ const userErrors = {
         status: 400,
         message: 'server error finding user by username',
         type: 'server'
+    },
+    user_find_refresh_server_error: {
+        status: 400,
+        message: 'server error finding user by refresh',
+        type: 'server'
+    },
+    user_remove_refresh_server_error: {
+        status: 400,
+        message: 'server error remove user refresh',
+        type: 'server'
     }
 }
 

@@ -136,25 +136,33 @@ router.get('/login/failed', (req, res) => {
 })
 
 router.get('/logout', async (req, res, next) => {
-    const cookies = req.cookies;
-
-    // no jwt cookie was found so no need to erase
-    if(!cookies?.jwt) return res.sendStatus(204)
-    const refreshToken = cookies.jwt;
-
-    const user_found = await userDB.findByRefresh(refreshToken)
+    try {
+        const cookies = req.cookies;
     
-    if(!user_found) {
-        // refresh token not found, remove cookie and send 204
-        res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true });
-        return res.sendStatus(204)
+        // no jwt cookie was found so no need to erase
+        if(!cookies?.jwt) return res.sendStatus(204)
+        const refreshToken = cookies.jwt;
+    
+        const user_found = await userDB.findByRefresh(refreshToken)
+        
+        if(!user_found) {
+            // refresh token not found, remove cookie and send 204
+            res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true });
+            return res.sendStatus(204)
+        }
+    
+        // user found, removed from selected user and clear cookie
+        await userDB.removeRefreshToken(user_found.id)
+        
+        res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
+        res.sendStatus(204)
+    } catch (error) {
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
     }
-
-    // user found, removed from selected user and clear cookie
-    await userDB.removeRefreshToken(user_found.id)
-    
-    res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
-    res.sendStatus(204)
 
 })
 
