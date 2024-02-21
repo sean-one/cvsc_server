@@ -49,6 +49,27 @@ async function findUserById(id) {
     }
 }
 
+// passport-config - local strategy - check_user
+function findByUsername(username) {
+    try {
+        return db('users')
+            .where({ username: username })
+            .select(
+                [
+                    'users.id',
+                    'users.username',
+                    'users.avatar',
+                    'users.email',
+                    'users.password'
+                ]
+            )
+            .first()
+    } catch (error) {
+        console.error('Error finding user by username:', error)
+        throw new Error('user_find_username_server_error')
+    }
+}
+
 // userRoute - '/users/update'
 async function updateUser(user_id, updates) {
     try {
@@ -133,22 +154,6 @@ async function findByGoogleId(google_id) {
                 'users.email'
             ]
         )
-}
-
-// passport-config - local strategy - check_user
-function findByUsername(username) {
-    return db('users')
-        .where({ username: username })
-        .select(
-            [
-                'users.id',
-                'users.username',
-                'users.avatar',
-                'users.email',
-                'users.password'
-            ]
-        )
-        .first()
 }
 
 // check for username duplicate and retur username if found

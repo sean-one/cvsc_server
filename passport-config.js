@@ -10,6 +10,7 @@ const { comparePassword } = require('./helpers/bcrypt_helper');
 const { createAccessToken, createRefreshToken } = require('./helpers/jwt_helper');
 const { generateUsername } = require('./helpers/generateUsername');
 const authErrors = require('./error_messages/authErrors');
+const userErrors = require('./error_messages/userErrors');
 
 passport.serializeUser(async (user, done) => {
     const accessToken = createAccessToken(user.id)
@@ -102,9 +103,9 @@ passport.use(
             } catch (error) {
 
                 return done({
-                    status: authErrors[error.message]?.status,
-                    message: authErrors[error.message]?.message,
-                    type: authErrors[error.message]?.type
+                    status: userErrors[error.message]?.status,
+                    message: userErrors[error.message]?.message,
+                    type: userErrors[error.message]?.type
                 }, false)
             }
         }

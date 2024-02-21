@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken')
 const router = express.Router();
 
 const authErrors = require('../error_messages/authErrors');
+const userErrors = require('../error_messages/userErrors');
 const { createAccessToken, createRefreshToken } = require('../helpers/jwt_helper');
 const { uploadImageS3Url } = require('../s3');
 const { hashPassword } = require('../helpers/bcrypt_helper');
@@ -57,9 +58,9 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
 
     } catch (error) {
         next({
-            status: authErrors[error.message]?.status,
-            message: authErrors[error.message]?.message,
-            type: authErrors[error.message]?.type,
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
         })
     }
 })
@@ -72,7 +73,6 @@ router.post('/login', loginUserValidator, result, passport.authenticate('local',
 }), async (req, res) => {
     
     const user = req.user
-    console.log(req.user)
     
     res.cookie('jwt', user.refreshToken)
     // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })

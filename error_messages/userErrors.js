@@ -17,6 +17,18 @@ const userErrors = {
         message: 'image upload error',
         type: 'avatar'
     },
+    // passport-config - local strategy
+    incomplete_input: {
+        status: 400,
+        message: 'please fill in all required fields',
+        type: 'server'
+    },
+    // passport-config - local strategy
+    invalid_credentials: {
+        status: 400,
+        message: 'invalid credentials server error',
+        type: 'server'
+    },
     delete_failed: {
         status: 500,
         message: 'user delete failed',
@@ -43,6 +55,11 @@ const userErrors = {
         message: 'server error updating user',
         type: 'server'
     },
+    user_find_username_server_error: {
+        status: 400,
+        message: 'server error finding user by username',
+        type: 'server'
+    }
 }
 
 module.exports = userErrors;
