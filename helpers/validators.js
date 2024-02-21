@@ -220,7 +220,7 @@ const formatValidationCheck = async(req, res, next) => {
     }
 }
 
-// .post('/register'), .post('EVENTS/')
+// .post('USERS/update'), .post('/register'), .post('EVENTS/')
 const validateImageFile = async (req, res, next) => {
     const exceptedFileTypes = ['png', 'jpg', 'jpeg', 'webp'];
     if(!req.file) {
@@ -503,6 +503,7 @@ const loginUserValidator = [
         .escape(),
 ]
 
+// .post('USERS/update')
 const updateUserValidator = [
     check('username').trim().optional()
         .isLength({ min: 4, max: 50 }).withMessage('invalid username length')

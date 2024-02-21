@@ -3,15 +3,15 @@ const { deleteImageS3 } = require('../../s3');
 
 module.exports = {
     createUser,
+    findUserById,
+    updateUser,
     addRefreshToken,
     removeRefreshToken,
     findByRefresh,
-    findUserById,
     getUserAccount,
     findByGoogleId,
     findByUsername,
     checkUsernameDuplicate,
-    updateUser,
     removeUser,
 };
 
@@ -30,6 +30,48 @@ async function createUser(user) {
         throw new Error('create_user_server_error')
     }
 }
+
+// userRoute - '.post(/users/update)'
+async function findUserById(id) {
+    try {
+        return await db('users')
+            .where({ 'users.id': id })
+            .select([
+                'users.id',
+                'users.username',
+                'users.avatar',
+                'users.email'
+            ])
+            .first()
+    } catch (error) {
+        console.error('Error finding user by id:', error)
+        throw new Error('user_find_id_server_error')
+    }
+}
+
+// userRoute - '/users/update'
+async function updateUser(user_id, updates) {
+    try {
+        await db('users').where({ id: user_id }).update(updates)
+    
+        return await db('users')
+            .where({ 'users.id': user_id })
+            .select(
+                [
+                    'users.id',
+                    'users.username',
+                    'users.avatar',
+                    'users.email',
+                ]
+            )
+            .first()
+    } catch (error) {
+        console.error('Error updating user:', error)
+        throw new Error('update_user_server_error')
+    }
+}
+
+
 
 // passport-config - serialize user
 async function addRefreshToken(id, token) {
@@ -60,23 +102,7 @@ async function findByRefresh(token) {
         .first()
 }
 
-// userRoute - '.post(/users/update)'
-async function findUserById(id) {
-    try {
-        return await db('users')
-            .where({ 'users.id': id })
-            .select([
-                'users.id',
-                'users.username',
-                'users.avatar',
-                'users.email'
-            ])
-            .first()
-    } catch (error) {
-        console.error('Error finding user by id:', error)
-        throw new Error('user_find_id_server_error')
-    }
-}
+
 
 // passport-config - deserialize user
 async function getUserAccount(id) {
@@ -131,13 +157,6 @@ function checkUsernameDuplicate(username) {
         .where(db.raw('LOWER(username) ILIKE ?', username.toLowerCase()))
         .select([ 'users.username' ])
         .first()
-}
-
-// userRoute - '/users/update'
-async function updateUser(user_id, updates) {
-    await db('users').where({ id: user_id }).update(updates)
-
-    return getUserAccount(user_id)
 }
 
 // userRoute - '/users/delete'

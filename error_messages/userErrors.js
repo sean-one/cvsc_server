@@ -1,37 +1,32 @@
 const userErrors = {
+    // .post('USERS/update') - user not found
     invalid_user: {
-        status: 400,
-        message: 'invalid user',
+        status: 404,
+        message: 'invalid user / user not found',
+        type: 'server'
     },
-    invalid_password_format: {
+    // .post('USERS/update')
+    empty_object: {
         status: 400,
-        message: 'invalid password formatting',
-        type: 'credentials'
+        message: 'no user updates submitted',
+        type: 'server'
     },
-    invalid_email_format: {
-        status: 400,
-        message: 'invalid email formatting',
-        type: 'email'
-    },
+    // .post('USERS/update')
     upload_error: {
         status: 400,
         message: 'image upload error',
         type: 'avatar'
-    },
-    empty_object: {
-        status: 400,
-        message: 'no changes found',
-        type: 'input'
     },
     delete_failed: {
         status: 500,
         message: 'user delete failed',
         type: 'server'
     },
-
-
-
-    
+    //
+    //
+    //
+    //
+    //
     // generic server errors
     create_user_server_error: {
         status: 400,
@@ -41,6 +36,11 @@ const userErrors = {
     user_find_id_server_error: {
         status: 400,
         message: 'server error finding user by id',
+        type: 'server'
+    },
+    update_user_server_error: {
+        status: 400,
+        message: 'server error updating user',
         type: 'server'
     },
 }

@@ -39,10 +39,11 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
         const check_link = /^(http|https)/g
         const user_id = req.user_decoded
         const user_changes = {}
-        const user = await db.findUserById('7e21c54d-b447-4771-ad82-9bec1d16a111')
+        const user = await db.findUserById(user_id)
 
-        console.log('here is the found user')
-        console.log(user)
+        if (user === undefined) {
+            throw new Error('invalid_user')
+        }
 
         if(req.body?.username) {
             user_changes.username = req.body.username
@@ -75,6 +76,7 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
             user_changes.avatar = image_key
         }
 
+        // make sure there are changes to be made
         if (Object.keys(user_changes).length !== 0) {
             const user_details = await db.updateUser(user_id, user_changes)
     
@@ -84,7 +86,6 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
         }
         
     } catch (error) {
-        console.log(error)
         next({
             status: userErrors[error.message]?.status,
             message: userErrors[error.message]?.message,
