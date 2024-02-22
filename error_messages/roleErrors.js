@@ -7,8 +7,8 @@ const roleErrors = {
     },
     // .get('ROLES/users/:user_id') - user_id in url param does not match user id in token
     invalid_user: {
-        status: 400,
-        message: 'invalid matching user request',
+        status: 401,
+        message: 'user authentication server error',
         type: 'server'
     },
     missing_input: {
@@ -57,8 +57,17 @@ const roleErrors = {
         status: 400,
         message: 'an internal server error occurred',
         type: 'server'
+    },
+    // generic server errors
+    get_user_account_role_server_error: {
+        status: 400,
+        message: 'server error getting user account role',
+        type: 'server'
     }
 }
+
+
+
 
 // database server errors
 //   - roles_user_id_business_id_unique

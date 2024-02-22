@@ -35,6 +35,32 @@ module.exports = {
     checkForRole,
 }
 
+// .get('ROLES/users/:user_id/account-role) - returns highest active role type for a user
+async function getUserAccountRole(user_id) {
+    try {
+        // IF ROLES ARE NOT FOUND, BASIC ACCOUNT TYPE RETURNED AS SUCCESS 
+        const role = await db('roles')
+            .where({ user_id: user_id, active_role: true })
+            .select(
+                [
+                    'roles.role_type',
+                ]
+            )
+            .orderBy('roles.role_type', 'desc')
+            .first()
+
+        return role ? { ...role, role_type: getAccountType(role.role_type) } : { role_type: 'basic' }
+    } catch (error) {
+        // 'INVALID TEXT REPRESENTATION from postgresql error.code '22P02'
+        console.error(`Error fetching user account role`, error)
+        throw new Error('get_user_account_role_server_error')
+    }
+}
+
+
+
+
+
 // .get('ROLES/businesses/:business_id') - returns array of roles for a selected business (ACTIVE/INACTIVE)
 async function getBusinessRoles(business_id) {
     try {
@@ -117,32 +143,6 @@ async function getAllUserRoles(user_id) {
     } catch (error) {
         console.error(`Error fetching user roles, ${error}`)
         throw new Error('server_error')
-    }
-}
-
-// .get('ROLES/users/:user_id/account-role) - returns highest active role type for a user
-async function getUserAccountRole(user_id) {
-    try {
-        // IF ROLES ARE NOT FOUND, BASIC ACCOUNT TYPE RETURNED AS SUCCESS 
-        const role = await db('roles')
-            .where({ user_id: user_id, active_role: true })
-            .select(
-                [
-                    'roles.role_type',
-                ]
-            )
-            .orderBy('roles.role_type', 'desc')
-            .first()
-        
-        return role ? { ...role, role_type: getAccountType(role.role_type) } : { role_type: 'basic' }
-    } catch (error) {
-        // 'INVALID TEXT REPRESENTATION from postgresql error.code
-        if (error?.code === '22P02') {
-            throw new Error('server_error')
-        } else {
-            console.error(`Error fetching user account role - code: ${error?.code}, routine: ${error?.routine}`)
-            throw new Error('server_error')
-        }
     }
 }
 

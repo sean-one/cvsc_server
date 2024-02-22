@@ -63,7 +63,7 @@ router.get('/users/:user_id', [validToken, uuidValidation, result], async (req, 
     try {
         const { user_id } = req.params
 
-        if (req.user_decoded !== user_id) { throw new Error('invalid_user') }
+        // if (req.user_decoded !== user_id) { throw new Error('invalid_user') }
 
         const user_roles = await db.getAllUserRoles(user_id)
 
