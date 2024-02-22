@@ -14,10 +14,6 @@ exports.up = async function (knex) {
         businesses.string('business_avatar')
 
         businesses.text('business_description', 'longtext')
-
-        businesses
-            .enu('business_type', ['brand', 'venue', 'both'])
-            .notNullable()
         
         businesses
             .string('formatted_address')
@@ -83,16 +79,6 @@ exports.up = async function (knex) {
         CHECK (
             (formatted_address IS NULL AND place_id IS NULL) OR
             (formatted_address IS NOT NULL AND place_id IS NOT NULL)
-        )
-    `);
-
-    // add a CHECK constraint to ensure 'formatted_address' and 'place_id' must both be true if 'business_type' is 'venue' or 'both'
-    await knex.schema.raw(`
-        ALTER TABLE businesses
-        ADD CONSTRAINT check_formatted_address_and_place_id_required
-        CHECK (
-            (business_type NOT IN ('venue', 'both')) OR
-            (business_type IN ('venue', 'both') AND formatted_address IS NOT NULL AND place_id IS NOT NULL)
         )
     `);
 };

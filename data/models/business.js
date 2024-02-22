@@ -31,7 +31,6 @@ async function getAllBusinesses() {
                     'businesses.place_id',
                     'businesses.business_avatar',
                     'businesses.business_description',
-                    'businesses.business_type',
                     'businesses.business_request_open',
                     'businesses.active_business',
                     'businesses.business_admin',
@@ -64,7 +63,6 @@ function getBusinessById(business_id) {
                 'businesses.place_id',
                 'businesses.business_avatar',
                 'businesses.business_description',
-                'businesses.business_type',
                 'businesses.business_request_open',
                 'businesses.active_business',
                 'businesses.business_admin',
@@ -105,7 +103,6 @@ async function getBusinessManagement(user_id) {
                     'businesses.place_id',
                     'businesses.business_avatar',
                     'businesses.business_description',
-                    'businesses.business_type',
                     'businesses.business_request_open',
                     'businesses.active_business',
                     'businesses.business_admin',
@@ -143,7 +140,7 @@ async function addBusiness(business) {
             // insert new business into database
             const added_business = await db('businesses')
                 .transacting(trx)
-                .insert(business, ['id', 'business_name', 'business_admin', 'business_type'])
+                .insert(business, ['id', 'business_name', 'business_admin'])
             
             // create a business_admin role for the user requesting the new business
             await db('roles')
@@ -169,7 +166,6 @@ async function addBusiness(business) {
                         'businesses.place_id',
                         'businesses.business_avatar',
                         'businesses.business_description',
-                        'businesses.business_type',
                         'businesses.business_request_open',
                         'businesses.active_business',
                         'businesses.business_admin',
@@ -197,24 +193,6 @@ async function updateBusiness(business_id, changes) {
     try {
         return await db.transaction(async trx => {
             
-            // remove business from any events listed as 'dispensary'
-            if (changes?.business_type === 'brand') {
-                console.log('updating events with business as dispensary')
-                await db('events')
-                .transacting(trx)
-                .where({ venue_id: business_id})
-                .update({ venue_id: null, active_event: false })
-            }
-            
-            // remove business from any events listed as 'brand'
-            if (changes?.business_type === 'venue') {
-                console.log('updating events with business as brand')
-                await db('events')
-                    .transacting(trx)
-                    .where({ brand_id: business_id })
-                    .update({ brand_id: null, active_event: false })
-            }
-
             await db('businesses').transacting(trx).where({ id: business_id }).update(changes)
         
             return db('businesses')
@@ -227,7 +205,6 @@ async function updateBusiness(business_id, changes) {
                     'businesses.place_id',
                     'businesses.business_avatar',
                     'businesses.business_description',
-                    'businesses.business_type',
                     'businesses.business_request_open',
                     'businesses.active_business',
                     'businesses.business_admin',
@@ -284,7 +261,6 @@ async function toggleActiveBusiness(business_id) {
                 'businesses.formatted_address',
                 'businesses.business_avatar',
                 'businesses.business_description',
-                'businesses.business_type',
                 'businesses.business_request_open',
                 'businesses.active_business',
                 'businesses.business_admin',
@@ -324,7 +300,6 @@ async function toggleBusinessRequest(business_id) {
                     'businesses.formatted_address',
                     'businesses.business_avatar',
                     'businesses.business_description',
-                    'businesses.business_type',
                     'businesses.business_request_open',
                     'businesses.active_business',
                     'businesses.business_admin',

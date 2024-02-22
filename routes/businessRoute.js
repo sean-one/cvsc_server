@@ -50,7 +50,6 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
         const new_business = {
             business_name: req.body.business_name,
             business_description: req.body.business_description,
-            business_type: req.body.business_type,
             business_email: req.body.business_email,
             business_admin: req.user_decoded,
             active_business: true,
@@ -225,7 +224,6 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
         // include only these fields, any additional fields will be left behind
         const fieldsToInclude = [
             'business_description',
-            'business_type',
             'formatted_address',
             'place_id',
             'business_email',
@@ -256,13 +254,6 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
                 if (error?.response?.status === 403) {
                     throw new Error('geocode_error')
                 }
-            }
-        }
-
-        // if attempting to change from business type other then brand, an address must be attached or already on the business
-        if (business_update?.business_type) { // Check if business_type is being updated
-            if (((business_update?.business_type === 'venue') || (business_update?.business_type === 'both')) && (!current_business?.place_id && !business_update?.place_id)) {
-                throw new Error('business_address_required');
             }
         }
 

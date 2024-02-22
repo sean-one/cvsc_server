@@ -525,10 +525,7 @@ const newBusinessValidator = [
         .isLength({ min: 4, max: 50 }).withMessage('business name must be between 4 and 50 characters')
         .custom(isBusinessNameUnique),
     check('business_description').trim().not().isEmpty().withMessage('business description is required'),
-    check('business_type').trim().not().isEmpty().withMessage('business type required')
-        .isIn(['brand','venue','both']).withMessage('invalid business type'),
-    check('place_id').if((value, { req }) => req.body['business_type'] !== 'brand')
-        .notEmpty().withMessage('business address is required')
+    check('place_id').trim().optional()
         .matches(googlePlaceIdFormat).withMessage('invalid google place id format')
         .escape(),
     check('business_email').trim().optional().isEmail().normalizeEmail().escape(),
@@ -550,9 +547,6 @@ const newBusinessValidator = [
 // put('BUSINESSES/:business_id)
 const updateBusinessValidator = [
     check('business_description').trim().optional(),
-    check('business_type').trim().optional()
-        .custom(isBusinessAdmin)
-        .isIn(['brand','venue','both']).withMessage('invalid business type'),
     check('place_id').trim().optional()
         .custom(isBusinessAdmin)
         .matches(googlePlaceIdFormat).withMessage('invalid google places id format')
