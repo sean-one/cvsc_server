@@ -63,30 +63,22 @@ router.get('/users/:user_id', [validToken, uuidValidation, result], async (req, 
     try {
         const { user_id } = req.params
 
-        // if (req.user_decoded !== user_id) { throw new Error('invalid_user') }
+        if (req.user_decoded !== user_id) { throw new Error('invalid_user') }
 
         const user_roles = await db.getAllUserRoles(user_id)
 
         res.status(200).json(user_roles)
 
     } catch (error) {
-        if (error?.routine) {
-            next({
-                status: roleErrors[error?.routine]?.status,
-                message: roleErrors[error?.routine]?.message,
-                type: roleErrors[error?.routine]?.type,
-            })
-        } else {
-            next({
-                status: roleErrors[error.message]?.status,
-                message: roleErrors[error.message]?.message,
-                type: roleErrors[error.message]?.type,
-            })
-        }
-
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
     }
 })
 
+// useRolesApi - useUserAccountRole
 router.get('/users/:user_id/account-role', [validToken, uuidValidation, result], async (req, res, next) => {
     try {
         const { user_id } = req.params

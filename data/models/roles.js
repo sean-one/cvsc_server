@@ -57,6 +57,33 @@ async function getUserAccountRole(user_id) {
     }
 }
 
+// .get('ROLES/users/:user_id') - returns array of ALL roles (active/inactive) for a selected user id
+// if NO ROLES or NO USER ID is found -> will return 200 and an empty array []
+async function getAllUserRoles(user_id) {
+    try {
+        const roles = await db('roles')
+            .where({ user_id: user_id })
+            .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
+            .select(
+                [
+                    'roles.id',
+                    'roles.business_id',
+                    'roles.role_type',
+                    'roles.active_role',
+                    'businesses.business_name'
+                ]
+            )
+            .orderBy('roles.role_type', 'desc')
+
+        return roles.map(role => ({
+            ...role,
+            role_type: getAccountType(role.role_type)
+        }))
+    } catch (error) {
+        console.error('Error fetching all user roles', error)
+        throw new Error('all_user_roles_server_error')
+    }
+}
 
 
 
@@ -118,33 +145,7 @@ async function getBusinessManagement(business_id) {
     }
 }
 
-// .get('ROLES/users/:user_id') - returns array of ALL roles (active/inactive) for a selected user id
-// if NO ROLES or NO USER ID is found -> will return 200 and an empty array []
-async function getAllUserRoles(user_id) {
-    try {
-        const roles = await db('roles')
-            .where({ user_id: user_id })
-            .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
-            .select(
-                [
-                    'roles.id',
-                    'roles.business_id',
-                    'roles.role_type',
-                    'roles.active_role',
-                    'businesses.business_name'
-                ]
-            )
-            .orderBy('roles.role_type', 'desc')
-        
-        return roles.map(role => ({
-            ...role,
-            role_type: getAccountType(role.role_type)
-        }))
-    } catch (error) {
-        console.error(`Error fetching user roles, ${error}`)
-        throw new Error('server_error')
-    }
-}
+
 
 // .post('ROLES/businesses/:business_id/role-requests') - creates a new role request with business and user ids
 async function createRoleRequest(business_id, user_id) {
