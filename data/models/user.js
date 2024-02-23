@@ -208,14 +208,6 @@ async function removeUser(user_id) {
         if(avatar !== undefined) { keys_to_delete = [ ...keys_to_delete, avatar ] }
 
         // set all events with businesses to be deleted as inactive
-        if(admin_businesses.length !== 0) {
-            admin_businesses.forEach(async business_id => {
-                await db('events')
-                    .where({ 'events.venue_id': business_id })
-                    .orWhere({ 'events.brand_id': business_id })
-                    .update({ active_event: false })
-            })
-        }
 
         // deletes user - CASCADES event creator, business admin, business roles
         const deleted_user = await db('users').where({ 'users.id': user_id }).del();

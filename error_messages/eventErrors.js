@@ -66,18 +66,6 @@ const eventErrors = {
 
     },
     //! constrain error from event model
-    events_venue_id_foreign: {
-        status: 404,
-        message: 'venue not found',
-        type: 'venue_id'
-    },
-    //! constrain error from event model
-    events_brand_id_foreign: {
-        status: 404,
-        message: 'brand not found',
-        type: 'brand_id'
-    },
-    //! constrain error from event model
     events_created_by_foreign: {
         status: 404,
         message: 'user not found',

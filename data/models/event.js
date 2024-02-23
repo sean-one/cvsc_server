@@ -1,14 +1,14 @@
 const db = require('../dbConfig');
 
 module.exports = {
-    getBusinessEvents,
-    getEventRelatedEvents,
+    // getBusinessEvents,
+    // getEventRelatedEvents,
     getUserEvents,
     getEventById,
     getAllEvents,
     createEvent,
     updateEvent,
-    removeEventBusiness,
+    // removeEventBusiness,
     removeEvent,
 
     checkEventName,
@@ -16,106 +16,96 @@ module.exports = {
 };
 
 // .get('EVENTS/business/:business_id') - returns array of ACTIVE events for specific business id
-async function getBusinessEvents(business_id) {
-    try {
-        return await db('events')
-            // Ensure eventdate and eventstart are in the future
-            .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
-            // Match either brand_id or venue_id with the provided business_id
-            .andWhere(function () {
-                this.where('events.brand_id', '=', business_id)
-                    .orWhere('events.venue_id', '=', business_id)
-            })
-            // Remove inactive events from event list return
-            .andWhere({ active_event: true })
-            .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
-            .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
-            .join('users', 'events.created_by', '=', 'users.id')
-            .select([
-                'events.id as event_id',
-                'events.eventname',
-                'events.eventdate',
-                'events.eventstart',
-                'events.eventend',
-                'events.eventmedia',
-                'events.details',
-                'events.active_event',
+// async function getBusinessEvents(business_id) {
+//     try {
+//         return await db('events')
+//             // Ensure eventdate and eventstart are in the future
+//             .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+//             // Match either brand_id or venue_id with the provided business_id
+//             .andWhere(function () {
+//                 this.where('events.brand_id', '=', business_id)
+//                     .orWhere('events.venue_id', '=', business_id)
+//             })
+//             // Remove inactive events from event list return
+//             .andWhere({ active_event: true })
+//             .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
+//             .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
+//             .join('users', 'events.created_by', '=', 'users.id')
+//             .select([
+//                 'events.id as event_id',
+//                 'events.eventname',
+//                 'events.eventdate',
+//                 'events.eventstart',
+//                 'events.eventend',
+//                 'events.eventmedia',
+//                 'events.details',
+//                 'events.active_event',
     
-                'venue.id as venue_id',
-                'venue.business_avatar as venue_logo',
-                'venue.business_name as venue_name',
-                'venue.formatted_address as venue_location',
+//                 'venue.id as venue_id',
     
-                'brand.id as brand_id',
-                'brand.business_avatar as brand_logo',
-                'brand.business_name as brand_name',
+//                 'brand.id as brand_id',
     
-                'events.created_by',
-                'users.username as event_creator'
-            ])
-            // Order by combined timestamp of eventdate and reformatted eventstart
-            .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
-    } catch (error) {
-        console.error('Error fetching related business events:', error);
-        throw new Error('server_error');
-    }
-}
+//                 'events.created_by',
+//                 'users.username as event_creator'
+//             ])
+//             // Order by combined timestamp of eventdate and reformatted eventstart
+//             .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
+//     } catch (error) {
+//         console.error('Error fetching related business events:', error);
+//         throw new Error('server_error');
+//     }
+// }
 
 // .get('EVENTS/event-related/:event_id) - returns array of ACTIVE events for specific event id (all events that include venue and brand)
-async function getEventRelatedEvents(event_id) {
-    try {
-        const { venue_id, brand_id } = await db('events').where({ 'events.id': event_id }).first()
+// async function getEventRelatedEvents(event_id) {
+//     try {
+//         const { venue_id, brand_id } = await db('events').where({ 'events.id': event_id }).first()
         
-        return await db('events')
-            // Ensure eventdate and eventstart are in the future
-            .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
-            .andWhere(function() {
-                if (venue_id !== null) {
-                    this.where('events.venue_id', venue_id)
-                        .orWhere('events.brand_id', venue_id);
-                }
-                if (brand_id !== null) {
-                    this.where('events.venue_id', brand_id)
-                        .orWhere('events.brand_id', brand_id);
-                }
-            })
-            .where('events.active_event', true)
-            .andWhereNot('events.id', event_id)
-            .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
-            .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
-            .leftJoin('users', 'events.created_by', '=', 'users.id')
-            .select(
-                [
-                    'events.id as event_id',
-                    'events.eventname',
-                    'events.eventdate',
-                    'events.eventstart',
-                    'events.eventend',
-                    'events.eventmedia',
-                    'events.details',
-                    'events.active_event',
+//         return await db('events')
+//             // Ensure eventdate and eventstart are in the future
+//             .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+//             .andWhere(function() {
+//                 if (venue_id !== null) {
+//                     this.where('events.venue_id', venue_id)
+//                         .orWhere('events.brand_id', venue_id);
+//                 }
+//                 if (brand_id !== null) {
+//                     this.where('events.venue_id', brand_id)
+//                         .orWhere('events.brand_id', brand_id);
+//                 }
+//             })
+//             .where('events.active_event', true)
+//             .andWhereNot('events.id', event_id)
+//             .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
+//             .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
+//             .leftJoin('users', 'events.created_by', '=', 'users.id')
+//             .select(
+//                 [
+//                     'events.id as event_id',
+//                     'events.eventname',
+//                     'events.eventdate',
+//                     'events.eventstart',
+//                     'events.eventend',
+//                     'events.eventmedia',
+//                     'events.details',
+//                     'events.active_event',
 
-                    'venue.id as venue_id',
-                    'venue.business_avatar as venue_logo',
-                    'venue.business_name as venue_name',
-                    'venue.formatted_address as venue_location',
+//                     'venue.id as venue_id',
 
-                    'brand.id as brand_id',
-                    'brand.business_avatar as brand_logo',
-                    'brand.business_name as brand_name',
+//                     'brand.id as brand_id',
 
-                    'events.created_by',
-                    'users.username as event_creator'
-                ]
-            )
-            // Order by combined timestamp of eventdate and reformatted eventstart
-            .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
+//                     'events.created_by',
+//                     'users.username as event_creator'
+//                 ]
+//             )
+//             // Order by combined timestamp of eventdate and reformatted eventstart
+//             .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 
-    } catch (error) {
-        console.error('Error fetching event related events', error)
-        throw new Error('server_error');
-    }
-}
+//     } catch (error) {
+//         console.error('Error fetching event related events', error)
+//         throw new Error('server_error');
+//     }
+// }
 
 // .get('EVENTS/user/:user_id')
 async function getUserEvents(user_id) {
@@ -123,8 +113,6 @@ async function getUserEvents(user_id) {
         return await db('events')
             .where({ created_by: user_id })
             .andWhere('events.eventdate', '>=', new Date())
-            .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
-            .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
             .leftJoin('users', 'events.created_by', '=', 'users.id')
             .select(
                 [
@@ -136,16 +124,6 @@ async function getUserEvents(user_id) {
                     'events.eventmedia',
                     'events.details',
                     'events.active_event',
-    
-                    'venue.id as venue_id',
-                    'venue.business_avatar as venue_logo',
-                    'venue.business_name as venue_name',
-                    'venue.formatted_address as venue_location',
-    
-                    'brand.id as brand_id',
-                    'brand.business_avatar as brand_logo',
-                    'brand.business_name as brand_name',
-    
                     'events.created_by',
                     'users.username as event_creator'
                 ]
@@ -165,8 +143,6 @@ async function getAllEvents() {
             .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             // Remove inactive events from event list return
             .andWhere({ active_event: true })
-            .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
-            .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
             .join('users', 'events.created_by', '=', 'users.id')
             .select([
                 'events.id as event_id',
@@ -177,15 +153,6 @@ async function getAllEvents() {
                 'events.eventmedia',
                 'events.details',
                 'events.active_event',
-    
-                'venue.id as venue_id',
-                'venue.business_name as venue_name',
-                'venue.business_avatar as venue_logo',
-                'venue.formatted_address as venue_location',
-    
-                'brand.id as brand_id',
-                'brand.business_avatar as brand_logo',
-                'brand.business_name as brand_name',
     
                 'events.created_by',
                 'users.username as event_creator'
@@ -203,8 +170,6 @@ async function getEventById(event_id) {
     try {
         return await db('events')
             .where({ 'events.id': event_id })
-            .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
-            .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
             .leftJoin('users', 'events.created_by', '=', 'users.id')
             .select(
                 [
@@ -216,15 +181,6 @@ async function getEventById(event_id) {
                     'events.eventmedia',
                     'events.details',
                     'events.active_event',
-                    
-                    'venue.id as venue_id',
-                    'venue.business_name as venue_name',
-                    'venue.business_avatar as venue_logo',
-                    'venue.formatted_address as venue_location',
-                    
-                    'brand.id as brand_id',
-                    'brand.business_avatar as brand_logo',
-                    'brand.business_name as brand_name',
     
                     'events.created_by',
                     'users.username as event_creator'
@@ -244,8 +200,6 @@ async function createEvent(event) {
             const id = eventId[0].id;
             return db('events')
                 .where('events.id', id)
-                .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
-                .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
                 .join('users', 'events.created_by', '=', 'users.id')
                 .select(
                     [
@@ -257,15 +211,6 @@ async function createEvent(event) {
                         'events.eventmedia',
                         'events.details',
                         'events.active_event',
-
-                        'venue.id as venue_id',
-                        'venue.business_name as venue_name',
-                        'venue.business_avatar as venue_logo',
-                        'venue.formatted_address as venue_location',
-                        
-                        'brand.id as brand_id',
-                        'brand.business_avatar as brand_logo',
-                        'brand.business_name as brand_name',
 
                         'events.created_by',
                         'users.username as event_creator'
@@ -296,17 +241,11 @@ async function createEvent(event) {
 // .put('EVENTS/:event_id') - update event
 async function updateEvent(event_id, eventChanges) {
     try {
-        const updated_event = await db('events').where({ id: event_id }).update(eventChanges, ['id', 'brand_id', 'venue_id'])
-        const { id, brand_id, venue_id} = updated_event[0]
-
-        if(brand_id !== null && venue_id !== null) {
-            await db('events').where({ id: id }).update({ active_event: true })
-        }
+        const updated_event = await db('events').where({ id: event_id }).update(eventChanges, ['id'])
+        const { id } = updated_event[0]
 
         return db('events')
             .where('events.id', id)
-            .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
-            .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
             .join('users', 'events.created_by', '=', 'users.id')
             .select(
                 [
@@ -318,15 +257,6 @@ async function updateEvent(event_id, eventChanges) {
                     'events.eventmedia',
                     'events.details',
                     'events.active_event',
-
-                    'venue.id as venue_id',
-                    'venue.business_name as venue_name',
-                    'venue.business_avatar as venue_logo',
-                    'venue.formatted_address as venue_location',
-
-                    'brand.id as brand_id',
-                    'brand.business_avatar as brand_logo',
-                    'brand.business_name as brand_name',
 
                     'events.created_by',
                     'users.username as event_creator'
@@ -356,28 +286,28 @@ async function updateEvent(event_id, eventChanges) {
 }
 
 // .put('EVENTS/businesses/:business_id/events/:event_id')
-async function removeEventBusiness(event_id, business_id) {
-    try {
-        let eventUpdates = { active_event: false }
-        const current_event = await db('events').where({ id: event_id }).select(['venue_id', 'brand_id']).first()
+// async function removeEventBusiness(event_id, business_id) {
+//     try {
+//         let eventUpdates = { active_event: false }
+//         const current_event = await db('events').where({ id: event_id }).select(['venue_id', 'brand_id']).first()
     
-        if (current_event.venue_id === business_id) {
-            eventUpdates.venue_id = null
-        }
+//         if (current_event.venue_id === business_id) {
+//             eventUpdates.venue_id = null
+//         }
     
-        if (current_event.brand_id === business_id) {
-            eventUpdates.brand_id = null
-        }
+//         if (current_event.brand_id === business_id) {
+//             eventUpdates.brand_id = null
+//         }
     
-        await db('events')
-            .where({ id: event_id })
-            .update(eventUpdates, ['events.id as event_id'])
+//         await db('events')
+//             .where({ id: event_id })
+//             .update(eventUpdates, ['events.id as event_id'])
         
-        return { event_id, business_id }
-    } catch (error) {
-        throw new Error('delete_error')
-    }
-}
+//         return { event_id, business_id }
+//     } catch (error) {
+//         throw new Error('delete_error')
+//     }
+// }
 
 // .delete('EVENTS/:event_id')
 async function removeEvent(event_id) {

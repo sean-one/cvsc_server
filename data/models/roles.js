@@ -261,15 +261,7 @@ async function deleteRole(role_id) {
                 .where({ id: business_id })
                 .first()
             
-            await db('events')
-                .transacting(trx)
-                .where({ created_by: user_id, brand_id: business_id })
-                .update({ brand_id: null, active_event: false })
-            
-            await db('events')
-                .transacting(trx)
-                .where({ created_by: user_id, venue_id: business_id })
-                .update({ venue_id: null, active_event: false })
+            // delete events created with that role
 
             await db('roles')
                 .transacting(trx)

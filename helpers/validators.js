@@ -447,32 +447,11 @@ const validateEventCreator = async (req, res, next) => {
 
 // .post('EVENTS/'), .put('EVENTS/:event_id') - validate user roles for at least one event business
 const validateEventBusinessRoles = async (req, res, next) => {
-    const user_id = req.user_decoded;
-    let current_venue, current_brand;
-
-    if (req.method === 'PUT') {
-        // get event id from put method indicating it is an update
-        const { event_id } = req.params;
-        // get current venue
-        const { venue_id, brand_id } = await eventsDB.getEventById(event_id);
-        current_venue = venue_id;
-        current_brand = brand_id;
-    }
-
-    const { venue_id = current_venue, brand_id = current_brand } = req.body;
-
-    const isVenueCreator = await rolesDB.checkForRole(venue_id, user_id);
-    const isBrandCreator = await rolesDB.checkForRole(brand_id, user_id);
-
-    if (isVenueCreator || isBrandCreator) {
-        next()
-    } else {
-        next({
-            status: 400,
-            message: 'must have creator permission for at least one business',
-            type: 'role_rights'
-        })
-    }
+    next({
+        status: 400,
+        message: 'must have creator permission for at least one business',
+        type: 'role_rights'
+    })
 }
 
 // .post('/register')
@@ -580,11 +559,7 @@ const newEventValidator = [
         .custom(isValidTime),
     check('eventend').trim().not().isEmpty().withMessage('an event ending time is required')
         .custom(isValidTime),
-    check('venue_id').trim().not().isEmpty().withMessage('an event location is required')
-        .matches(uuidPattern).withMessage('business identifier is inproperly formatted'),
     check('details').trim().not().isEmpty().withMessage('event details are required'),
-    check('brand_id').trim().not().isEmpty().withMessage('event branding is required')
-        .matches(uuidPattern).withMessage('business identifier is inproperly formatted'),
 ]
 
 // .put('EVENTS/:event_id)
@@ -598,11 +573,7 @@ const updateEventValidator =[
         .custom(isValidTime),
     check('eventend').trim().optional()
         .custom(isValidTime),
-    check('venue_id').trim().optional()
-        .matches(uuidPattern).withMessage('event business venue is incorrectly formatted'),
     check('details').trim().optional(),
-    check('brand_id').trim().optional()
-        .matches(uuidPattern).withMessage('event business brand is incorrectly formatted'),
 ]
 
 const result = (req, res, next) => {

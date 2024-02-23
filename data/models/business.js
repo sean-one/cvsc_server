@@ -352,17 +352,7 @@ async function removeBusiness(business_id) {
         
         const deleted_business = await db.transaction(async trx => {
             
-            // remove business as venue from events
-            await db('events')
-                .transacting(trx)
-                .where({ venue_id: business_id })
-                .update({ venue_id: null, active_event: false })
-            
-            // remove business as brand from events
-            await db('events')
-                .transacting(trx)
-                .where({ brand_id: business_id })
-                .update({ brand_id: null, active_event: false })
+            // remove business from events
             
             // remove all business roles
             await db('roles')

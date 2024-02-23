@@ -25,21 +25,7 @@ exports.up = async function (knex) {
 
         events.string('eventmedia')
 
-        events
-            .uuid('venue_id')
-            .unsigned()
-            .references('id')
-            .inTable('businesses')
-            .onDelete('set null')
-
         events.text('details', 'longtext')
-
-        events
-            .uuid('brand_id')
-            .unsigned()
-            .references('id')
-            .inTable('businesses')
-            .onDelete('set null')
 
         events
             .uuid('created_by')
