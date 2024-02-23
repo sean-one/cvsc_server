@@ -69,8 +69,6 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
             }
         });
 
-        console.log(`new business place_id: ${new_business?.place_id}`)
-        console.log(`req body place_id: ${req.body?.place_id}`)
         // check if business location is attached
         if (new_business?.place_id) {
             try {
@@ -127,11 +125,6 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
         res.status(201).json(created_business);
 
     } catch (error) {
-        console.log(Object.keys(error))
-        console.log(error.message)
-        // console.log(error)
-        // console.log(error.response)
-
         // errors returned from created_business database call - invalid input errors
         if (error.constraint) {
             // error return from database after image creation, remove image from s3

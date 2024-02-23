@@ -41,10 +41,10 @@ const businessErrors = {
         message: 'unable to locate user admin by identifier',
         type: 'server'
     },
-    // .post('/create')
+    // .post('BUSINESSES/')
     missing_image: {
         status: 400,
-        message: 'a business logo is required to create a new business',
+        message: 'business logo is required',
         type: 'business_avatar'
     },
     // .post('/create')
