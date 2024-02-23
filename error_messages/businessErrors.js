@@ -11,18 +11,6 @@ const businessErrors = {
         message: 'no updates or changes made',
         type: 'server'
     },
-    // if there is an error with geocode place_id request
-    invalid_place_id: {
-        status: 400,
-        message: 'Invalid request, invalid place_id parameter',
-        type: 'server'
-    },
-    // if there is an error geocode api key
-    geocode_error: {
-        status: 403,
-        message: 'provided api key is invalid',
-        type: 'server'
-    },
     // .get('/managed') - user id invalid format
     string_to_uuid: {
         status: 400,
@@ -53,12 +41,6 @@ const businessErrors = {
         message: 'unable to locate user admin by identifier',
         type: 'server'
     },
-    // .put('/update/:business_id')
-    business_address_required: {
-        status: 400,
-        message: 'business type must have a valid address',
-        type: 'formatted_address'
-    },
     // .post('/create')
     missing_image: {
         status: 400,
@@ -87,6 +69,61 @@ const businessErrors = {
     delete_failed: {
         status: 400,
         message: 'business delete failed',
+        type: 'server'
+    },
+
+
+    // geocoding errors
+    geocode_failed: {
+        status: 400,
+        message: 'geocode place id call failed',
+        type: 'server'
+    },
+    geocode_permission_denied: {
+        status: 400,
+        message: 'geocode permission denied',
+        type: 'server'
+    },
+    geocode_api_error: {
+        status: 400,
+        message: 'geocode fetch error',
+        type: 'server'
+    },
+    geocode_no_response: {
+        status: 400,
+        message: 'no response from geocode',
+        type: 'server'
+    },
+    geocode_setup_error: {
+        status: 400,
+        message: 'error setting up geocode request',
+        type: 'server'
+    },
+
+
+    // aws s3 errors
+    aws_invalid_access_key: {
+        status: 400,
+        message: 'invalid s3 access key',
+        type: 'server'
+    },
+    aws_invalid_bucket: {
+        status: 400,
+        message: 'invalid s3 bucket',
+        type: 'server'
+    },
+    aws_upload_error: {
+        status: 400,
+        message: 'failed to upload image to s3',
+        type: 'server'
+    },
+
+
+
+    // generic server errors
+    create_business_server_error: {
+        status: 400,
+        message: 'server error while creating business',
         type: 'server'
     }
 }

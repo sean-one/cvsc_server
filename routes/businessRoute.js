@@ -69,13 +69,48 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
             }
         });
 
+        console.log(`new business place_id: ${new_business?.place_id}`)
+        console.log(`req body place_id: ${req.body?.place_id}`)
         // check if business location is attached
-        if (new_business.place_id) {
-            const geocode = await updatedGoogleMapsClient.geocode({ params: { place_id: new_business.place_id, key: process.env.GEOCODER_API_KEY }, timeout: 1000 })
+        if (new_business?.place_id) {
+            try {
+                const geocodeResponse = await updatedGoogleMapsClient.geocode({
+                    params: { place_id: new_business.place_id, key: process.env.GEOCODER_API_KEY },
+                    timeout: 1000
+                });
 
-            new_business.formatted_address = geocode.data.results[0].formatted_address
-        } else {
-            delete new_business.place_id
+                if (geocodeResponse?.data?.status === 'OK' && geocodeResponse?.data?.results.length > 0) {
+                    new_business.formatted_address = geocodeResponse?.data?.results[0]?.formatted_address;
+                } else {
+                    throw new Error('geocode_failed')
+                }      
+            } catch (error) {
+                // log the error for debug
+                console.error('Geocoding error:', Object.keys(error));
+
+                // Handle network errors or other unexpected issues
+                if (error.response) {
+                    // API responded with an error status and possibly an error message
+                    console.error('Geocoding API response error:', error.response.data.error_message);
+
+                    // You might want to throw different errors based on the response status code
+                    console.log(error.response.status)
+                    if (error.response.status === 403) {
+                        throw new Error('geocode_permission_denied');
+                    } else {
+                        throw new Error('geocode_api_error');
+                    }
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.error('No response received from Geocoding API');
+                    throw new Error('geocode_no_response');
+                } else {
+                    // Something else happened in setting up the request that triggered an error
+                    console.error('Error setting up geocode request:', error.message);
+                    throw new Error('geocode_setup_error');
+                }
+            }
+
         }
 
         // if file present resize the image and upload to s3 returning an image key or return error due to missing image
@@ -91,24 +126,29 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
 
         res.status(201).json(created_business);
 
-    } catch (err) {
+    } catch (error) {
+        console.log(Object.keys(error))
+        console.log(error.message)
+        // console.log(error)
+        // console.log(error.response)
+
         // errors returned from created_business database call - invalid input errors
-        if (err.constraint) {
+        if (error.constraint) {
             // error return from database after image creation, remove image from s3
             if (image_key) { await deleteImageS3(image_key) }
 
             next({
-                status: businessErrors[err.constraint]?.status,
-                message: businessErrors[err.constraint]?.message,
-                type: businessErrors[err.constraint]?.type
+                status: businessErrors[error.constraint]?.status,
+                message: businessErrors[error.constraint]?.message,
+                type: businessErrors[error.constraint]?.type
             })
 
         } else {
 
             next({
-                status: businessErrors[err.message]?.status,
-                message: businessErrors[err.message]?.message,
-                type: businessErrors[err.message]?.type
+                status: businessErrors[error.message]?.status,
+                message: businessErrors[error.message]?.message,
+                type: businessErrors[error.message]?.type
             })
 
         }

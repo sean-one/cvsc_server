@@ -44,22 +44,41 @@ const generateUploadURL = async () => {
 }
 
 const uploadImageS3Url = async (imageFile) => {
-    console.log(imageFile)
-    const rawBytes = await randomBytes(32)
-    const imageName = `${rawBytes.toString('hex')}`
+    try {
+        const rawBytes = await randomBytes(32)
+        const imageName = `${rawBytes.toString('hex')}`
+    
+        const imageParams = {
+            Bucket: bucketName,
+            Key: imageName,
+            Body: imageFile.buffer,
+            ContentType: imageFile.mimetype,
+        }
+    
+        const command = new PutObjectCommand(imageParams)
+    
+        await s3.send(command)
+    
+        return imageName;
+        
+    } catch (error) {
+        // Log the error for debugging purposes
+        console.error('Error uploading image to S3:', Object.keys(error));
 
-    const imageParams = {
-        Bucket: bucketName,
-        Key: imageName,
-        Body: imageFile.buffer,
-        ContentType: imageFile.mimetype,
+        // Check if error is due to invalid AWS credentials
+        if (error.name === 'InvalidAccessKeyId') {
+            throw new Error('aws_invalid_access_key');
+        }
+
+        // Check if error is due to missing bucket
+        if (error.name === 'NoSuchBucket') {
+            throw new Error('aws_invalid_bucket');
+        }
+
+        // For handling specific S3 errors, you might check error.code or error.name depending on the SDK version
+        // Example for a generic catch-all error
+        throw new Error('aws_upload_error');
     }
-
-    const command = new PutObjectCommand(imageParams)
-
-    await s3.send(command)
-
-    return imageName;
 }
 
 const deleteImageS3 = async(image_key) => {

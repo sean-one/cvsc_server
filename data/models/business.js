@@ -2,10 +2,12 @@ const db = require('../dbConfig');
 const { deleteImageS3 } = require('../../s3');
 
 module.exports = {
+    addBusiness,
+
+    
     getAllBusinesses,
     getBusinessById,
     getBusinessManagement,
-    addBusiness,
     updateBusiness,
     toggleActiveBusiness,
     toggleBusinessRequest,
@@ -134,7 +136,6 @@ async function getBusinessManagement(user_id) {
 // .post('/business/create) - creates a new business
 async function addBusiness(business) {
     try {
-        
         return await db.transaction(async trx => {
             
             // insert new business into database
@@ -151,13 +152,12 @@ async function addBusiness(business) {
                     role_type: process.env.ADMIN_ACCOUNT,
                     active_role: true,
                     approved_by: added_business[0].business_admin
-                }, [ 'id' ])
+                })
 
             // return the newly created business with contact and location if available
             return db('businesses')
                 .transacting(trx)
                 .where({ 'businesses.id': added_business[0].id})
-                .join('roles', 'businesses.id', '=', 'roles.business_id')
                 .select(
                     [
                         'businesses.id',
@@ -175,15 +175,13 @@ async function addBusiness(business) {
                         'businesses.business_facebook',
                         'businesses.business_website',
                         'businesses.business_twitter',
-                        'roles.id as admin_role_id',
-                        'roles.active_role',
-                        'roles.role_type',
                     ]
                 )
                 .first()
         })
     } catch (error) {
-        throw error
+        console.error('Error creating new business:', error)
+        throw new Error('create_business_server_error')
     }
 
 }
