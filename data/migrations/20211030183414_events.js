@@ -10,6 +10,14 @@ exports.up = async function (knex) {
             .string('eventname')
             .notNullable()
             .unique()
+        
+        events
+            .string('event_place_id')
+            .notNullable()
+        
+        events
+            .string('event_formatted_address')
+            .notNullable()
 
         events
             .date('eventdate')
@@ -26,6 +34,14 @@ exports.up = async function (knex) {
         events.string('eventmedia')
 
         events.text('details', 'longtext')
+
+        events
+            .uuid('host_business')
+            .unsigned()
+            .notNullable()
+            .references('id')
+            .inTable('businesses')
+            .onDelete('cascade')
 
         events
             .uuid('created_by')
