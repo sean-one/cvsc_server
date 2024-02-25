@@ -394,7 +394,7 @@ const validateBusinessManagement = async (req, res, next) => {
 
     if (!isBusinessManager) {
         return next({
-            status: 404,
+            status: 403,
             message: 'valid business permission role not found',
             type: 'server'
         })
