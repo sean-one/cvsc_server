@@ -6,7 +6,7 @@ const businessErrors = {
         type: 'server'
     },
     // if no changes are found at .put('/:business_id')
-    no_changes: {
+    empty_update_object: {
         status: 400,
         message: 'no updates or changes made',
         type: 'server'
@@ -117,6 +117,11 @@ const businessErrors = {
         message: 'failed to upload image to s3',
         type: 'server'
     },
+    aws_delete_error: {
+        status: 400,
+        message: 'faled to delete image from s3',
+        type: 'server'
+    },
 
 
 
@@ -125,6 +130,10 @@ const businessErrors = {
         status: 400,
         message: 'server error while creating business',
         type: 'server'
+    },
+    business_find_id_server_error: {
+        status: 400,
+        message: 'server error finding business by id'
     }
 }
 

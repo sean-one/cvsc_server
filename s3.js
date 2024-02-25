@@ -99,8 +99,7 @@ const deleteImageS3 = async(image_key) => {
         return
 
     } catch (error) {
-        console.log('s3 error', error)
-        
+        throw new Error('aws_delete_error');
     }
 }
 

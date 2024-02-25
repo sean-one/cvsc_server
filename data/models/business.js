@@ -3,12 +3,12 @@ const { deleteImageS3 } = require('../../s3');
 
 module.exports = {
     addBusiness,
+    getBusinessById,
+    updateBusiness,
 
     
     getAllBusinesses,
-    getBusinessById,
     getBusinessManagement,
-    updateBusiness,
     toggleActiveBusiness,
     toggleBusinessRequest,
     transferBusiness,
@@ -55,28 +55,33 @@ async function getAllBusinesses() {
 
 // .put('BUSINESSES/:business_id)
 function getBusinessById(business_id) {
-    return db('businesses')
-        .where({ 'businesses.id': business_id })
-        .select(
-            [
-                'businesses.id',
-                'businesses.business_name',
-                'businesses.formatted_address',
-                'businesses.place_id',
-                'businesses.business_avatar',
-                'businesses.business_description',
-                'businesses.business_request_open',
-                'businesses.active_business',
-                'businesses.business_admin',
-                'businesses.business_email',
-                'businesses.business_phone',
-                'businesses.business_instagram',
-                'businesses.business_facebook',
-                'businesses.business_website',
-                'businesses.business_twitter',
-            ]
-        )
-        .first();
+    try {
+        return db('businesses')
+            .where({ 'businesses.id': business_id })
+            .select(
+                [
+                    'businesses.id',
+                    'businesses.business_name',
+                    'businesses.formatted_address',
+                    'businesses.place_id',
+                    'businesses.business_avatar',
+                    'businesses.business_description',
+                    'businesses.business_request_open',
+                    'businesses.active_business',
+                    'businesses.business_admin',
+                    'businesses.business_email',
+                    'businesses.business_phone',
+                    'businesses.business_instagram',
+                    'businesses.business_facebook',
+                    'businesses.business_website',
+                    'businesses.business_twitter',
+                ]
+            )
+            .first();
+    } catch (error) {
+        console.error('Error finding business by id:', error);
+        throw new Error('business_find_id_server_error');
+    }
 }
 
 // .get('BUSINESSES/managed')
@@ -216,7 +221,8 @@ async function updateBusiness(business_id, changes) {
                 .first()
         })
     } catch (error) {
-        throw error
+        console.error('Error updating business:', error);
+        throw new Error('update_business_server_error');
     }
 }
 

@@ -234,13 +234,12 @@ router.put('/:business_id/transfer/:manager_id', [validToken, uuidValidation, fo
     }
 })
 
-
 // useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
 router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, updateBusinessValidator, validateImageFile, result], async (req, res, next) => {
     try {
         const check_link = /^(http|https)/g
         const { business_id } = req.params;
-        const current_business = await db.getBusinessById(business_id)
+        const { business_avatar } = await db.getBusinessById(business_id)
 
         // if only the image is being updated this object will be empty
         function createUpdateObject(originalObject, keysToInclude) {
@@ -273,19 +272,40 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
         // if place_id is present validate it with google
         if (business_update?.place_id) {
             try {
-                const geocode = await updatedGoogleMapsClient.geocode({
+                const geocodeResponse = await updatedGoogleMapsClient.geocode({
                     params: { place_id: business_update.place_id, key: process.env.GEOCODER_API_KEY },
                     timeout: 1000
-                })
+                });
 
-                business_update.formatted_address = geocode.data.results[0].formatted_address
-            } catch (error) {
-                if (error?.response?.status === 400) {
-                    throw new Error('invalid_place_id')
+                if (geocodeResponse?.data?.status === 'OK' && geocodeResponse?.data?.results.length > 0) {
+                    business_update.formatted_address = geocodeResponse?.data?.results[0]?.formatted_address
+                } else {
+                    throw new Error('geocode_failed')
                 }
+            } catch (error) {
+                // log the error for debug
+                console.error('Geocoding error:', Object.keys(error));
 
-                if (error?.response?.status === 403) {
-                    throw new Error('geocode_error')
+                // Handle network errors or other unexpected issues
+                if (error.response) {
+                    // API responded with an error status and possibly an error message
+                    console.error('Geocoding API response error:', error.response.data.error_message);
+
+                    // You might want to throw different errors based on the response status code
+                    console.log(error.response.status)
+                    if (error.response.status === 403) {
+                        throw new Error('geocode_permission_denied');
+                    } else {
+                        throw new Error('geocode_api_error');
+                    }
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.error('No response received from Geocoding API');
+                    throw new Error('geocode_no_response');
+                } else {
+                    // Something else happened in setting up the request that triggered an error
+                    console.error('Error setting up geocode request:', error.message);
+                    throw new Error('geocode_setup_error');
                 }
             }
         }
@@ -300,8 +320,8 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
 
             // check the current_business.business_avatar to see if it is saved on the s3 bucket
             // if it is delete it from the s3 bucket
-            if (!check_link.test(current_business?.business_avatar)) {
-                await deleteImageS3(current_business?.business_avatar)
+            if (!check_link.test(business_avatar)) {
+                await deleteImageS3(business_avatar)
             }
 
             // update business_update with image_key from s3 image upload
@@ -310,7 +330,7 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
 
         // if there are no changes in the update there is no need to hit the database
         if (Object.keys(business_update).length === 0) {
-            throw new Error('no_changes')
+            throw new Error('empty_update_object')
         }
 
         const updated_business = await db.updateBusiness(business_id, business_update)
