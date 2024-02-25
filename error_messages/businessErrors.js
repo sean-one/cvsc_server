@@ -133,7 +133,13 @@ const businessErrors = {
     },
     business_find_id_server_error: {
         status: 400,
-        message: 'server error finding business by id'
+        message: 'server error finding business by id',
+        type: 'server'
+    },
+    fetch_all_businesses_server_error: {
+        status: 400,
+        message: 'server error fetching all businesses',
+        type: 'server'
     }
 }
 

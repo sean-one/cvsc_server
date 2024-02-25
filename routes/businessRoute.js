@@ -35,11 +35,8 @@ router.get('/', async (req, res, next) => {
         res.status(200).json(businesses)
         
     } catch (error) {
-        next({
-            status: businessErrors[error.message]?.status,
-            message: businessErrors[error.message]?.message,
-            type: businessErrors[error.message]?.type,
-        })
+        console.error('Error fetching all businesses:', error)
+        throw new Error('fetch_all_businesses_server_error');
     }
 });
 
