@@ -1,5 +1,5 @@
 const businessErrors = {
-    // if business not found at get('/:business_id)
+    // .get('/:business_id)
     business_not_found: {
         status: 404,
         message: 'unable to locate business by identifier',
