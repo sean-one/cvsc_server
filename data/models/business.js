@@ -5,12 +5,12 @@ module.exports = {
     addBusiness,
     getBusinessById,
     updateBusiness,
-
-    
     getAllBusinesses,
-    getBusinessManagement,
     toggleActiveBusiness,
     toggleBusinessRequest,
+
+    
+    getBusinessManagement,
     transferBusiness,
     removeBusiness,
 
@@ -228,77 +228,38 @@ async function updateBusiness(business_id, changes) {
 
 // .put('/:business_id/toggle)
 async function toggleActiveBusiness(business_id) {
-
-    return await db.transaction(async trx => {
-        // get current business object from the database to reference and toggle from, and confirm admin
-        const business = await db('businesses')
-            .where({ 'businesses.id': business_id })
-            .select(
-                [
-                    'businesses.id',
-                    'businesses.active_business',
-                ]
-            )
-            .first()
-
-        // change all roles that are not pending and update active role to match business
-        await db('roles')
-            .transacting(trx)
-            .where({ business_id: business_id })
-            .whereIn('roles.role_type', [process.env.CREATOR_ACCOUNT, process.env.MANAGER_ACCOUNT])
-            .whereNotNull('roles.approved_by')
-            .update({ active_role: !business.active_business })
-        
-        // update the active business status
-        await db('businesses')
-            .transacting(trx)
-            .where({ id: business_id })
-            .update({ active_business: !business.active_business })
-        
-        // return the new business object with updated active status
-        return await db('businesses')
-            .transacting(trx)
-            .where({ 'businesses.id': business_id })
-            .select([
-                'businesses.id',
-                'businesses.business_name',
-                'businesses.formatted_address',
-                'businesses.business_avatar',
-                'businesses.business_description',
-                'businesses.business_request_open',
-                'businesses.active_business',
-                'businesses.business_admin',
-                'businesses.business_email',
-                'businesses.business_phone',
-                'businesses.business_instagram',
-                'businesses.business_facebook',
-                'businesses.business_website',
-                'businesses.business_twitter',
-            ])
-            .first()
-    })
-}
-
-// .put('/:business_id/toggle)
-async function toggleBusinessRequest(business_id) {
-    const business = await db('businesses')
-        .where({ 'businesses.id': business_id })
-        .select(
-            [
-                'businesses.id',
-                'businesses.business_request_open'
-            ]
-        )
-        .first()
+    try {
+        return await db.transaction(async trx => {
+            // get current business object from the database to reference and toggle from, and confirm admin
+            const business = await db('businesses')
+                .where({ 'businesses.id': business_id })
+                .select(
+                    [
+                        'businesses.id',
+                        'businesses.active_business',
+                    ]
+                )
+                .first()
     
-    await db('businesses')
-            .where({ id: business.id })
-            .update({ business_request_open: !business.business_request_open })
-    
-    return await db('businesses')
-            .where({ 'businesses.id': business_id })
-            .select(
-                [
+            // change all roles that are not pending and update active role to match business
+            await db('roles')
+                .transacting(trx)
+                .where({ business_id: business_id })
+                .whereIn('roles.role_type', [process.env.CREATOR_ACCOUNT, process.env.MANAGER_ACCOUNT])
+                .whereNotNull('roles.approved_by')
+                .update({ active_role: !business.active_business })
+            
+            // update the active business status
+            await db('businesses')
+                .transacting(trx)
+                .where({ id: business_id })
+                .update({ active_business: !business.active_business })
+            
+            // return the new business object with updated active status
+            return await db('businesses')
+                .transacting(trx)
+                .where({ 'businesses.id': business_id })
+                .select([
                     'businesses.id',
                     'businesses.business_name',
                     'businesses.formatted_address',
@@ -313,9 +274,61 @@ async function toggleBusinessRequest(business_id) {
                     'businesses.business_facebook',
                     'businesses.business_website',
                     'businesses.business_twitter',
+                ])
+                .first()
+        })
+    
+    } catch (error) {
+        console.error('Error attempting to toggle active business status:', error)
+        throw new Error('active_business_toggle_server_error')    
+    }
+
+}
+
+// .put('/:business_id/toggle)
+async function toggleBusinessRequest(business_id) {
+    try {
+        const business = await db('businesses')
+            .where({ 'businesses.id': business_id })
+            .select(
+                [
+                    'businesses.id',
+                    'businesses.business_request_open'
                 ]
             )
             .first()
+        
+        // toggle business request to the opposite of what it was
+        await db('businesses')
+                .where({ id: business.id })
+                .update({ business_request_open: !business.business_request_open })
+        
+        return await db('businesses')
+                .where({ 'businesses.id': business_id })
+                .select(
+                    [
+                        'businesses.id',
+                        'businesses.business_name',
+                        'businesses.formatted_address',
+                        'businesses.business_avatar',
+                        'businesses.business_description',
+                        'businesses.business_request_open',
+                        'businesses.active_business',
+                        'businesses.business_admin',
+                        'businesses.business_email',
+                        'businesses.business_phone',
+                        'businesses.business_instagram',
+                        'businesses.business_facebook',
+                        'businesses.business_website',
+                        'businesses.business_twitter',
+                    ]
+                )
+                .first()
+        
+    } catch (error) {
+        console.error('Error attempting to toggle business request status:', error);
+        throw new Error('business_request_toggle_server_error');
+    }
 }
 
 // .put('/:business_id/transfer/:manager_id')

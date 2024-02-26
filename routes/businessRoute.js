@@ -199,7 +199,7 @@ router.put('/:business_id/status/toggle', [validToken, uuidValidation, formatVal
         }
 
         else {
-            throw new Error('invalid_toggle_type')
+            throw new Error('business_toggle_error')
         }
 
     } catch (error) {

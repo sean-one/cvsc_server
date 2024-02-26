@@ -60,9 +60,9 @@ const businessErrors = {
         type: 'server'
     },
     // .put('/:business_id/toggle)
-    invalid_toggle_type: {
+    business_toggle_error: {
         status: 400,
-        message: 'invalid toggle type request',
+        message: 'invalid business toggle type',
         type: 'server'
     },
     // .delete('/:business_id')
@@ -139,6 +139,16 @@ const businessErrors = {
     fetch_all_businesses_server_error: {
         status: 400,
         message: 'server error fetching all businesses',
+        type: 'server'
+    },
+    active_business_toggle_server_error: {
+        status: 400,
+        message: 'server error occured during active business status toggle',
+        type: 'server'
+    },
+    business_request_toggle_server_error: {
+        status: 400,
+        message: 'server error occured during business request status toggle',
         type: 'server'
     }
 }
