@@ -1,6 +1,19 @@
 const db = require('../dbConfig');
 const { deleteImageS3 } = require('../../s3');
 
+function getAccountType(accountNumber) {
+    switch (accountNumber) {
+        case process.env.CREATOR_ACCOUNT:
+            return 'creator';
+        case process.env.MANAGER_ACCOUNT:
+            return 'manager';
+        case process.env.ADMIN_ACCOUNT:
+            return 'admin';
+        default:
+            return 'basic'
+    }
+}
+
 module.exports = {
     addBusiness,
     getBusinessById,
@@ -87,23 +100,13 @@ function getBusinessById(business_id) {
 // .get('BUSINESSES/managed')
 async function getBusinessManagement(user_id) {
     try {
-        const { business_ids } = await db('roles')
+        const management_businesses = await db('roles')
             .where({ user_id: user_id, active_role: true })
             .andWhere('role_type', '>=', process.env.MANAGER_ACCOUNT)
+            .leftJoin('businesses', 'roles.business_id', '=', 'businesses.id')
             .select(
                 [
-                    db.raw('ARRAY_AGG(roles.business_id) as business_ids')
-                ]
-            )
-            .first()
-        
-        // if no roles with role type of manager or admin throw non manager error    
-        if (business_ids === null) { throw new Error('non_manager') }
-        
-        return db('businesses')
-            .whereIn('id', business_ids)
-            .select(
-                [
+                    'roles.role_type',
                     'businesses.id',
                     'businesses.business_name',
                     'businesses.formatted_address',
@@ -119,22 +122,20 @@ async function getBusinessManagement(user_id) {
                     'businesses.business_facebook',
                     'businesses.business_website',
                     'businesses.business_twitter',
+
                 ]
             )
 
+        const updated_list = management_businesses.map(obj => ({
+            ...obj,
+            role_type: getAccountType(obj.role_type)
+        }));
+
+        return updated_list;
+
     } catch (error) {
-        // if user_id is not properly formatted as a uuid
-        if (error?.routine === 'string_to_uuid') {
-            throw new Error('string_to_uuid')
-        }
-
-        // if no management roles were found
-        if (error?.message === 'non_manager') {
-            throw new Error('non_manager')
-        }
-
-        // fall back in case of unexpected errors
-        throw new Error('server_error')
+        // console.error('Error finding users management:', error);
+        throw new Error('fetch_business_management_server_error');
     }
 }
 
@@ -353,8 +354,8 @@ async function transferBusiness(business_id, manager_id, admin_id) {
             return { business_id, admin_id }
         })
     } catch (error) {
-        console.error(`Error during business tranfer, ${error}`)
-        throw new Error('server_error')
+        console.error('Error during business tranfer:', error)
+        throw new Error('business_transfer_server_error')
     }
 }
 
@@ -362,9 +363,9 @@ async function transferBusiness(business_id, manager_id, admin_id) {
 async function removeBusiness(business_id) {
     try {
         const check_link = /^(http|https)/g
-        const { business_avatar, business_name } = await db('businesses')
+        const { business_avatar, business_name, business_admin } = await db('businesses')
             .where({ id: business_id })
-            .select([ 'businesses.business_avatar', 'businesses.business_name' ])
+            .select([ 'businesses.business_avatar', 'businesses.business_name', 'businesses.business_admin' ])
             .first()
         
         const deleted_business = await db.transaction(async trx => {
@@ -393,10 +394,11 @@ async function removeBusiness(business_id) {
             }
         }
 
-        return { success, business_id, business_name };
+        return { success, business_id, business_name, business_admin };
 
     } catch (error) {
-        throw error
+        console.error('Error deleting business:', error)
+        throw new Error('delete_business_server_error');
     }
 }
 

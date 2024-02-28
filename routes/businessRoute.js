@@ -114,7 +114,7 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
             image_key = await uploadImageS3Url(req.file)
             new_business['business_avatar'] = image_key
         } else {
-            throw new Error('missing_image')
+            throw new Error('missing_business_avatar')
         }
 
         const created_business = await db.addBusiness(new_business)
@@ -150,6 +150,7 @@ router.get('/managed', [validToken], async (req, res, next) => {
     try {
         const user_id = req.user_decoded
         const business_management_list = await db.getBusinessManagement(user_id)
+
 
         res.status(200).json(business_management_list)
     } catch (error) {
