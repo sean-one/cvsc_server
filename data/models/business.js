@@ -1,18 +1,7 @@
 const db = require('../dbConfig');
+const getAccountType = require('../../helpers/getAccountType');
 const { deleteImageS3 } = require('../../s3');
 
-function getAccountType(accountNumber) {
-    switch (accountNumber) {
-        case process.env.CREATOR_ACCOUNT:
-            return 'creator';
-        case process.env.MANAGER_ACCOUNT:
-            return 'manager';
-        case process.env.ADMIN_ACCOUNT:
-            return 'admin';
-        default:
-            return 'basic'
-    }
-}
 
 module.exports = {
     addBusiness,
@@ -21,8 +10,6 @@ module.exports = {
     getAllBusinesses,
     toggleActiveBusiness,
     toggleBusinessRequest,
-
-    
     getBusinessManagement,
     transferBusiness,
     removeBusiness,
