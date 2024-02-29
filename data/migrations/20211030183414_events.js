@@ -12,11 +12,11 @@ exports.up = async function (knex) {
             .unique()
         
         events
-            .string('event_place_id')
+            .string('place_id')
             .notNullable()
         
         events
-            .string('event_formatted_address')
+            .string('formatted_address')
             .notNullable()
 
         events

@@ -447,11 +447,20 @@ const validateEventCreator = async (req, res, next) => {
 
 // .post('EVENTS/'), .put('EVENTS/:event_id') - validate user roles for at least one event business
 const validateEventBusinessRoles = async (req, res, next) => {
-    next({
-        status: 400,
-        message: 'must have creator permission for at least one business',
-        type: 'role_rights'
-    })
+    const user_id = req.user_decoded;
+    const business_id = req.body.host_business;
+
+    const hasActiveRole = await rolesDB.checkForRole(user_id, business_id)
+
+    if (hasActiveRole) {
+        next()
+    } else {
+        next({
+            status: 400,
+            message: 'must have at least creator permission for business',
+            type: 'server'
+        })
+    }
 }
 
 // .post('/register')
@@ -502,78 +511,114 @@ const updateUserValidator = [
 const newBusinessValidator = [
     check('business_name').trim().not().isEmpty().withMessage('business name is required')
         .isLength({ min: 4, max: 50 }).withMessage('business name must be between 4 and 50 characters')
-        .custom(isBusinessNameUnique),
-    check('business_description').trim().not().isEmpty().withMessage('business description is required'),
+        .custom(isBusinessNameUnique)
+        .escape(),
+    check('business_description').trim().not().isEmpty().withMessage('business description is required')
+        .escape(),
     check('place_id').trim().optional()
         .matches(googlePlaceIdFormat).withMessage('invalid google place id format')
         .escape(),
     check('business_email').trim().optional().isEmail().normalizeEmail().escape(),
     check('business_phone').trim().optional()
-        .matches(phonePattern).withMessage('phone number must be 10 digits'),
+        .matches(phonePattern).withMessage('phone number must be 10 digits')
+        .escape(),
     check('business_instagram').trim().optional()
         .isLength({ min: 1, max: 30 })
         .withMessage('instagram must be between 1 and 30 characters')
-        .matches(instagramPattern).withMessage('instagram may only contain letters, numbers and underscores( _ )'),
+        .matches(instagramPattern).withMessage('instagram may only contain letters, numbers and underscores( _ )')
+        .escape(),
     check('business_twitter').trim().optional()
         .isLength({ min: 1, max: 15 }).withMessage('twitter must be between 1 and 15 characters')
-        .matches(twitterPattern).withMessage('twitter may only contain letters, numbers and underscores( _ )'),
+        .matches(twitterPattern).withMessage('twitter may only contain letters, numbers and underscores( _ )')
+        .escape(),
     check('business_facebook').trim().optional()
         .isLength({ min: 5 }).withMessage('facebook must be at least 5 characters')
-        .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )'),
-    check('business_website').trim().optional().isURL(),
+        .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )')
+        .escape(),
+    check('business_website').trim().optional().isURL()
+        .escape(),
 ]
 
 // put('BUSINESSES/:business_id)
 const updateBusinessValidator = [
-    check('business_description').trim().optional(),
+    check('business_description').trim().optional()
+        .escape(),
     check('place_id').trim().optional()
         .custom(isBusinessAdmin)
         .matches(googlePlaceIdFormat).withMessage('invalid google places id format')
         .escape(),
     check('business_email').trim().optional()
         .custom(isBusinessAdmin)
-        .isEmail().normalizeEmail(),
+        .isEmail().normalizeEmail()
+        .escape(),
     check('business_phone').trim().optional()
-        .matches(phonePattern).withMessage('phone number must be 10 digits'),
+        .matches(phonePattern).withMessage('phone number must be 10 digits')
+        .escape(),
     check('business_instagram').trim().optional()
         .isLength({ min: 1, max: 30 })
         .withMessage('instagram must be between 1 and 30 characters')
-        .matches(instagramPattern).withMessage('instagram may only contain letters, numbers and underscores( _ )'),
+        .matches(instagramPattern).withMessage('instagram may only contain letters, numbers and underscores( _ )')
+        .escape(),
     check('business_twitter').trim().optional()
         .isLength({ min: 1, max: 15 }).withMessage('twitter must be between 1 and 15 characters')
-        .matches(twitterPattern).withMessage('twitter may only contain letters, numbers and underscores( _ )'),
+        .matches(twitterPattern).withMessage('twitter may only contain letters, numbers and underscores( _ )')
+        .escape(),
     check('business_facebook').trim().optional()
         .isLength({ min: 5 }).withMessage('facebook must be at least 5 characters')
-        .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )'),
-    check('business_website').trim().optional().isURL(),
+        .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )')
+        .escape(),
+    check('business_website').trim().optional().isURL()
+        .escape(),
 ]
 
 // .post('EVENTS/')
 const newEventValidator = [
     check('eventname').trim().not().isEmpty().withMessage('an eventname is required')
         .isLength({ min: 4, max: 50}).withMessage('an event name must be between 4 and 50 characters')
-        .custom(isEventNameUnique),
+        .custom(isEventNameUnique)
+        .escape(),
+    check('place_id').trim().not().isEmpty().withMessage('an event location is required')
+        .matches(googlePlaceIdFormat).withMessage('invalid google place id format')
+        .escape(),
     check('eventdate').trim().not().isEmpty().withMessage('an event date is required')
-        .custom(isValidDate),
+        .custom(isValidDate)
+        .escape(),
     check('eventstart').trim().not().isEmpty().withMessage('an event starting time is required')
-        .custom(isValidTime),
+        .custom(isValidTime)
+        .escape(),
     check('eventend').trim().not().isEmpty().withMessage('an event ending time is required')
-        .custom(isValidTime),
-    check('details').trim().not().isEmpty().withMessage('event details are required'),
+        .custom(isValidTime)
+        .escape(),
+    check('host_business').trim().not().isEmpty().withMessage('an event must have a business')
+        .matches(uuidPattern).withMessage('invalid business identifier')
+        .escape(),
+    check('details').trim().not().isEmpty().withMessage('event details are required')
+        .escape(),
 ]
 
 // .put('EVENTS/:event_id)
 const updateEventValidator =[
     check('eventname').trim().optional()
-        .isLength({ min: 2, max: 50 }).withMessage('an event name must be between 4 and 50 characters')
-        .custom(isEventNameUnique),
+        .isLength({ min: 4, max: 50 }).withMessage('an event name must be between 4 and 50 characters')
+        .custom(isEventNameUnique)
+        .escape(),
+    check('place_id').trim().optional()
+        .matches(googlePlaceIdFormat).withMessage('invalid google place id format')
+        .escape(),
     check('eventdate').trim().optional()
-        .custom(isValidDate),
+        .custom(isValidDate)
+        .escape(),
     check('eventstart').trim().optional()
-        .custom(isValidTime),
+        .custom(isValidTime)
+        .escape(),
     check('eventend').trim().optional()
-        .custom(isValidTime),
-    check('details').trim().optional(),
+        .custom(isValidTime)
+        .escape(),
+    check('host_business').trim().optional()
+        .matches(uuidPattern).withMessage('invalid business identifier')
+        .escape(),
+    check('details').trim().optional()
+        .escape(),
 ]
 
 const result = (req, res, next) => {
