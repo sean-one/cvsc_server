@@ -195,47 +195,38 @@ async function getEventById(event_id) {
 
 // .post('EVENTS/') - create new event
 async function createEvent(event) {
-    return await db('events').insert(event, ['id'])
-        .then(eventId => {
-            const id = eventId[0].id;
-            return db('events')
-                .where('events.id', id)
-                .join('users', 'events.created_by', '=', 'users.id')
-                .select(
-                    [
-                        'events.id as event_id',
-                        'events.eventname',
-                        'events.eventdate',
-                        'events.eventstart',
-                        'events.eventend',
-                        'events.eventmedia',
-                        'events.details',
-                        'events.active_event',
+    try {
+        // insert the new event into database
+        const new_event = await db('events')
+            .insert(event, ['id'])
+        
+        return await db('events')
+            .where({ 'events.id': new_event[0].id })
+            .join('users', 'events.created_by', '=', 'users.id')
+            .select(
+                [
+                    'events.id as event_id',
+                    'events.eventname',
+                    'events.place_id',
+                    'events.formatted_address',
+                    'events.eventdate',
+                    'events.eventstart',
+                    'events.eventend',
+                    'events.eventmedia',
+                    'events.host_business',
+                    'events.details',
+                    'events.active_event',
 
-                        'events.created_by',
-                        'users.username as event_creator'
-                    ]
-                )
-                .first()
-        })
-        .catch(err => {
-            // console.log(err)
-            if(err?.code === '23502') {
-                // err.column is created_by for no admin
-                throw new Error('invalid_admin')
-            }
-
-            if(err?.routine === 'DecodeDateTime') {
-                throw new Error('invalid_time_format')
-            }
-
-            if(err?.constraint === 'events_eventname_unique') {
-                throw new Error('events_eventname_unique')
-            } else {
-                console.log('uncaught error inside create event model')
-                throw err
-            }
-        })
+                    'events.created_by',
+                    'users.username as event_creator'
+                ]
+            )
+            .first()
+        
+    } catch (error) {
+        console.error('Error creating new event:', error.message);
+        throw new Error('create_event_server_error');
+    }
 }
 
 // .put('EVENTS/:event_id') - update event

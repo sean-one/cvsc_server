@@ -450,8 +450,9 @@ const validateEventBusinessRoles = async (req, res, next) => {
     const user_id = req.user_decoded;
     const business_id = req.body.host_business;
 
-    const hasActiveRole = await rolesDB.checkForRole(user_id, business_id)
+    const hasActiveRole = await rolesDB.checkForRole(business_id, user_id)
 
+    console.log(hasActiveRole)
     if (hasActiveRole) {
         next()
     } else {
