@@ -11,15 +11,16 @@ const eventErrors = {
         message: 'an event must have a location',
         type: 'place_id'
     },
-
-
-
-    // .get('EVENTS/:event_id'), .delete('EVENTS/:event_id')
+    // .get('EVENTS/:event_id')
+    //! .delete('EVENTS/:event_id')
     event_not_found: {
         status: 404,
         message: 'unable to find event by event id',
         type: 'server'
     },
+
+
+
     // event model - updateEvent
     events_eventname_unique: {
         status: 400,
@@ -129,6 +130,16 @@ const eventErrors = {
     create_event_server_error: {
         status: 400,
         message: 'server error while creating event',
+        type: 'server'
+    },
+    fetch_all_events_server_error: {
+        status: 400,
+        message: 'server error wile fetching all events',
+        type: 'server'
+    },
+    event_find_id_server_error: {
+        status: 400,
+        message: 'server error finding event by id',
         type: 'server'
     }
 }

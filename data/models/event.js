@@ -1,12 +1,15 @@
 const db = require('../dbConfig');
 
 module.exports = {
+    createEvent,
+    getAllEvents,
+    getEventById,
+
+
+
     // getBusinessEvents,
     // getEventRelatedEvents,
     getUserEvents,
-    getEventById,
-    getAllEvents,
-    createEvent,
     updateEvent,
     // removeEventBusiness,
     removeEvent,
@@ -144,13 +147,18 @@ async function getAllEvents() {
             // Remove inactive events from event list return
             .andWhere({ active_event: true })
             .join('users', 'events.created_by', '=', 'users.id')
+            .join('businesses', 'events.host_business', '=', 'businesses.id')
             .select([
                 'events.id as event_id',
                 'events.eventname',
+                'events.place_id',
+                'events.formatted_address',
                 'events.eventdate',
                 'events.eventstart',
                 'events.eventend',
                 'events.eventmedia',
+                'events.host_business',
+                'businesses.business_name',
                 'events.details',
                 'events.active_event',
     
@@ -160,8 +168,8 @@ async function getAllEvents() {
             // Order by combined timestamp of eventdate and reformatted eventstart
             .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
     } catch (error) {
-        console.error('Error fetching events:', error);
-        throw new Error('server_error');
+        console.error('Error fetching events:', Object.keys(error));
+        throw new Error('fetch_all_events_server_error');
     }
 }
 
@@ -170,15 +178,20 @@ async function getEventById(event_id) {
     try {
         return await db('events')
             .where({ 'events.id': event_id })
-            .leftJoin('users', 'events.created_by', '=', 'users.id')
+            .join('users', 'events.created_by', '=', 'users.id')
+            .join('businesses', 'events.host_business', '=', 'businesses.id')
             .select(
                 [
                     'events.id as event_id',
                     'events.eventname',
+                    'events.place_id',
+                    'events.formatted_address',
                     'events.eventdate',
                     'events.eventstart',
                     'events.eventend',
                     'events.eventmedia',
+                    'events.host_business',
+                    'businesses.business_name',
                     'events.details',
                     'events.active_event',
     
@@ -188,8 +201,8 @@ async function getEventById(event_id) {
             )
             .first()
     } catch (error) {
-        console.error('Error fetching event by id:', error);
-        throw new Error('server_error');
+        console.error('Error fetching event by id:', Object.keys(error));
+        throw new Error('event_find_id_server_error');
     }
 }
 
@@ -224,7 +237,7 @@ async function createEvent(event) {
             .first()
         
     } catch (error) {
-        console.error('Error creating new event:', error.message);
+        console.error('Error creating new event:', Object.keys(error));
         throw new Error('create_event_server_error');
     }
 }
