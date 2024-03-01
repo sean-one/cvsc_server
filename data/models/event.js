@@ -7,10 +7,9 @@ module.exports = {
     updateEvent,
     removeEvent,
     getUserEvents,
-
-
     getBusinessEvents,
-    // getEventRelatedEvents,
+    getEventRelatedEvents,
+
 
     checkEventName,
     validateCreatedBy,
@@ -54,55 +53,46 @@ async function getBusinessEvents(business_id) {
 }
 
 // .get('EVENTS/event-related/:event_id) - returns array of ACTIVE events for specific event id (all events that include venue and brand)
-// async function getEventRelatedEvents(event_id) {
-//     try {
-//         const { venue_id, brand_id } = await db('events').where({ 'events.id': event_id }).first()
+async function getEventRelatedEvents(event_id) {
+    try {
+        const { place_id } = await db('events').where({ 'events.id': event_id }).first()
         
-//         return await db('events')
-//             // Ensure eventdate and eventstart are in the future
-//             .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
-//             .andWhere(function() {
-//                 if (venue_id !== null) {
-//                     this.where('events.venue_id', venue_id)
-//                         .orWhere('events.brand_id', venue_id);
-//                 }
-//                 if (brand_id !== null) {
-//                     this.where('events.venue_id', brand_id)
-//                         .orWhere('events.brand_id', brand_id);
-//                 }
-//             })
-//             .where('events.active_event', true)
-//             .andWhereNot('events.id', event_id)
-//             .leftJoin('businesses as venue', 'events.venue_id', '=', 'venue.id')
-//             .leftJoin('businesses as brand', 'events.brand_id', '=', 'brand.id')
-//             .leftJoin('users', 'events.created_by', '=', 'users.id')
-//             .select(
-//                 [
-//                     'events.id as event_id',
-//                     'events.eventname',
-//                     'events.eventdate',
-//                     'events.eventstart',
-//                     'events.eventend',
-//                     'events.eventmedia',
-//                     'events.details',
-//                     'events.active_event',
+        return await db('events')
+            // Ensure eventdate and eventstart are in the future
+            .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+            .andWhere('events.place_id', '=', place_id)
+            .andWhere('events.active_event', true)
+            .andWhereNot('events.id', event_id)
+            .join('businesses', 'events.host_business', '=', 'businesses.id')
+            .join('users', 'events.created_by', '=', 'users.id')
+            .select(
+                [
+                    'events.id as event_id',
+                    'events.eventname',
+                    'events.place_id',
+                    'events.formatted_address',
+                    'events.eventdate',
+                    'events.eventstart',
+                    'events.eventend',
+                    'events.eventmedia',
+                    'events.host_business',
+                    'businesses.business_name',
+                    'events.details',
+                    'events.active_event',
 
-//                     'venue.id as venue_id',
 
-//                     'brand.id as brand_id',
+                    'events.created_by',
+                    'users.username as event_creator'
+                ]
+            )
+            // Order by combined timestamp of eventdate and reformatted eventstart
+            .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
 
-//                     'events.created_by',
-//                     'users.username as event_creator'
-//                 ]
-//             )
-//             // Order by combined timestamp of eventdate and reformatted eventstart
-//             .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
-
-//     } catch (error) {
-//         console.error('Error fetching event related events', error)
-//         throw new Error('server_error');
-//     }
-// }
+    } catch (error) {
+        console.error('Error fetching event related events', Object.keys(error));
+        throw new Error('fetch_related_events_server_error');
+    }
+}
 
 // .get('EVENTS/user/:user_id')
 async function getUserEvents(user_id) {

@@ -112,6 +112,11 @@ const eventErrors = {
         message: 'server error while fetching all events',
         type: 'server'
     },
+    fetch_related_events_server_error: {
+        status: 400,
+        message: 'server error while fetching related events',
+        type: 'server'
+    },
     event_find_id_server_error: {
         status: 400,
         message: 'server error finding event by id',
