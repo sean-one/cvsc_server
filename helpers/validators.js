@@ -403,31 +403,6 @@ const validateBusinessManagement = async (req, res, next) => {
     }
 }
 
-// .put('EVENTS/businesses/:business_id/events/:events_id')
-const validateEventBusinessRemove = async (req, res, next) => {
-    const user_id = req.user_decoded;
-    const { business_id, event_id } = req.params;
-
-    const isEventCreator = await eventsDB.validateCreatedBy(event_id, user_id)
-
-    if (isEventCreator) {
-        next()
-    } else {
-        const businessRole = await rolesDB.getUserBusinessRole(business_id, user_id)
-    
-        if (businessRole === undefined || businessRole.active_role === false || businessRole.role_type < process.env.MANAGER_ACCOUNT) {
-            return next({
-                status: 400,
-                message: 'business remove failed - invalid business role',
-                type: 'server'
-            })
-        } else {
-            next()
-        }
-    }
-
-}
-
 // .delete('EVENTS/:event_id') - validate that user created an event
 const validateEventCreator = async (req, res, next) => {
     const user_id = req.user_decoded
@@ -651,7 +626,6 @@ module.exports = {
     validateRoleDelete,
     validateRoleAction,
     validateBusinessManagement,
-    validateEventBusinessRemove,
     validateEventCreator,
     validateEventBusinessRoles,
     updateBusinessValidator,

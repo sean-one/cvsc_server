@@ -6,56 +6,52 @@ module.exports = {
     getEventById,
     updateEvent,
     removeEvent,
-
-
-    // getBusinessEvents,
-    // getEventRelatedEvents,
     getUserEvents,
+
+
+    getBusinessEvents,
+    // getEventRelatedEvents,
 
     checkEventName,
     validateCreatedBy,
 };
 
 // .get('EVENTS/business/:business_id') - returns array of ACTIVE events for specific business id
-// async function getBusinessEvents(business_id) {
-//     try {
-//         return await db('events')
-//             // Ensure eventdate and eventstart are in the future
-//             .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
-//             // Match either brand_id or venue_id with the provided business_id
-//             .andWhere(function () {
-//                 this.where('events.brand_id', '=', business_id)
-//                     .orWhere('events.venue_id', '=', business_id)
-//             })
-//             // Remove inactive events from event list return
-//             .andWhere({ active_event: true })
-//             .join('businesses as venue', 'events.venue_id', '=', 'venue.id')
-//             .join('businesses as brand', 'events.brand_id', '=', 'brand.id')
-//             .join('users', 'events.created_by', '=', 'users.id')
-//             .select([
-//                 'events.id as event_id',
-//                 'events.eventname',
-//                 'events.eventdate',
-//                 'events.eventstart',
-//                 'events.eventend',
-//                 'events.eventmedia',
-//                 'events.details',
-//                 'events.active_event',
+async function getBusinessEvents(business_id) {
+    try {
+        return await db('events')
+            // Ensure eventdate and eventstart are in the future
+            .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+            // Match either brand_id or venue_id with the provided business_id
+            .andWhere('events.host_business', '=', business_id)
+            // Remove inactive events from event list return
+            .andWhere({ active_event: true })
+            .join('businesses', 'events.host_business', '=', 'businesses.id')
+            .join('users', 'events.created_by', '=', 'users.id')
+            .select([
+                'events.id as event_id',
+                'events.eventname',
+                'events.place_id',
+                'events.formatted_address',
+                'events.eventdate',
+                'events.eventstart',
+                'events.eventend',
+                'events.eventmedia',
+                'events.host_business',
+                'businesses.business_name',
+                'events.details',
+                'events.active_event',
     
-//                 'venue.id as venue_id',
-    
-//                 'brand.id as brand_id',
-    
-//                 'events.created_by',
-//                 'users.username as event_creator'
-//             ])
-//             // Order by combined timestamp of eventdate and reformatted eventstart
-//             .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
-//     } catch (error) {
-//         console.error('Error fetching related business events:', error);
-//         throw new Error('server_error');
-//     }
-// }
+                'events.created_by',
+                'users.username as event_creator'
+            ])
+            // Order by combined timestamp of eventdate and reformatted eventstart
+            .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
+    } catch (error) {
+        console.error('Error fetching business events:', Object.keys(error));
+        throw new Error('fetch_business_events_server_error');
+    }
+}
 
 // .get('EVENTS/event-related/:event_id) - returns array of ACTIVE events for specific event id (all events that include venue and brand)
 // async function getEventRelatedEvents(event_id) {

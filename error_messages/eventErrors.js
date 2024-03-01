@@ -97,6 +97,11 @@ const eventErrors = {
         message: 'server error while creating event',
         type: 'server'
     },
+    fetch_business_events_server_error: {
+        status: 400,
+        message: 'server error while fetching business events',
+        type: 'server'
+    },
     fetch_user_events_server_error: {
         status: 400,
         message: 'sever error while fetching user events',

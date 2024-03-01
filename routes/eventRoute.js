@@ -15,7 +15,6 @@ const {
     validateImageFile,
     uuidValidation,
     result,
-    validateEventBusinessRemove,
     formatValidationCheck,
     validateEventBusinessRoles
 } = require('../helpers/validators');
@@ -25,39 +24,21 @@ const upload = multer({ storage: storage })
 // '/events'
 const router = express.Router();
 
-// useRemoveEventBusinessMutation - removes a business id from venue_id and or brand_id & sets active_event to false
-// router.put('/:event_id/remove/:business_id', [validToken, uuidValidation, formatValidationCheck, validateEventBusinessRemove, result], async (req, res, next) => {
-//     try {
-//         const { event_id, business_id } = req.params
-//         const deleted_business = await db.removeEventBusiness(event_id, business_id)
-
-//         res.status(201).json(deleted_business)
-
-//     } catch (error) {
-//         // 'token' - 401, 403 / 'server' - 403 / *path - 400
-//         next({
-//             status: eventErrors[error.message]?.status,
-//             type: eventErrors[error.message]?.type,
-//             message: eventErrors[error.message]?.message,
-//         })
-//     }
-// });
-
 // useBusinessEventsQuery - returns all the events for a business id
-// router.get('/business/:business_id', [uuidValidation, result], async (req, res, next) => {
-//     try {
-//         const { business_id } = req.params;
-//         const business_events = await db.getBusinessEvents(business_id)
+router.get('/business/:business_id', [uuidValidation, result], async (req, res, next) => {
+    try {
+        const { business_id } = req.params;
+        const business_events = await db.getBusinessEvents(business_id)
 
-//         res.status(200).json(business_events)
-//     } catch (error) {
-//         next({
-//             status: eventErrors[error.message]?.status,
-//             message: eventErrors[error.message]?.message,
-//             type: eventErrors[error.message]?.type,
-//         })
-//     }
-// });
+        res.status(200).json(business_events)
+    } catch (error) {
+        next({
+            status: eventErrors[error.message]?.status,
+            message: eventErrors[error.message]?.message,
+            type: eventErrors[error.message]?.type,
+        })
+    }
+});
 
 // useEventRelatedEventsQuery - returns all the events for an event id (all events that include event venue and event brand)
 // router.get('/event-related/:event_id', [uuidValidation, result], async (req, res, next) => {
