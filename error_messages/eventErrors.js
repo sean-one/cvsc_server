@@ -17,15 +17,15 @@ const eventErrors = {
         message: 'unable to find event by event id',
         type: 'server'
     },
-
-
-
     // .get('EVENTS/user/:user_id') - user_id in url param does not match user id in token
     invalid_user: {
         status: 400,
         message: 'invalid matching user request',
         type: 'server'
     },
+
+
+
     // event models generic try catch error
     server_error: {
         status: 500,
@@ -97,9 +97,14 @@ const eventErrors = {
         message: 'server error while creating event',
         type: 'server'
     },
+    fetch_user_events_server_error: {
+        status: 400,
+        message: 'sever error while fetching user events',
+        type: 'server'
+    },
     fetch_all_events_server_error: {
         status: 400,
-        message: 'server error wile fetching all events',
+        message: 'server error while fetching all events',
         type: 'server'
     },
     event_find_id_server_error: {

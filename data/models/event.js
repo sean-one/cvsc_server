@@ -5,14 +5,12 @@ module.exports = {
     getAllEvents,
     getEventById,
     updateEvent,
-
+    removeEvent,
 
 
     // getBusinessEvents,
     // getEventRelatedEvents,
     getUserEvents,
-    // removeEventBusiness,
-    removeEvent,
 
     checkEventName,
     validateCreatedBy,
@@ -116,16 +114,23 @@ async function getUserEvents(user_id) {
         return await db('events')
             .where({ created_by: user_id })
             .andWhere('events.eventdate', '>=', new Date())
-            .leftJoin('users', 'events.created_by', '=', 'users.id')
+            .join('users', 'events.created_by', '=', 'users.id')
+            .join('businesses', 'events.host_business', '=', 'businesses.id')
             .select(
                 [
                     'events.id as event_id',
                     'events.eventname',
+                    'events.place_id',
+                    'events.formatted_address',
                     'events.eventdate',
                     'events.eventstart',
                     'events.eventend',
                     'events.eventmedia',
+                    'events.host_business',
+                    'businesses.business_name',
                     'events.details',
+
+
                     'events.active_event',
                     'events.created_by',
                     'users.username as event_creator'
@@ -134,11 +139,11 @@ async function getUserEvents(user_id) {
             .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`)
     } catch (error) {
         console.error('Error fetching related user events:', error);
-        throw new Error('server_error');
+        throw new Error('fetch_user_events_server_error');
     }
 }
 
-//! main calendar event call
+// .get('EVENTS/') - returns all active upcoming events
 async function getAllEvents() {
     try {
         return await db('events')
@@ -280,30 +285,6 @@ async function updateEvent(event_id, eventChanges) {
     }
 }
 
-// .put('EVENTS/businesses/:business_id/events/:event_id')
-// async function removeEventBusiness(event_id, business_id) {
-//     try {
-//         let eventUpdates = { active_event: false }
-//         const current_event = await db('events').where({ id: event_id }).select(['venue_id', 'brand_id']).first()
-    
-//         if (current_event.venue_id === business_id) {
-//             eventUpdates.venue_id = null
-//         }
-    
-//         if (current_event.brand_id === business_id) {
-//             eventUpdates.brand_id = null
-//         }
-    
-//         await db('events')
-//             .where({ id: event_id })
-//             .update(eventUpdates, ['events.id as event_id'])
-        
-//         return { event_id, business_id }
-//     } catch (error) {
-//         throw new Error('delete_error')
-//     }
-// }
-
 // .delete('EVENTS/:event_id')
 async function removeEvent(event_id) {
     try {
@@ -314,6 +295,10 @@ async function removeEvent(event_id) {
         throw new Error('delete_event_server_error')
     }
 }
+
+
+
+
 
 //! VALIDATION HELPERS - validators.js
 // isEventNameUnique
