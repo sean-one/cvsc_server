@@ -4,13 +4,13 @@ module.exports = {
     createEvent,
     getAllEvents,
     getEventById,
+    updateEvent,
 
 
 
     // getBusinessEvents,
     // getEventRelatedEvents,
     getUserEvents,
-    updateEvent,
     // removeEventBusiness,
     removeEvent,
 
@@ -251,14 +251,19 @@ async function updateEvent(event_id, eventChanges) {
         return db('events')
             .where('events.id', id)
             .join('users', 'events.created_by', '=', 'users.id')
+            .join('businesses', 'events.host_business', '=', 'businesses.id')
             .select(
                 [
                     'events.id as event_id',
                     'events.eventname',
+                    'events.place_id',
+                    'events.formatted_address',
                     'events.eventdate',
                     'events.eventstart',
                     'events.eventend',
                     'events.eventmedia',
+                    'events.host_business',
+                    'businesses.business_name',
                     'events.details',
                     'events.active_event',
 
@@ -269,22 +274,8 @@ async function updateEvent(event_id, eventChanges) {
             .first()
         
     } catch (error) {
-        if(error?.constraint === 'events_eventname_unique') {
-            throw new Error('events_eventname_unique')
-        }
-    
-        if(error?.routine === 'DateTimeParseError') {
-            throw new Error('invalid_date_format')
-        }
-    
-        if(error?.routine === 'pg_strtoint32') {
-            throw new Error('invalid_time_format')
-        }
-    
-        if(error?.routine === 'string_to_uuid') {
-            throw new Error('invalid_business_id')
-        }
-        console.log(error)
+        console.error('Error updating event:', Object.keys(error))
+        throw new Error('update_event_server_error')
         
     }
 }
@@ -319,7 +310,8 @@ async function removeEvent(event_id) {
         return await db('events').where({ id: event_id }).first().del()
         
     } catch (error) {
-        throw new Error('delete_error')
+        console.error('Error deleting event:', Object.keys(error))
+        throw new Error('delete_event_server_error')
     }
 }
 

@@ -209,7 +209,7 @@ async function updateBusiness(business_id, changes) {
                 .first()
         })
     } catch (error) {
-        console.error('Error updating business:', error);
+        console.error('Error updating business:', Object.keys(error));
         throw new Error('update_business_server_error');
     }
 }

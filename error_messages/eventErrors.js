@@ -11,8 +11,7 @@ const eventErrors = {
         message: 'an event must have a location',
         type: 'place_id'
     },
-    // .get('EVENTS/:event_id')
-    //! .delete('EVENTS/:event_id')
+    // .get('EVENTS/:event_id') .delete('EVENTS/:event_id')
     event_not_found: {
         status: 404,
         message: 'unable to find event by event id',
@@ -21,45 +20,10 @@ const eventErrors = {
 
 
 
-    // event model - updateEvent
-    events_eventname_unique: {
-        status: 400,
-        message: 'eventname already exist',
-        type: 'eventname'
-    },
     // .get('EVENTS/user/:user_id') - user_id in url param does not match user id in token
     invalid_user: {
         status: 400,
         message: 'invalid matching user request',
-        type: 'server'
-    },
-    // event model / updateEvent - invalid formatting of time of db insert
-    invalid_time_format: {
-        status: 400,
-        message: 'please be sure time has correct formatting',
-        type: 'server'
-    },
-    // event model - updateEvent
-    invalid_business_id: {
-        status: 400,
-        message: 'invalid business',
-        type: 'server',
-    },
-    // event model - updateEvent
-    invalid_date_format: {
-        status: 400,
-        message: 'please be sure date has correct formatting',
-        type: 'eventdate'
-    },
-    // .put('EVENTS/:event_id') - error uploading image to s3 bucket
-    upload_error: {
-        status: 400,
-        message: 'an error occured during image upload',
-        type: 'media_error'
-    },
-    delete_error: {
-        status: 400,
-        message: 'event delete failed on server',
         type: 'server'
     },
     // event models generic try catch error
@@ -75,6 +39,7 @@ const eventErrors = {
         message: 'user not found',
         type: 'server'
     },
+
 
     // geocoding errors
     geocode_failed: {
@@ -140,6 +105,16 @@ const eventErrors = {
     event_find_id_server_error: {
         status: 400,
         message: 'server error finding event by id',
+        type: 'server'
+    },
+    update_event_server_error: {
+        status: 400,
+        message: 'server error updating event',
+        type: 'server'
+    },
+    delete_event_server_error: {
+        status: 400,
+        message: 'server error deleting event',
         type: 'server'
     }
 }

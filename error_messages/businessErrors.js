@@ -118,6 +118,11 @@ const businessErrors = {
         status: 400,
         message: 'server error fetching business management',
         type: 'server'
+    },
+    update_business_server_error: {
+        status: 400,
+        message: 'server error updating business',
+        type: 'server'
     }
 }
 

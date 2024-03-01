@@ -137,20 +137,70 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
         }
 
         // only fields to include in update object
-        const fieldsToInclude = ['eventname', 'eventdate', 'eventstart', 'eventend', 'details', 'brand_id']
+        const fieldsToInclude = [
+            'eventname',
+            'place_id',
+            'eventdate',
+            'eventstart',
+            'eventend',
+            'host_business',
+            'details',
+        ]
 
         const event_update = createUpdateObject(req.body, fieldsToInclude)
 
+        // check for place id and set formatted address
+        if (event_update?.place_id) {
+            try {
+                const geocodeResponse = await updatedGoogleMapsClient.geocode({
+                    params: { place_id: event_update.place_id, key: process.env.GEOCODER_API_KEY },
+                    timeout: 1000
+                });
+
+                if (geocodeResponse?.data?.status === 'OK' && geocodeResponse?.data?.results.length > 0) {
+                    event_update.formatted_address = geocodeResponse?.data?.results[0]?.formatted_address;
+                } else {
+                    throw new Error('geocode_failed')
+                }
+            } catch (error) {
+                // log the error for debug
+                console.error('Geocoding error:', Object.keys(error));
+
+                // Handle network errors or other unexpected issues
+                if (error.response) {
+                    // API responded with an error status and possibly an error message
+                    console.error('Geocoding API response error:', error.response.data.error_message);
+
+                    // You might want to throw different errors based on the response status code
+                    console.log(error.response.status)
+                    if (error.response.status === 403) {
+                        throw new Error('geocode_permission_denied');
+                    } else {
+                        throw new Error('geocode_api_error');
+                    }
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.error('No response received from Geocoding API');
+                    throw new Error('geocode_no_response');
+                } else {
+                    // Something else happened in setting up the request that triggered an error
+                    console.error('Error setting up geocode request:', error.message);
+                    throw new Error('geocode_setup_error');
+                }
+            }
+        }
+
         if (req.file) {
+            // get current eventmedia image
             const { eventmedia } = await db.getEventById(event_id)
-            // resize the image
+
+            // resize the new updated image
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
 
             // upload to s3 and get key
             const image_key = await uploadImageS3Url(req.file)
 
-            if (!image_key) throw new Error('upload_error')
-
+            // check the outgoing image and delete it from s3 if needed
             if (!check_link.test(eventmedia)) {
                 // if on s3 remove from bucket
                 await deleteImageS3(eventmedia)
@@ -178,7 +228,6 @@ router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, 
         const check_link = /^(http|https)/g
         const { event_id } = req.params
         const current_event = await db.getEventById(event_id)
-        console.log(current_event)
 
         if(current_event === undefined) {
             throw new Error('event_not_found')
