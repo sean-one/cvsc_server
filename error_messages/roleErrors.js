@@ -16,12 +16,6 @@ const roleErrors = {
         message: 'missing business id',
         type: 'missing_input'
     },
-    // createRoleRequest insert error
-    db_insert_error: {
-        status: 404,
-        message: 'foriegn identifiers not found',
-        type: 'server'
-    },
     get_business_roles_error: {
         status: 400,
         message: 'business identifier formatting error',
@@ -58,6 +52,10 @@ const roleErrors = {
         message: 'an internal server error occurred',
         type: 'server'
     },
+
+
+
+
     // generic server errors
     get_user_account_role_server_error: {
         status: 400,
@@ -67,6 +65,11 @@ const roleErrors = {
     all_user_roles_server_error: {
         status: 400,
         message: 'server error getting all user roles',
+        type: 'server'
+    },
+    create_role_request_server_error: {
+        status: 400,
+        message: 'server error creating business role request',
         type: 'server'
     }
 }

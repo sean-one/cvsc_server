@@ -162,7 +162,8 @@ async function createRoleRequest(business_id, user_id) {
         
         return { ...new_role, role_type: getAccountType(new_role.role_type) }
     } catch (error) {
-        throw new Error('db_insert_error');
+        console.error('Error creating new role request:', Object.keys(error));
+        throw new Error('create_role_request_server_error');
     }
 
 }

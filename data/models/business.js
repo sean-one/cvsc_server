@@ -391,7 +391,7 @@ async function removeBusiness(business_id) {
 
 
 //! VALIDATORS
-// isBusinessNameUnique - checks if business name is already in use
+// isBusinessNameUnique - checks if business_name is already in use
 function checkBusinessNameDuplicate(business_name) {
     return db('businesses')
         .where(db.raw('LOWER(business_name) ILIKE ?', business_name.toLowerCase()))
@@ -399,7 +399,7 @@ function checkBusinessNameDuplicate(business_name) {
         .first()
         .then(business => !!business)
 }
-// validateRoleRequest - check that business request open is set to true
+// validateRoleRequest - check that business_request_open is set to true
 function validateBusinessRequestOpen(business_id) {
     return db('businesses')
         .where({ id: business_id, business_request_open: true })

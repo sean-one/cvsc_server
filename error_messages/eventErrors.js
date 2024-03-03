@@ -25,22 +25,6 @@ const eventErrors = {
     },
 
 
-
-    // event models generic try catch error
-    server_error: {
-        status: 500,
-        message: 'an internal server error occurred',
-        type: 'server'
-
-    },
-    //! constrain error from event model
-    events_created_by_foreign: {
-        status: 404,
-        message: 'user not found',
-        type: 'server'
-    },
-
-
     // geocoding errors
     geocode_failed: {
         status: 400,
@@ -91,6 +75,7 @@ const eventErrors = {
         type: 'server'
     },
 
+    
     // generic server errors
     create_event_server_error: {
         status: 400,
