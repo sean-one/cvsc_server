@@ -74,9 +74,6 @@ async function getAllUserRoles(user_id) {
     }
 }
 
-
-
-
 // .get('ROLES/businesses/:business_id') - returns array of roles for a selected business (ACTIVE/INACTIVE)
 async function getBusinessRoles(business_id) {
     try {
@@ -101,8 +98,8 @@ async function getBusinessRoles(business_id) {
             }))
 
     } catch (error) {
-        console.error(`Error fetching business roles, ${error}`)
-        throw new Error('server_error')
+        console.error('Error fetching all business roles', error);
+        throw new Error('all_business_roles_server_error');
     }
 }
 

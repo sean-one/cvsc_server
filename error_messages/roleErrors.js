@@ -62,6 +62,11 @@ const roleErrors = {
         message: 'server error getting user account role',
         type: 'server'
     },
+    all_business_roles_server_error: {
+        status: 400,
+        message: 'server error getting all business roles',
+        type: 'server'
+    },
     all_user_roles_server_error: {
         status: 400,
         message: 'server error getting all user roles',
