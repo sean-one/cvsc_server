@@ -153,8 +153,9 @@ router.get('/logout', async (req, res, next) => {
     
         // user found, removed from selected user and clear cookie
         await userDB.removeRefreshToken(user_found.id)
-        
+
         res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
+
         res.sendStatus(204)
     } catch (error) {
         next({
