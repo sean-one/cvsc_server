@@ -312,6 +312,7 @@ const validateRoleDelete = async (req, res, next) => {
 
     // if role.user_id is user_decoded role belongs to user
     if(user_id === role_user_id) {
+        req.my_role = true
         next()
     } else {
         const requestUserRole = await rolesDB.getUserBusinessRole(business_id, user_id)

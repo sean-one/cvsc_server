@@ -25,20 +25,11 @@ router.get('/businesses/:business_id', [validToken, uuidValidation, formatValida
         res.status(200).json(business_roles);
         
     } catch (error) {
-        if (error?.routine) {
-            next({
-                status: roleErrors['get_business_roles_error']?.status,
-                message: roleErrors['get_business_roles_error']?.message,
-                type: roleErrors['get_business_roles_error']?.type,
-            })
-        } else {
-            next({
-                status: roleErrors[error.message]?.status,
-                message: roleErrors[error.message]?.message,
-                type: roleErrors[error.message]?.type,
-            })
-        }
-
+        next({
+            status: roleErrors[error.message]?.status,
+            message: roleErrors[error.message]?.message,
+            type: roleErrors[error.message]?.type,
+        })
     }
 })
 
@@ -166,7 +157,11 @@ router.delete('/:role_id', [validToken, uuidValidation, formatValidationCheck, v
         const { role_id } = req.params;
         const deletedRole = await db.deleteRole(role_id)
 
-        res.status(200).json(deletedRole)
+        if (req.my_role) {
+            res.status(200).json({ ...deletedRole, my_role: true })
+        } else {
+            res.status(200).json(deletedRole)
+        }
     } catch (error) {
         next({
             status: roleErrors[error.message]?.status,
