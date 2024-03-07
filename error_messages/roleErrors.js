@@ -76,6 +76,11 @@ const roleErrors = {
         status: 400,
         message: 'server error creating business role request',
         type: 'server'
+    },
+    fetch_role_id_server_error: {
+        status: 400,
+        message: 'server error getting role by id',
+        type: 'server'
     }
 }
 

@@ -355,8 +355,8 @@ const validateRoleAction = async (req, res, next) => {
         })
     }
     // if role is valid and business_id exist check active_business
-    const { active_business } = await businessDB.getBusinessById(business_id)
-    if (active_business === undefined || !active_business) {
+    const isActiveBussiness = await businessDB.validateActiveBusiness(business_id)
+    if (!isActiveBussiness) {
         return next({
             status: 400,
             message: 'business currently not accepting new role request',

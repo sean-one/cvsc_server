@@ -17,6 +17,7 @@ module.exports = {
 
     checkBusinessNameDuplicate,
     validateBusinessRequestOpen,
+    validateActiveBusiness,
 };
 
 // .get('BUSINESSES/)
@@ -403,6 +404,14 @@ function checkBusinessNameDuplicate(business_name) {
 function validateBusinessRequestOpen(business_id) {
     return db('businesses')
         .where({ id: business_id, business_request_open: true })
+        .select(['businesses.id'])
+        .first()
+        .then(business => !!business)
+}
+// validateRoleAction - check that active_business is set to true
+function validateActiveBusiness(business_id) {
+    return db('businesses')
+        .where({ id: business_id, active_business: true })
         .select(['businesses.id'])
         .first()
         .then(business => !!business)

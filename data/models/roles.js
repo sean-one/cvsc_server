@@ -301,18 +301,24 @@ async function validateBusinessManagement(business_id, user_id) {
         .then(role => !!role)
 }
 
+// validators.js - validateRoleAction confirms role to take action on
 async function getRoleById(role_id) {
-    return await db('roles')
-        .where({ 'roles.id': role_id})
-        .select(
-            [
-                'roles.business_id',
-                'roles.user_id',
-                'roles.role_type',
-                'roles.active_role'
-            ]
-        )
-        .first()
+    try {
+        return await db('roles')
+            .where({ 'roles.id': role_id})
+            .select(
+                [
+                    'roles.business_id',
+                    'roles.user_id',
+                    'roles.role_type',
+                    'roles.active_role'
+                ]
+            )
+            .first()
+    } catch (error) {
+        console.error('Error fetching role by id:', error);
+        throw new Error('fetch_role_id_server_error')
+    }
 }
 
 // validators.js - validateBusinessManagement, validateRoleDelete - ONLY ACTIVE ROLE
