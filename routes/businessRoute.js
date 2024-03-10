@@ -75,7 +75,9 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
                 });
 
                 if (geocodeResponse?.data?.status === 'OK' && geocodeResponse?.data?.results.length > 0) {
-                    new_business.formatted_address = geocodeResponse?.data?.results[0]?.formatted_address;
+
+                    let formatted_address = geocodeResponse?.data?.results[0]?.formatted_address.replace(', USA', '')
+                    new_business.formatted_address = formatted_address;
                 } else {
                     throw new Error('geocode_failed')
                 }      
@@ -276,7 +278,11 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
                 });
 
                 if (geocodeResponse?.data?.status === 'OK' && geocodeResponse?.data?.results.length > 0) {
-                    business_update.formatted_address = geocodeResponse?.data?.results[0]?.formatted_address
+
+                    let formatted_address = geocodeResponse?.data?.results[0]?.formatted_address.replace(', USA', '');
+
+                    console.log(geocodeResponse?.data?.results[0]?.address_components)
+                    business_update.formatted_address = formatted_address
                 } else {
                     throw new Error('geocode_failed')
                 }
