@@ -332,6 +332,12 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
             business_update['business_avatar'] = image_key
         }
 
+        // if remove address flag is true update place_id & formatted_address
+        if (req.body.remove_address) {
+            business_update.place_id = null;
+            business_update.formatted_address = null;
+        }
+
         // if there are no changes in the update there is no need to hit the database
         if (Object.keys(business_update).length === 0) {
             throw new Error('empty_update_object')
