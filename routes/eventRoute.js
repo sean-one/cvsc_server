@@ -261,6 +261,7 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventBusiness
             eventmedia: req.body.eventmedia,
             details: req.body.details,
             host_business: req.body.host_business,
+            business_tag: req.body.business_tag,
             
             created_by: req.user_decoded,
             active_event: true,

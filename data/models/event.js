@@ -200,32 +200,63 @@ async function getEventById(event_id) {
 // .post('EVENTS/') - create new event
 async function createEvent(event) {
     try {
-        // insert the new event into database
-        const new_event = await db('events')
-            .insert(event, ['id'])
-        
-        return await db('events')
-            .where({ 'events.id': new_event[0].id })
-            .join('users', 'events.created_by', '=', 'users.id')
-            .select(
-                [
-                    'events.id as event_id',
-                    'events.eventname',
-                    'events.place_id',
-                    'events.formatted_address',
-                    'events.eventdate',
-                    'events.eventstart',
-                    'events.eventend',
-                    'events.eventmedia',
-                    'events.host_business',
-                    'events.details',
-                    'events.active_event',
+        return await db.transaction(async trx => {
+            let businessTag = null
+            
+            // check for business tag
+            if (event.business_tag) {
+                // check if the user has role rights for tagged business (true/false)
+                const hasRoleRights = await db('roles')
+                    .transacting(trx)
+                    .where({ user_id: event?.created_by, business_id: event.business_tag, active_role: true })
+                    .select(['roles.id'])
+                    .first()
+                    .then(role => !!role)
 
-                    'events.created_by',
-                    'users.username as event_creator'
-                ]
-            )
-            .first()
+                // create business tag as approved with user id or pending with approved_by as null
+                businessTag = { business_id: event.business_tag, approved_by: hasRoleRights ? event.created_by : null };
+                delete event['business_tag'];
+            }
+            // remove business_tag no matter what
+            delete event['business_tag'];
+
+            // insert the new event into database
+            const new_event = await db('events')
+                .transacting(trx)
+                .insert(event, ['id'])
+            
+            if (businessTag) {
+                // add event id from new event to business tag
+                businessTag = {...businessTag, event_id: new_event[0].id }
+                await db('business_tags')
+                    .transacting(trx)
+                    .insert(businessTag, ['id'])
+            }
+
+            return await db('events')
+                .transacting(trx)
+                .where({ 'events.id': new_event[0].id })
+                .join('users', 'events.created_by', '=', 'users.id')
+                .select(
+                    [
+                        'events.id as event_id',
+                        'events.eventname',
+                        'events.place_id',
+                        'events.formatted_address',
+                        'events.eventdate',
+                        'events.eventstart',
+                        'events.eventend',
+                        'events.eventmedia',
+                        'events.host_business',
+                        'events.details',
+                        'events.active_event',
+    
+                        'events.created_by',
+                        'users.username as event_creator'
+                    ]
+                )
+                .first()
+        })
         
     } catch (error) {
         console.error('Error creating new event:', Object.keys(error));
