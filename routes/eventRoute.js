@@ -139,7 +139,8 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
                 });
 
                 if (geocodeResponse?.data?.status === 'OK' && geocodeResponse?.data?.results.length > 0) {
-                    event_update.formatted_address = geocodeResponse?.data?.results[0]?.formatted_address;
+                    let formatted_address = geocodeResponse?.data?.results[0]?.formatted_address.replace(', USA', '');
+                    event_update.formatted_address = formatted_address;
                 } else {
                     throw new Error('geocode_failed')
                 }
@@ -276,7 +277,9 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventBusiness
                 });
 
                 if (geocodeResponse?.data?.status === 'OK' && geocodeResponse?.data?.results.length > 0) {
-                    new_event.formatted_address = geocodeResponse?.data?.results[0]?.formatted_address;
+                    
+                    let formatted_address = geocodeResponse?.data?.results[0]?.formatted_address.replace(', USA', '');
+                    new_event.formatted_address = formatted_address;
                 } else {
                     throw new Error('geocode_failed')
                 }
