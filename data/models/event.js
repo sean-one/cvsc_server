@@ -132,34 +132,34 @@ async function getUserEvents(user_id) {
 // .get('EVENTS/') - returns all active upcoming events
 async function getAllEvents() {
     try {
-        return await db('events')
-            // Ensure eventdate and eventstart are in the future
-            .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
-            // Remove inactive events from event list return
-            .andWhere({ active_event: true })
-            .join('users', 'events.created_by', '=', 'users.id')
-            .join('businesses', 'events.host_business', '=', 'businesses.id')
+        return await db('events as e')
+            .leftJoin('users as u', 'e.created_by', 'u.id')
+            .leftJoin('businesses as b', 'e.host_business', 'b.id')
+            .leftJoin('business_tags as bt', 'e.id', 'bt.event_id')
             .select([
-                'events.id as event_id',
-                'events.eventname',
-                'events.place_id',
-                'events.formatted_address',
-                'events.eventdate',
-                'events.eventstart',
-                'events.eventend',
-                'events.eventmedia',
-                'events.host_business',
-                'businesses.business_name',
-                'events.details',
-                'events.active_event',
-    
-                'events.created_by',
-                'users.username as event_creator'
+                'e.id as event_id',
+                'e.eventname',
+                'e.place_id',
+                'e.formatted_address',
+                'e.eventdate',
+                'e.eventstart',
+                'e.eventend',
+                'e.eventmedia',
+                'e.details',
+                'e.host_business',
+                'e.created_by',
+                'e.active_event',
+                'u.username as event_creator',
+                'b.business_name',
+                // Updated ARRAY_AGG to include only approved business tags
+                db.raw('ARRAY_AGG(bt.business_id) FILTER (WHERE bt.business_id IS NOT NULL AND bt.approved_by IS NOT NULL) as tags'),
             ])
-            // Order by combined timestamp of eventdate and reformatted eventstart
-            .orderByRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp`);
+            .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+            .andWhere({ 'e.active_event': true })
+            .groupBy('e.id', 'u.username', 'b.business_name')
+            .orderByRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp`);
     } catch (error) {
-        console.error('Error fetching events:', Object.keys(error));
+        console.error('Error fetching events:', error);
         throw new Error('fetch_all_events_server_error');
     }
 }
