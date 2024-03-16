@@ -15,6 +15,7 @@ const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoute');
 const eventRouter = require('./routes/eventRoute');
 const businessRouter = require('./routes/businessRoute');
+const businessTagsRouter = require('./routes/businessTagsRoute');
 const roleRouter = require('./routes/roleRoute');
 const s3Router = require('./routes/s3Route');
 const errorHandler = require('./helpers/errorHandler');
@@ -61,6 +62,7 @@ app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
 app.use('/businesses', businessRouter);
+app.use('/business-tags', businessTagsRouter);
 app.use('/roles', roleRouter);
 app.use('/s3', s3Router);
 

@@ -214,8 +214,6 @@ router.put('/:business_id/status/toggle', [validToken, uuidValidation, formatVal
     }
 });
 
-// router.put('/:business_id/address/remove')
-
 // useBusinessTransferMutation - business.admin.view tranfer business account and admin role to manager
 router.put('/:business_id/transfer/:manager_id', [validToken, uuidValidation, formatValidationCheck, validateBusinessAdmin, result], async (req, res, next) => {
     try {
