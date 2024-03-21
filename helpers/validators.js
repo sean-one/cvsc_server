@@ -439,6 +439,25 @@ const validateEventBusinessRoles = async (req, res, next) => {
     }
 }
 
+const validateEventUpdate = async (req, res, next) => {
+    console.log(req.method)
+    const user_id = req.user_decoded;
+
+
+    if (req.body?.host_business) {
+        const hasActiveRole = await rolesDB.checkForRole(req.body?.host_business, user_id)
+
+        if (!hasActiveRole) {
+            next({
+                status: 400,
+                message: 'must have at least creator permission for business',
+                type: 'server'
+            })
+        }
+    }
+    next()
+}
+
 // .post('/register')
 const registerUserValidator = [
     check('username').trim().not().isEmpty().withMessage('username is required')
@@ -628,6 +647,7 @@ module.exports = {
     validateBusinessManagement,
     validateEventCreator,
     validateEventBusinessRoles,
+    validateEventUpdate,
     updateBusinessValidator,
     updateUserValidator,
     newEventValidator,

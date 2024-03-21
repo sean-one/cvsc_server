@@ -26,13 +26,12 @@ async function getBusinessEvents(business_id) {
         // Query for events tagged with the business_id
         const taggedEventsQuery = db('business_tags as bt')
             .select('bt.event_id as id')
-            .where('bt.business_id', '=', business_id)
-            .andWhereNotNull('bt.approved_by');
+            .whereNotNull('bt.approved_by')
+            .andWhere('bt.business_id', '=', business_id)
 
         // Combine the queries to get a unified list of event IDs
         const combinedEventIDsQuery = directEventsQuery.union([taggedEventsQuery]);
 
-        console.log(combinedEventIDsQuery)
         // Fetch the complete event records matching the combined list of event IDs
         return await db('events as e')
             .joinRaw(`JOIN (${combinedEventIDsQuery.toQuery()}) AS combined ON e.id = combined.id`)

@@ -16,7 +16,8 @@ const {
     uuidValidation,
     result,
     formatValidationCheck,
-    validateEventBusinessRoles
+    validateEventBusinessRoles,
+    validateEventUpdate
 } = require('../helpers/validators');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -77,7 +78,6 @@ router.get('/user/:user_id', [validToken, uuidValidation, result], async (req, r
 });
 
 // useEventQuery - returns a single event from event id
-// event.edit.view - inside useEffect
 router.get('/:event_id', [uuidValidation, result], async (req, res, next) => {
     try {
         const { event_id } = req.params
@@ -98,8 +98,9 @@ router.get('/:event_id', [uuidValidation, result], async (req, res, next) => {
 });
 
 // useUpdateEventMutation - update event
-router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, validateEventBusinessRoles, updateEventValidator, validateImageFile, result], async (req, res, next) => {
+router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, validateEventUpdate, updateEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
+        console.log(req.body)
         const check_link = /^(http|https)/g
         const { event_id } = req.params
         // const event_updates = req.body;
