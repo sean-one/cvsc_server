@@ -83,7 +83,6 @@ router.get('/:event_id', [uuidValidation, result], async (req, res, next) => {
         const { event_id } = req.params
         const selected_event = await db.getEventById(event_id)
 
-        console.log(selected_event)
         if (selected_event === undefined) {
             throw new Error('event_not_found')
         } else {
@@ -101,10 +100,8 @@ router.get('/:event_id', [uuidValidation, result], async (req, res, next) => {
 // useUpdateEventMutation - update event
 router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidation, formatValidationCheck, validateEventUpdate, updateEventValidator, validateImageFile, result], async (req, res, next) => {
     try {
-        console.log(req.body)
         const check_link = /^(http|https)/g
         const { event_id } = req.params
-        // const event_updates = req.body;
 
         // check for any additional fields and rmove them
         function createUpdateObject(originalObject, keysToInclude) {
