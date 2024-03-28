@@ -18,26 +18,10 @@ module.exports = {
 // .get('EVENTS/business/:business_id') - returns array of ACTIVE events for specific business id
 async function getBusinessEvents(business_id) {
     try {
-        // Query for direct events
-        const directEventsQuery = db('events as e')
-            .select('e.id')
-            .where('e.host_business', '=', business_id);
-
-        // Query for events tagged with the business_id
-        const taggedEventsQuery = db('business_tags as bt')
-            .select('bt.event_id as id')
-            .whereNotNull('bt.approved_by')
-            .andWhere('bt.business_id', '=', business_id)
-
-        // Combine the queries to get a unified list of event IDs
-        const combinedEventIDsQuery = directEventsQuery.union([taggedEventsQuery]);
-
         // Fetch the complete event records matching the combined list of event IDs
         return await db('events as e')
-            .joinRaw(`JOIN (${combinedEventIDsQuery.toQuery()}) AS combined ON e.id = combined.id`)
             .leftJoin('users as u', 'e.created_by', 'u.id')
             .leftJoin('businesses as b', 'e.host_business', 'b.id')
-            .leftJoin('business_tags as bt', 'e.id', 'bt.event_id')
             .select([
                 'e.id as event_id',
                 'e.eventname',
@@ -53,11 +37,9 @@ async function getBusinessEvents(business_id) {
                 'e.active_event',
                 'u.username as event_creator',
                 'b.business_name',
-                // Updated ARRAY_AGG to include only approved business tags
-                db.raw('ARRAY_AGG(bt.business_id) FILTER (WHERE bt.business_id IS NOT NULL AND bt.approved_by IS NOT NULL) as tags'),
             ])
             .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
-            .andWhere({ active_event: true })
+            .andWhere({ 'e.host_business': business_id, 'e.active_event': true })
             .groupBy('e.id', 'u.username', 'b.business_name')
             // Order by combined timestamp of eventdate and reformatted eventstart
             .orderByRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp`);
@@ -117,7 +99,6 @@ async function getUserEvents(user_id) {
         return await db('events as e')
             .leftJoin('users as u', 'e.created_by', 'u.id')
             .leftJoin('businesses as b', 'e.host_business', 'b.id')
-            .leftJoin('business_tags as bt', 'e.id', 'bt.event_id')
             .select([
                 'e.id as event_id',
                 'e.eventname',
@@ -133,8 +114,6 @@ async function getUserEvents(user_id) {
                 'e.active_event',
                 'u.username as event_creator',
                 'b.business_name',
-                // Updated ARRAY_AGG to include only approved business tags
-                db.raw('ARRAY_AGG(bt.business_id) FILTER (WHERE bt.business_id IS NOT NULL AND bt.approved_by IS NOT NULL) as tags'),
             ])
             .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere({ 'e.created_by': user_id })
@@ -152,7 +131,6 @@ async function getAllEvents() {
         return await db('events as e')
             .leftJoin('users as u', 'e.created_by', 'u.id')
             .leftJoin('businesses as b', 'e.host_business', 'b.id')
-            .leftJoin('business_tags as bt', 'e.id', 'bt.event_id')
             .select([
                 'e.id as event_id',
                 'e.eventname',
@@ -168,8 +146,6 @@ async function getAllEvents() {
                 'e.active_event',
                 'u.username as event_creator',
                 'b.business_name',
-                // Updated ARRAY_AGG to include only approved business tags
-                db.raw('ARRAY_AGG(bt.business_id) FILTER (WHERE bt.business_id IS NOT NULL AND bt.approved_by IS NOT NULL) as tags'),
             ])
             .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere({ 'e.active_event': true })
@@ -208,6 +184,7 @@ async function getEventById(event_id) {
                 ]
             )
             .first()
+
     } catch (error) {
         console.error('Error fetching event by id:', Object.keys(error));
         throw new Error('event_find_id_server_error');
@@ -218,38 +195,12 @@ async function getEventById(event_id) {
 async function createEvent(event) {
     try {
         return await db.transaction(async trx => {
-            let businessTag = null
             
-            // check for business tag
-            if (event.business_tag) {
-                // check if the user has role rights for tagged business (true/false)
-                const hasRoleRights = await db('roles')
-                    .transacting(trx)
-                    .where({ user_id: event?.created_by, business_id: event.business_tag, active_role: true })
-                    .select(['roles.id'])
-                    .first()
-                    .then(role => !!role)
-
-                // create business tag as approved with user id or pending with approved_by as null
-                businessTag = { business_id: event.business_tag, approved_by: hasRoleRights ? event.created_by : null };
-                delete event['business_tag'];
-            }
-            // remove business_tag no matter what
-            delete event['business_tag'];
-
             // insert the new event into database
             const new_event = await db('events')
                 .transacting(trx)
                 .insert(event, ['id'])
             
-            if (businessTag) {
-                // add event id from new event to business tag
-                businessTag = {...businessTag, event_id: new_event[0].id }
-                await db('business_tags')
-                    .transacting(trx)
-                    .insert(businessTag, ['id'])
-            }
-
             return await db('events')
                 .transacting(trx)
                 .where({ 'events.id': new_event[0].id })

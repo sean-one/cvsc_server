@@ -83,6 +83,7 @@ router.get('/:event_id', [uuidValidation, result], async (req, res, next) => {
         const { event_id } = req.params
         const selected_event = await db.getEventById(event_id)
 
+        console.log(selected_event)
         if (selected_event === undefined) {
             throw new Error('event_not_found')
         } else {
@@ -263,7 +264,6 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventBusiness
             eventmedia: req.body.eventmedia,
             details: req.body.details,
             host_business: req.body.host_business,
-            business_tag: req.body.business_tag,
             
             created_by: req.user_decoded,
             active_event: true,
