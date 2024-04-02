@@ -145,11 +145,11 @@ async function getAllEvents() {
                 'e.created_by',
                 'e.active_event',
                 'u.username as event_creator',
+                'b.business_avatar',
                 'b.business_name',
             ])
             .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere({ 'e.active_event': true })
-            .groupBy('e.id', 'u.username', 'b.business_name')
             .orderByRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp`);
     } catch (error) {
         console.error('Error fetching events:', error);
