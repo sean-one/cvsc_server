@@ -241,7 +241,7 @@ const validateImageFile = async (req, res, next) => {
 
 };
 
-// .put('BUSINESSES/:business_id/status/toggle)
+// .put('BUSINESSES/:business_id/status/toggle), .delete('/:business_id')
 const validateBusinessAdmin = async (req, res, next) => {
     const user_id = req.user_decoded
     const { business_id } = req.params

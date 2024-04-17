@@ -359,6 +359,10 @@ async function removeBusiness(business_id) {
         const deleted_business = await db.transaction(async trx => {
             
             // remove business from events
+            await db('events')
+                .transacting(trx)
+                .where({ host_business: business_id })
+                .del()
             
             // remove all business roles
             await db('roles')
