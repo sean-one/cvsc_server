@@ -15,23 +15,33 @@ const upload = multer({ storage: storage })
 
 const router = express.Router();
 
-// get user account
-// router.get('/user', [validToken], async (req, res, next) => {
-//     try {
-//         const user_id = req.user_decoded
-//         console.log(`user_id: ${user_id}`)
-//         const user_details = await db.findUserById(user_id)
+// user.account - delete_account
+router.delete('/delete', [ validToken ], async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded
+        if(!user_id) throw new Error('invalid_user')
 
-//         res.status(200).json(user_details)
-//     } catch (error) {
-//         console.log(error)
-//         next({
-//             status: userErrors[error.message]?.status,
-//             message: userErrors[error.message]?.message,
-//             type: userErrors[error.message]?.type, 
-//         })
-//     }
-// })
+        const deletedUser = await db.removeUser(user_id)
+        
+        console.log(`INSIDE THE ROUTE: deletedUser: ${deletedUser}`)
+        if (deletedUser >= 1) {
+            console.log('made it into send the successful status 204')
+            res.status(204).json({ success: 'ok' });
+
+        } else {
+            throw  new Error('delete_failed');
+        }
+
+    } catch (error) {
+        console.log(error)
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
+
+    }
+})
 
 // user.account - update_user
 router.post('/update', [ upload.single('avatar'), validToken, updateUserValidator, validateImageFile, result ], async (req, res, next) => {
@@ -94,32 +104,6 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
         
     }
 
-})
-
-// user.account - delete_account
-router.delete('/delete', [ validToken ], async (req, res, next) => {
-    try {
-        const user_id = req.user_decoded
-        if(!user_id) throw new Error('invalid_user')
-
-        const deletedUser = await db.removeUser(user_id)
-        
-        if (deletedUser >= 1) {
-            res.status(204).json();
-
-        } else {
-            throw  new Error('delete_failed');
-        }
-
-    } catch (error) {
-        
-        next({
-            status: userErrors[error.message]?.status,
-            message: userErrors[error.message]?.message,
-            type: userErrors[error.message]?.type,
-        })
-
-    }
 })
 
 module.exports = router;

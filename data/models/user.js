@@ -176,54 +176,101 @@ function checkUsernameDuplicate(username) {
 // userRoute - '/users/delete'
 async function removeUser(user_id) {
     try {
-        const check_link = /^(http|https)/g
-        // image keys to be deleted - businesss_avatar, eventmedia, & user avatar
-        let keys_to_delete = []
-        // business_ids of all business with user lsited as admin
-        let admin_businesses = []
-        
-        // collect image keys (business_avatar) and business_id from businesses created
-        const { business_ids, business_avatars } = await db('businesses')
-            .where({ 'businesses.business_admin': user_id })
-            .select([
-                db.raw('ARRAY_AGG(businesses.id) as business_ids'),
-                db.raw('ARRAY_AGG(businesses.business_avatar) as business_avatars')
-            ])
-            .first()
-        if(business_avatars !== null) { keys_to_delete = [ ...keys_to_delete, ...business_avatars ] }
-        if(business_ids !== null) { admin_businesses = [ ...business_ids ] }
-        
-        // collect image keys (eventmedia) from created events
-        const { eventmedia_keys } = await db('events')
-            .where({ 'events.created_by': user_id })
-            .select([ db.raw('ARRAY_AGG(events.eventmedia) as eventmedia_keys') ])
-            .first()
-        if(eventmedia_keys !== null) { keys_to_delete = [ ...keys_to_delete, ...eventmedia_keys ] }
+        return await db.transaction(async trx => {
+            const check_link = /^(http|https)/g
+            // image keys to be deleted - businesss_avatar, eventmedia, & user avatar
+            let keys_to_delete = []
+            // business_ids of all business with user lsited as admin
+            let admin_businesses = []
+            // event ids of all events needing to be deleted
+            let events_to_delete =[]
+    
+            // collect image keys (business_avatar) and business_id from businesses created
+            const businesses = await db('businesses')
+                .transacting(trx)
+                .where({ 'businesses.business_admin': user_id })
+                .select([
+                    'businesses.id',
+                    'businesses.business_avatar',
+                ])
+            
+            if(!!businesses) {
+                admin_businesses = businesses.map(business => business.id)
+                let business_avatars = businesses.map(business => business.business_avatar)
+                keys_to_delete = [...keys_to_delete, ...business_avatars]
+            }
+            
+            // collect image keys (eventmedia) from events with soon to be deleted business
+            const business_events = await db('events')
+                .transacting(trx)
+                .whereIn('events.host_business', admin_businesses)
+                .select([
+                    'events.id',
+                    'events.eventmedia',
+                ])
+    
+            if(!!business_events) {
+                let business_events_to_delete = business_events.map(event => event.id)
+                events_to_delete = [ ...events_to_delete, ...business_events_to_delete ]
+                let business_event_media = business_events.map(event => event.eventmedia)
+                keys_to_delete = [ ...keys_to_delete, ...business_event_media ]
+            };
+            
+            // collect image keys (eventmedia) from created events
+            const user_events = await db('events')
+                .transacting(trx)
+                .where({ 'events.created_by': user_id })
+                .select([
+                    'events.id',
+                    'events.eventmedia'
+                ])
+            
+            if(!!user_events) {
+                let user_events_to_delete = user_events.map(event => event.id)
+                events_to_delete = [ ...events_to_delete, ...user_events_to_delete ]
+                let user_event_media = user_events.map(event => event.eventmedia)
+                keys_to_delete = [ ...keys_to_delete, ...user_event_media ]
+            }
+    
+            // collect image key (avatar) from user account
+            const { avatar } = await db('users')
+                .transacting(trx)
+                .where({ 'users.id': user_id })
+                .select([ 'users.avatar' ])
+                .first()
+    
+            if(avatar !== undefined) { keys_to_delete = [ ...keys_to_delete, avatar ] }
 
-        // collect image key (avatar) from user account
-        const { avatar } = await db('users')
-            .where({ 'users.id': user_id })
-            .select([ 'users.avatar' ])
-            .first()
-        if(avatar !== undefined) { keys_to_delete = [ ...keys_to_delete, avatar ] }
+            // delete all roles for user to be deleted
+            await db('roles').transacting(trx).where({ 'roles.user_id': user_id }).del();
 
-        // set all events with businesses to be deleted as inactive
+            // delete all roles for businesses to be deleted
+            await db('roles').transacting(trx).whereIn('roles.business_id', admin_businesses).del();
 
-        // deletes user - CASCADES event creator, business admin, business roles
-        const deleted_user = await db('users').where({ 'users.id': user_id }).del();
-        
-        // remove all images for user created business, created events & profile image
-        if(keys_to_delete.length !== 0) {
-            keys_to_delete.forEach(async image_key => {
-                if(!check_link.test(image_key) && image_key !== null) {
-                    await deleteImageS3(image_key)
-                }
-            })
-        }
+            // delete all businesses where user to be deleted is admin
+            await db('businesses').transacting(trx).whereIn('businesses.id', admin_businesses).del();
 
-        return deleted_user
+            // delete all events from user and businesses to be deleted
+            await db('events').transacting(trx).whereIn('events.id', events_to_delete).del();
+    
+            // deletes user - CASCADES event creator, business admin, business roles
+            const deleted_user = await db('users').transacting(trx).where({ 'users.id': user_id }).del();
+            
+            // remove all images for user created business, created events & profile image
+            if (keys_to_delete.length !== 0) {
+                await Promise.all(keys_to_delete.map(async image_key => {
+                    if (!check_link.test(image_key) && image_key !== null) {
+                        return deleteImageS3(image_key);
+                    }
+                }));
+            }
+
+            
+            return deleted_user;
+        })
 
     } catch (error) {
-       throw error
+        console.log(error)
+        throw error
     }
 }
