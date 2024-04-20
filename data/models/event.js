@@ -20,8 +20,8 @@ async function getBusinessEvents(business_id) {
     try {
         // Fetch the complete event records matching the combined list of event IDs
         return await db('events as e')
-            .leftJoin('users as u', 'e.created_by', 'u.id')
-            .leftJoin('businesses as b', 'e.host_business', 'b.id')
+            .join('users as u', 'e.created_by', 'u.id')
+            .join('businesses as b', 'e.host_business', 'b.id')
             .select([
                 'e.id as event_id',
                 'e.eventname',
@@ -37,10 +37,11 @@ async function getBusinessEvents(business_id) {
                 'e.active_event',
                 'u.username as event_creator',
                 'b.business_name',
+                'b.business_avatar',
             ])
             .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere({ 'e.host_business': business_id, 'e.active_event': true })
-            .groupBy('e.id', 'u.username', 'b.business_name')
+            .groupBy('e.id', 'u.username', 'b.business_name', 'b.business_avatar')
             // Order by combined timestamp of eventdate and reformatted eventstart
             .orderByRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp`);
 
@@ -76,6 +77,7 @@ async function getEventRelatedEvents(event_id) {
                     'events.eventmedia',
                     'events.host_business',
                     'businesses.business_name',
+                    'businesses.business_avatar',
                     'events.details',
                     'events.active_event',
 
@@ -114,10 +116,11 @@ async function getUserEvents(user_id) {
                 'e.active_event',
                 'u.username as event_creator',
                 'b.business_name',
+                'b.business_avatar',
             ])
             .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere({ 'e.created_by': user_id })
-            .groupBy('e.id', 'u.username', 'b.business_name')
+            .groupBy('e.id', 'u.username', 'b.business_name', 'b.business_avatar')
             .orderByRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp`)
     } catch (error) {
         console.error('Error fetching related user events:', error);
@@ -176,6 +179,7 @@ async function getEventById(event_id) {
                     'events.eventmedia',
                     'events.host_business',
                     'businesses.business_name',
+                    'businesses.business_avatar',
                     'events.details',
                     'events.active_event',
     
@@ -205,6 +209,7 @@ async function createEvent(event) {
                 .transacting(trx)
                 .where({ 'events.id': new_event[0].id })
                 .join('users', 'events.created_by', '=', 'users.id')
+                .join('businesses', 'events.host_business', '=', 'businesses.id')
                 .select(
                     [
                         'events.id as event_id',
@@ -216,6 +221,8 @@ async function createEvent(event) {
                         'events.eventend',
                         'events.eventmedia',
                         'events.host_business',
+                        'businesses.business_name',
+                        'businesses.business_avatar',
                         'events.details',
                         'events.active_event',
     
@@ -254,6 +261,7 @@ async function updateEvent(event_id, eventChanges) {
                     'events.eventmedia',
                     'events.host_business',
                     'businesses.business_name',
+                    'businesses.business_avatar',
                     'events.details',
                     'events.active_event',
 
