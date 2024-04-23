@@ -22,7 +22,7 @@ const upload = multer({ storage: storage })
 // register.jsx
 router.post('/register', [upload.single('avatar'), registerUserValidator, validateImageFile, result], async (req, res, next) => {
     try {
-        
+        console.log(req.body)
         // create new user
         const new_user = { username: req.body.username, email: req.body.email }
     

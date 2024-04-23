@@ -165,6 +165,14 @@ function isValidTime(value) {
     }
 }
 
+// register
+const checkField = async (value) => {
+    if (value) {
+        throw new Error('Spam detected!');
+    }
+    return true;
+}
+
 
 //! MIDDLEWARE VALIDATIONS
 //! ======================
@@ -472,6 +480,10 @@ const registerUserValidator = [
     check('email').trim().not().isEmpty().withMessage('email is required')
         .isEmail().normalizeEmail().withMessage('invalid email format')
         .escape(),
+    // Honeypot field validation: check that 'userwebsite' must be empty
+    check('userwebsite')
+        .custom(checkField)
+        .optional({ checkFalsy: true, nullable: true }), // This makes it optional and allows empty or missing values
 ]
 
 // .post('/login')
