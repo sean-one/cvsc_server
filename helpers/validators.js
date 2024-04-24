@@ -600,6 +600,7 @@ const newEventValidator = [
         .matches(uuidPattern).withMessage('invalid business identifier')
         .escape(),
     check('details').trim().not().isEmpty().withMessage('event details are required')
+        .isLength({ min: 30, max: 1000 }).withMessage('event details must be between 30 and 1000 characters')
         .escape(),
 ]
 
@@ -625,6 +626,7 @@ const updateEventValidator =[
         .matches(uuidPattern).withMessage('invalid business identifier')
         .escape(),
     check('details').trim().optional()
+        .isLength({ min: 30, max: 1000}).withMessage('event details must be between 30 and 1000 characters')
         .escape(),
 ]
 
