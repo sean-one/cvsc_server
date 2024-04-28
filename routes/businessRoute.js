@@ -55,7 +55,6 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
             business_phone: req.body?.business_phone,
             business_instagram: req.body?.business_instagram,
             business_twitter: req.body?.business_twitter,
-            business_facebook: req.body?.business_facebook,
             business_website: req.body?.business_website,
         }
 
@@ -260,7 +259,6 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
             'business_phone',
             'business_instagram',
             'business_twitter',
-            'business_facebook',
             'business_website'
         ];
 

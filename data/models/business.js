@@ -41,7 +41,6 @@ async function getAllBusinesses() {
                     'businesses.business_email',
                     'businesses.business_phone',
                     'businesses.business_instagram',
-                    'businesses.business_facebook',
                     'businesses.business_website',
                     'businesses.business_twitter',
                 ]
@@ -73,7 +72,6 @@ function getBusinessById(business_id) {
                     'businesses.business_email',
                     'businesses.business_phone',
                     'businesses.business_instagram',
-                    'businesses.business_facebook',
                     'businesses.business_website',
                     'businesses.business_twitter',
                 ]
@@ -107,7 +105,6 @@ async function getBusinessManagement(user_id) {
                     'businesses.business_email',
                     'businesses.business_phone',
                     'businesses.business_instagram',
-                    'businesses.business_facebook',
                     'businesses.business_website',
                     'businesses.business_twitter',
 
@@ -166,7 +163,6 @@ async function addBusiness(business) {
                         'businesses.business_email',
                         'businesses.business_phone',
                         'businesses.business_instagram',
-                        'businesses.business_facebook',
                         'businesses.business_website',
                         'businesses.business_twitter',
                     ]
@@ -203,7 +199,6 @@ async function updateBusiness(business_id, changes) {
                     'businesses.business_email',
                     'businesses.business_phone',
                     'businesses.business_instagram',
-                    'businesses.business_facebook',
                     'businesses.business_website',
                     'businesses.business_twitter',
                 ])
@@ -260,7 +255,6 @@ async function toggleActiveBusiness(business_id) {
                     'businesses.business_email',
                     'businesses.business_phone',
                     'businesses.business_instagram',
-                    'businesses.business_facebook',
                     'businesses.business_website',
                     'businesses.business_twitter',
                 ])
@@ -307,7 +301,6 @@ async function toggleBusinessRequest(business_id) {
                         'businesses.business_email',
                         'businesses.business_phone',
                         'businesses.business_instagram',
-                        'businesses.business_facebook',
                         'businesses.business_website',
                         'businesses.business_twitter',
                     ]

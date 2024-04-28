@@ -9,7 +9,6 @@ const googlePlaceIdFormat = /^[A-Za-z0-9_\-+\.]{20,}$/;
 const phonePattern = /^\d{10}$/;
 const instagramPattern = /^[a-zA-Z0-9._]{1,30}$/;
 const twitterPattern = /^[a-zA-Z0-9_]{1,15}$/;
-const facebookPattern = /^[a-zA-Z0-9._-]{5,}$/;
 const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 //! CUSTOM VALIDATIONS
@@ -538,10 +537,6 @@ const newBusinessValidator = [
         .isLength({ min: 1, max: 15 }).withMessage('twitter must be between 1 and 15 characters')
         .matches(twitterPattern).withMessage('twitter may only contain letters, numbers and underscores( _ )')
         .escape(),
-    check('business_facebook').trim().optional()
-        .isLength({ min: 5 }).withMessage('facebook must be at least 5 characters')
-        .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )')
-        .escape(),
     check('business_website').trim().optional().isURL()
         .escape(),
 ]
@@ -569,10 +564,6 @@ const updateBusinessValidator = [
     check('business_twitter').trim().optional()
         .isLength({ min: 1, max: 15 }).withMessage('twitter must be between 1 and 15 characters')
         .matches(twitterPattern).withMessage('twitter may only contain letters, numbers and underscores( _ )')
-        .escape(),
-    check('business_facebook').trim().optional()
-        .isLength({ min: 5 }).withMessage('facebook must be at least 5 characters')
-        .matches(facebookPattern).withMessage('facebook may only contain letters, numbers, underscores( _ ), hyphens( - )')
         .escape(),
     check('business_website').trim().optional().isURL()
         .escape(),

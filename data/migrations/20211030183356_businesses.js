@@ -43,11 +43,6 @@ exports.up = async function (knex) {
             .defaultTo(null)
         
         businesses
-            .string('business_facebook')
-            .nullable()
-            .defaultTo(null)
-        
-        businesses
             .string('business_website')
             .nullable()
             .defaultTo(null)
