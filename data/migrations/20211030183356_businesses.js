@@ -46,6 +46,10 @@ exports.up = async function (knex) {
             .string('business_website')
             .nullable()
             .defaultTo(null)
+        
+        businesses
+            .string('business_slug')
+            .defaultTo(null)
 
         // business open to user creator request, defaults to true
         businesses

@@ -43,6 +43,7 @@ async function getAllBusinesses() {
                     'businesses.business_instagram',
                     'businesses.business_website',
                     'businesses.business_twitter',
+                    'businesses.business_slug',
                 ]
             )
         
@@ -74,6 +75,7 @@ function getBusinessById(business_id) {
                     'businesses.business_instagram',
                     'businesses.business_website',
                     'businesses.business_twitter',
+                    'businesses.business_slug',
                 ]
             )
             .first();
@@ -107,6 +109,7 @@ async function getBusinessManagement(user_id) {
                     'businesses.business_instagram',
                     'businesses.business_website',
                     'businesses.business_twitter',
+                    'businesses.business_slug',
 
                 ]
             )
@@ -165,6 +168,7 @@ async function addBusiness(business) {
                         'businesses.business_instagram',
                         'businesses.business_website',
                         'businesses.business_twitter',
+                        'businesses.business_slug',
                     ]
                 )
                 .first()
@@ -201,6 +205,7 @@ async function updateBusiness(business_id, changes) {
                     'businesses.business_instagram',
                     'businesses.business_website',
                     'businesses.business_twitter',
+                    'businesses.business_slug',
                 ])
                 .first()
         })
@@ -257,6 +262,7 @@ async function toggleActiveBusiness(business_id) {
                     'businesses.business_instagram',
                     'businesses.business_website',
                     'businesses.business_twitter',
+                    'businesses.business_slug',
                 ])
                 .first()
         })
@@ -303,6 +309,7 @@ async function toggleBusinessRequest(business_id) {
                         'businesses.business_instagram',
                         'businesses.business_website',
                         'businesses.business_twitter',
+                        'businesses.business_slug',
                     ]
                 )
                 .first()
