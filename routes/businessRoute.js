@@ -313,7 +313,7 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
         // if there is an image to update resize, save and delete previous
         if (req.file) {
             // resize the image
-            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).toBuffer()
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).webp().toBuffer()
 
             // upload the image to s3
             const image_key = await uploadImageS3Url(req.file)
