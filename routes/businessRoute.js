@@ -111,8 +111,10 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
 
         // if file present resize the image and upload to s3 returning an image key or return error due to missing image
         if (req.file) {
-            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).toBuffer()
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250, fit: 'cover' }).webp().toBuffer()
+
             image_key = await uploadImageS3Url(req.file)
+            
             new_business['business_avatar'] = image_key
         } else {
             throw new Error('missing_business_avatar')
@@ -313,7 +315,7 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
         // if there is an image to update resize, save and delete previous
         if (req.file) {
             // resize the image
-            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500, fit: 'cover' }).webp().toBuffer()
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250, fit: 'cover' }).webp().toBuffer()
 
             // upload the image to s3
             const image_key = await uploadImageS3Url(req.file)

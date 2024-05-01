@@ -48,6 +48,7 @@ const uploadImageS3Url = async (imageFile) => {
         const rawBytes = await randomBytes(32)
         const imageName = `${rawBytes.toString('hex')}`
     
+        console.log(imageFile)
         const imageParams = {
             Bucket: bucketName,
             Key: imageName,

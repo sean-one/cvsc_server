@@ -176,7 +176,7 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
             const { eventmedia } = await db.getEventById(event_id)
 
             // resize the new updated image
-            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+            req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).webp().toBuffer()
 
             // upload to s3 and get key
             const image_key = await uploadImageS3Url(req.file)
@@ -314,7 +314,7 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventBusiness
         if (!req.file) throw new Error('missing_eventmedia')
         
         // resize the image
-        req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
+        req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).webp().toBuffer()
         
         // upload the image to s3
         const image_key = await uploadImageS3Url(req.file)
