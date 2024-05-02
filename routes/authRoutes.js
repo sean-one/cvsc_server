@@ -29,7 +29,7 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
         // check for attached image, upload to s3 bucket or delete the field so that db will add default
         if(req.file) {   
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).toBuffer()
-            const avatar_key = await uploadImageS3Url(req.file)
+            const avatar_key = await uploadImageS3Url(req.file, 'user-profile')
             new_user['avatar'] = avatar_key
         }
     

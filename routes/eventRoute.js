@@ -179,12 +179,12 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).webp().toBuffer()
 
             // upload to s3 and get key
-            const image_key = await uploadImageS3Url(req.file)
+            const image_key = await uploadImageS3Url(req.file, 'event-media')
 
             // check the outgoing image and delete it from s3 if needed
             if (!check_link.test(eventmedia)) {
                 // if on s3 remove from bucket
-                await deleteImageS3(eventmedia)
+                await deleteImageS3(eventmedia, 'event-media')
             }
 
             event_update['eventmedia'] = image_key
@@ -217,7 +217,7 @@ router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, 
     
             if (deleteResponse >= 1) {
                 // check for image hosted on s3 and delete if found
-                if (!check_link.test(current_event?.eventmedia)) await deleteImageS3(current_event?.eventmedia)
+                if (!check_link.test(current_event?.eventmedia)) await deleteImageS3(current_event?.eventmedia, 'event-media')
                 
                 res.status(200).json({ eventname: current_event?.eventname });
             } else {
@@ -317,7 +317,7 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventBusiness
         req.file.buffer = await sharp(req.file.buffer).resize({ width: 500, fit: 'contain' }).webp().toBuffer()
         
         // upload the image to s3
-        const image_key = await uploadImageS3Url(req.file)
+        const image_key = await uploadImageS3Url(req.file, 'event-media')
         
         // if(!image_key) throw new Error('upload_error')
         new_event['eventmedia'] = image_key

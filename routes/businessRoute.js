@@ -113,7 +113,7 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
         if (req.file) {
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250, fit: 'cover' }).webp().toBuffer()
 
-            image_key = await uploadImageS3Url(req.file)
+            image_key = await uploadImageS3Url(req.file, 'business-logo')
             
             new_business['business_avatar'] = image_key
         } else {
@@ -128,7 +128,7 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
         // errors returned from created_business database call - invalid input errors
         if (error.constraint) {
             // error return from database after image creation, remove image from s3
-            if (image_key) { await deleteImageS3(image_key) }
+            if (image_key) { await deleteImageS3(image_key, 'business-logo') }
 
             next({
                 status: businessErrors[error.constraint]?.status,
@@ -318,12 +318,12 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
             req.file.buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250, fit: 'cover' }).webp().toBuffer()
 
             // upload the image to s3
-            const image_key = await uploadImageS3Url(req.file)
+            const image_key = await uploadImageS3Url(req.file, 'business-logo')
 
             // check the current_business.business_avatar to see if it is saved on the s3 bucket
             // if it is delete it from the s3 bucket
             if (!check_link.test(business_avatar)) {
-                await deleteImageS3(business_avatar)
+                await deleteImageS3(business_avatar, 'business-logo')
             }
 
             // update business_update with image_key from s3 image upload

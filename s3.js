@@ -43,15 +43,16 @@ const generateUploadURL = async () => {
     return uploadURL
 }
 
-const uploadImageS3Url = async (imageFile) => {
+const uploadImageS3Url = async (imageFile, folderName) => {
     try {
         const rawBytes = await randomBytes(32)
         const imageName = `${rawBytes.toString('hex')}`
+        const imageKey = `${folderName}/${imageName}`
     
         console.log(imageFile)
         const imageParams = {
             Bucket: bucketName,
-            Key: imageName,
+            Key: imageKey,
             Body: imageFile.buffer,
             ContentType: imageFile.mimetype,
         }
@@ -82,12 +83,14 @@ const uploadImageS3Url = async (imageFile) => {
     }
 }
 
-const deleteImageS3 = async(image_key) => {
+const deleteImageS3 = async(image_key, folderName) => {
     // console.log('deleting image from s3')
     try {
+        const imageKey = `${folderName}/${image_key}`
+
         const imageParams = {
             Bucket: bucketName,
-            Key: image_key,
+            Key: imageKey,
         }
     
         const command = new DeleteObjectCommand(imageParams)
