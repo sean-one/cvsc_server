@@ -6,12 +6,10 @@ const jwt = require('jsonwebtoken')
 
 const router = express.Router();
 
-const authErrors = require('../error_messages/authErrors');
 const userErrors = require('../error_messages/userErrors');
 const { createAccessToken, createRefreshToken } = require('../helpers/jwt_helper');
 const { uploadImageS3Url } = require('../s3');
 const { hashPassword } = require('../helpers/bcrypt_helper');
-// const rolesDB = require('../data/models/roles');
 const userDB = require('../data/models/user');
 
 const { loginUserValidator, registerUserValidator, result, validateImageFile } = require('../helpers/validators')
@@ -74,7 +72,7 @@ router.post('/login', loginUserValidator, result, passport.authenticate('local',
     failWithError: true,
     session: true
 }), async (req, res) => {
-    
+
     const user = req.user
     
     res.cookie('jwt', user.refreshToken)
