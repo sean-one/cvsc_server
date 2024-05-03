@@ -84,6 +84,7 @@ passport.use(
     },
         async (req, username, password, done) => {
             try {
+                if(req.body.logintimestamp && req.body.logintimestamp !== '') { throw new Error('invalid_input') }
                 if(!username || !password) { throw new Error('incomplete_input') }
                 
                 // get user from database
