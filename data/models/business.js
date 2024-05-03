@@ -381,9 +381,7 @@ async function removeBusiness(business_id) {
         const success = deleted_business > 0
 
         if (success) {
-            if (!check_link.test(business_avatar) && business_avatar !== null) {
-                await deleteImageS3(business_avatar)
-            }
+            await deleteImageS3(business_avatar)
         }
 
         return { success, business_id, business_name, business_admin };

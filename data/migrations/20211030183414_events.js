@@ -31,7 +31,9 @@ exports.up = async function (knex) {
             .integer('eventend')
             // .notNullable()
 
-        events.string('eventmedia')
+        events
+            .string('eventmedia')
+            .noNullable()
 
         events.text('details', 'longtext')
 

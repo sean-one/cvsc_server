@@ -182,9 +182,9 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
             const image_key = await uploadImageS3Url(req.file, 'event-media')
 
             // check the outgoing image and delete it from s3 if needed
-            if (!check_link.test(eventmedia)) {
+            if (eventmedia) {
                 // if on s3 remove from bucket
-                await deleteImageS3(eventmedia, 'event-media')
+                await deleteImageS3(eventmedia)
             }
 
             event_update['eventmedia'] = image_key
@@ -206,7 +206,6 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
 // useRemoveEventMutation - removes an event from the database
 router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, validateEventCreator, result], async (req, res, next) => {
     try {
-        const check_link = /^(http|https)/g
         const { event_id } = req.params
         const current_event = await db.getEventById(event_id)
 
@@ -217,7 +216,9 @@ router.delete('/:event_id', [validToken, uuidValidation, formatValidationCheck, 
     
             if (deleteResponse >= 1) {
                 // check for image hosted on s3 and delete if found
-                if (!check_link.test(current_event?.eventmedia)) await deleteImageS3(current_event?.eventmedia, 'event-media')
+                if (current_event?.eventmedia) {
+                    await deleteImageS3(current_event?.eventmedia)
+                }
                 
                 res.status(200).json({ eventname: current_event?.eventname });
             } else {

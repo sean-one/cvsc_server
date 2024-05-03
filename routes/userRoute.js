@@ -78,8 +78,8 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
             if(!image_key) throw new Error('upload_error')
 
             // check if previous link was s3 bucket, if so remove previous image from bucket
-            if(!check_link.test(user.avatar) && user.avatar !== null) {
-                await deleteImageS3(user.avatar, 'user-profile')
+            if(!!user.avatar) {
+                await deleteImageS3(user.avatar)
             }
 
             // update avatar image key for upload

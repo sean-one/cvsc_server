@@ -236,7 +236,6 @@ router.put('/:business_id/transfer/:manager_id', [validToken, uuidValidation, fo
 // useUpdateBusinessMutation - updateBusiness - useBusinessApi - UPDATE BUSINESS
 router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidValidation, formatValidationCheck, validateBusinessManagement, updateBusinessValidator, validateImageFile, result], async (req, res, next) => {
     try {
-        const check_link = /^(http|https)/g
         const { business_id } = req.params;
         const { business_avatar } = await db.getBusinessById(business_id)
 
@@ -322,8 +321,8 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
 
             // check the current_business.business_avatar to see if it is saved on the s3 bucket
             // if it is delete it from the s3 bucket
-            if (!check_link.test(business_avatar)) {
-                await deleteImageS3(business_avatar, 'business-logo')
+            if (business_avatar) {
+                await deleteImageS3(business_avatar)
             }
 
             // update business_update with image_key from s3 image upload

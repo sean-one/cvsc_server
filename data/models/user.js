@@ -177,7 +177,6 @@ function checkUsernameDuplicate(username) {
 async function removeUser(user_id) {
     try {
         return await db.transaction(async trx => {
-            const check_link = /^(http|https)/g
             // image keys to be deleted - businesss_avatar, eventmedia, & user avatar
             let keys_to_delete = []
             // business_ids of all business with user lsited as admin
@@ -239,7 +238,9 @@ async function removeUser(user_id) {
                 .select([ 'users.avatar' ])
                 .first()
     
-            if(avatar !== undefined) { keys_to_delete = [ ...keys_to_delete, avatar ] }
+            console.log('THIS IS THE AVATAR RETURNED FROM THE USER OBJECT')
+            console.log(avatar)
+            if(!!avatar) { keys_to_delete = [ ...keys_to_delete, avatar ] }
 
             // delete all roles for user to be deleted
             await db('roles').transacting(trx).where({ 'roles.user_id': user_id }).del();
@@ -259,13 +260,10 @@ async function removeUser(user_id) {
             // remove all images for user created business, created events & profile image
             if (keys_to_delete.length !== 0) {
                 await Promise.all(keys_to_delete.map(async image_key => {
-                    if (!check_link.test(image_key) && image_key !== null) {
-                        return deleteImageS3(image_key);
-                    }
+                    return deleteImageS3(image_key);
                 }));
             }
 
-            
             return deleted_user;
         })
 

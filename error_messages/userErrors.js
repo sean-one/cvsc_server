@@ -1,4 +1,10 @@
 const userErrors = {
+    // .post('/register') - invalid input
+    invalid_input: {
+        status: 400,
+        message: 'invalid input / spam detected',
+        type: 'server'
+    },
     // .post('USERS/update') - user not found
     invalid_user: {
         status: 404,

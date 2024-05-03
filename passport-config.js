@@ -6,6 +6,7 @@ const dbUser = require('./data/models/user');
 // const dbRoles = require('./data/models/roles');
 // const dbEvents = require('./data/models/event');
 
+const { processAndUploadImage } = require('./s3')
 const { comparePassword } = require('./helpers/bcrypt_helper');
 const { createAccessToken, createRefreshToken } = require('./helpers/jwt_helper');
 const { generateUsername } = require('./helpers/generateUsername');
@@ -41,7 +42,7 @@ passport.use(
         async (accessToken, refreshToken, profile, done) => {
             // check for user to log in
             const google_user = await dbUser.findByGoogleId(profile.id)
-            
+            console.log(profile)
             // no user found - register user
             if (google_user.length === 0) {
                 let username = generateUsername();
@@ -55,11 +56,13 @@ passport.use(
                     username = generateUsername()
                 }
 
+                const savedProfileImage = await processAndUploadImage(profile.photos[0].value)
+
                 const new_user = {
                     username: username,
                     email: profile.emails[0].value,
                     google_id: profile.id,
-                    avatar: profile.photos[0].value,
+                    avatar: savedProfileImage,
 
                 }
                 

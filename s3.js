@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const crypto = require('crypto');
+const axios = require('axios');
+const sharp = require('sharp');
 const { promisify } = require('util');
 const randomBytes = promisify(crypto.randomBytes)
 
@@ -22,12 +24,14 @@ const s3 = new S3Client({
     region: region
 });
 
-// const s3 = new aws.S3({
-//     region,
-//     accessKeyId,
-//     secretAccessKey,
-//     signatureVersion: 'v4'
-// })
+async function downloadImage(url) {
+    const response = await axios({
+        url,
+        responseType: 'arraybuffer'
+    });
+
+    return response.data;
+}
 
 const generateUploadURL = async () => {
     const rawBytes = await randomBytes(16)
@@ -54,14 +58,14 @@ const uploadImageS3Url = async (imageFile, folderName) => {
             Bucket: bucketName,
             Key: imageKey,
             Body: imageFile.buffer,
-            ContentType: imageFile.mimetype,
+            ContentType: 'image/webp',
         }
     
         const command = new PutObjectCommand(imageParams)
     
         await s3.send(command)
     
-        return imageName;
+        return imageKey;
         
     } catch (error) {
         // Log the error for debugging purposes
@@ -83,14 +87,33 @@ const uploadImageS3Url = async (imageFile, folderName) => {
     }
 }
 
-const deleteImageS3 = async(image_key, folderName) => {
+// takes google url from profile sign in removes the size scale saves it to s3 bucket
+const processAndUploadImage = async (thirdPartyUrl) => {
+    try {
+        const imageUrl = thirdPartyUrl.replace(/=s\d+-c/, '=s250');
+
+        const imageData = await downloadImage(imageUrl);
+        const optimizeBuffer = await sharp(imageData)
+            .resize(250, 250)
+            .webp()
+            .toBuffer();
+        
+        const s3Key = await uploadImageS3Url(optimizeBuffer, 'user-profile');
+
+        return s3Key;
+    } catch (error) {
+        console.error('failed to download, process or upload image: ', error);
+        throw error;
+    }
+}
+
+const deleteImageS3 = async(image_key) => {
     // console.log('deleting image from s3')
     try {
-        const imageKey = `${folderName}/${image_key}`
 
         const imageParams = {
             Bucket: bucketName,
-            Key: imageKey,
+            Key: image_key,
         }
     
         const command = new DeleteObjectCommand(imageParams)
@@ -110,5 +133,6 @@ const deleteImageS3 = async(image_key, folderName) => {
 module.exports = {
     generateUploadURL,
     uploadImageS3Url,
+    processAndUploadImage,
     deleteImageS3,
 }

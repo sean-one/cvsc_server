@@ -11,7 +11,9 @@ exports.up = async function (knex) {
             .notNullable()
             .unique()
 
-        businesses.string('business_avatar')
+        businesses
+            .string('business_avatar')
+            .notNullable()
 
         businesses.text('business_description', 'longtext')
         
