@@ -238,8 +238,6 @@ async function removeUser(user_id) {
                 .select([ 'users.avatar' ])
                 .first()
     
-            console.log('THIS IS THE AVATAR RETURNED FROM THE USER OBJECT')
-            console.log(avatar)
             if(!!avatar) { keys_to_delete = [ ...keys_to_delete, avatar ] }
 
             // delete all roles for user to be deleted
@@ -268,7 +266,7 @@ async function removeUser(user_id) {
         })
 
     } catch (error) {
-        console.log(error)
+        console.error(error)
         throw error
     }
 }

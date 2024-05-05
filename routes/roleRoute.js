@@ -97,7 +97,6 @@ router.post('/businesses/:business_id/role-requests', [validToken, uuidValidatio
         res.status(201).json(role_request)
 
     } catch (error) {
-        // console.log(error)
         if(error?.message) {
             next({
                 status: roleErrors[error.message]?.status,
@@ -105,7 +104,6 @@ router.post('/businesses/:business_id/role-requests', [validToken, uuidValidatio
                 type: roleErrors[error.message]?.type,
             })
         }
-        // console.log(error)
     }
 
 })

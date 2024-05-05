@@ -153,7 +153,6 @@ router.put('/:event_id', [upload.single('eventmedia'), validToken, uuidValidatio
                     console.error('Geocoding API response error:', error.response.data.error_message);
 
                     // You might want to throw different errors based on the response status code
-                    console.log(error.response.status)
                     if (error.response.status === 403) {
                         throw new Error('geocode_permission_denied');
                     } else {
@@ -292,7 +291,6 @@ router.post('/', [upload.single('eventmedia'), validToken, validateEventBusiness
                     console.error('Geocoding API response error:', error.response.data.error_message);
 
                     // You might want to throw different errors based on the response status code
-                    console.log(error.response.status)
                     if (error.response.status === 403) {
                         throw new Error('geocode_permission_denied');
                     } else {

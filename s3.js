@@ -53,7 +53,6 @@ const uploadImageS3Url = async (imageFile, folderName) => {
         const imageName = `${rawBytes.toString('hex')}`
         const imageKey = `${folderName}/${imageName}`
     
-        console.log(imageFile)
         const imageParams = {
             Bucket: bucketName,
             Key: imageKey,
@@ -108,7 +107,6 @@ const processAndUploadImage = async (thirdPartyUrl) => {
 }
 
 const deleteImageS3 = async(image_key) => {
-    // console.log('deleting image from s3')
     try {
 
         const imageParams = {
@@ -119,10 +117,8 @@ const deleteImageS3 = async(image_key) => {
         const command = new DeleteObjectCommand(imageParams)
     
         // if successful returns $metadata.httpStatusCode of 204
-        // const deleted = await s3.send(command)
         await s3.send(command)
 
-        // console.log(deleted)
         return
 
     } catch (error) {

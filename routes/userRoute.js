@@ -8,7 +8,7 @@ const { hashPassword } = require('../helpers/bcrypt_helper');
 const { validToken } = require('../helpers/jwt_helper')
 const { uploadImageS3Url, deleteImageS3 } = require('../s3');
 
-const { result, updateUserValidator, validateImageFile, uuidValidation } = require('../helpers/validators')
+const { result, updateUserValidator, validateImageFile } = require('../helpers/validators')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -23,9 +23,7 @@ router.delete('/delete', [ validToken ], async (req, res, next) => {
 
         const deletedUser = await db.removeUser(user_id)
         
-        console.log(`INSIDE THE ROUTE: deletedUser: ${deletedUser}`)
         if (deletedUser >= 1) {
-            console.log('made it into send the successful status 204')
             res.status(204).json({ success: 'ok' });
 
         } else {
@@ -33,7 +31,6 @@ router.delete('/delete', [ validToken ], async (req, res, next) => {
         }
 
     } catch (error) {
-        console.log(error)
         next({
             status: userErrors[error.message]?.status,
             message: userErrors[error.message]?.message,
@@ -46,7 +43,6 @@ router.delete('/delete', [ validToken ], async (req, res, next) => {
 // user.account - update_user
 router.post('/update', [ upload.single('avatar'), validToken, updateUserValidator, validateImageFile, result ], async (req, res, next) => {
     try {
-        const check_link = /^(http|https)/g
         const user_id = req.user_decoded
         const user_changes = {}
         const user = await db.findUserById(user_id)

@@ -439,7 +439,6 @@ const validateEventBusinessRoles = async (req, res, next) => {
 }
 
 const validateEventUpdate = async (req, res, next) => {
-    console.log(req.method)
     const user_id = req.user_decoded;
 
 

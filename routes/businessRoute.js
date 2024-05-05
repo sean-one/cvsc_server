@@ -90,7 +90,6 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
                     console.error('Geocoding API response error:', error.response.data.error_message);
 
                     // You might want to throw different errors based on the response status code
-                    console.log(error.response.status)
                     if (error.response.status === 403) {
                         throw new Error('geocode_permission_denied');
                     } else {
@@ -278,7 +277,6 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
 
                     let formatted_address = geocodeResponse?.data?.results[0]?.formatted_address.replace(', USA', '');
 
-                    console.log(geocodeResponse?.data?.results[0]?.address_components)
                     business_update.formatted_address = formatted_address
                 } else {
                     throw new Error('geocode_failed')
@@ -293,7 +291,6 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
                     console.error('Geocoding API response error:', error.response.data.error_message);
 
                     // You might want to throw different errors based on the response status code
-                    console.log(error.response.status)
                     if (error.response.status === 403) {
                         throw new Error('geocode_permission_denied');
                     } else {

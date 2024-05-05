@@ -42,7 +42,6 @@ passport.use(
         async (accessToken, refreshToken, profile, done) => {
             // check for user to log in
             const google_user = await dbUser.findByGoogleId(profile.id)
-            console.log(profile)
             // no user found - register user
             if (google_user.length === 0) {
                 let username = generateUsername();

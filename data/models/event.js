@@ -46,7 +46,6 @@ async function getBusinessEvents(business_id) {
             .orderByRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp`);
 
     } catch (error) {
-        console.log(error)
         console.error('Error fetching business events:', Object.keys(error));
         throw new Error('fetch_business_events_server_error');
     }

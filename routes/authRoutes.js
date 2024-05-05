@@ -132,7 +132,6 @@ router.get('/google/redirect', passport.authenticate("google", {
 })
 
 router.get('/login/failed', (req, res) => {
-    console.log(Object.keys(req))
     res.status(401).redirect(`${process.env.FRONTEND_CLIENT}/login`)
 })
 
