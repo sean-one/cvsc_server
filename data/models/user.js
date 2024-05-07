@@ -6,6 +6,8 @@ module.exports = {
     findUserById,
     updateUser,
     addRefreshToken,
+    updateMfaSecret,
+    validateMfaSecret,
     removeRefreshToken,
     findByRefresh,
     getUserAccount,
@@ -40,7 +42,10 @@ async function findUserById(id) {
                 'users.id',
                 'users.username',
                 'users.avatar',
-                'users.email'
+                'users.email',
+                'users.is_superadmin',
+                'users.mfa_secret',
+
             ])
             .first()
     } catch (error) {
@@ -124,7 +129,6 @@ async function removeRefreshToken(user_id) {
     }
 }
 
-
 // passport-config - serialize user
 async function addRefreshToken(id, token) {
     return await db('users')
@@ -132,7 +136,15 @@ async function addRefreshToken(id, token) {
         .update({ refreshToken: token })
 }
 
+// authRoute - '/generate-mfa'
+async function updateMfaSecret(user_id, mfa_temp_secret) {
+    await db('users').where({ id: user_id }).update({ mfa_secret: mfa_temp_secret })
+}
 
+// authRoute - '/verify-mfa'
+async function validateMfaSecret(user_id) {
+    await db('users').where({ id: user_id }).update({ mfa_enabled: true })
+}
 
 // passport-config - deserialize user
 async function getUserAccount(id) {

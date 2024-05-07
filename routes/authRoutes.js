@@ -1,4 +1,6 @@
 const express = require('express');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const multer = require('multer');
 const sharp = require('sharp');
 const passport = require('passport');
@@ -7,7 +9,7 @@ const jwt = require('jsonwebtoken')
 const router = express.Router();
 
 const userErrors = require('../error_messages/userErrors');
-const { createAccessToken, createRefreshToken } = require('../helpers/jwt_helper');
+const { createAccessToken, createRefreshToken, validToken } = require('../helpers/jwt_helper');
 const { uploadImageS3Url } = require('../s3');
 const { hashPassword } = require('../helpers/bcrypt_helper');
 const userDB = require('../data/models/user');
@@ -129,6 +131,68 @@ router.get('/google/redirect', passport.authenticate("google", {
 
     res.redirect(`${process.env.FRONTEND_CLIENT}/profile`)
     // res.status(200).json({ user: user, roles: user_roles })
+})
+
+router.get('/generate-mfa', [validToken], async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded;
+        if (!user_id) throw new Error('invalid_user')
+        
+        const super_user = await userDB.findUserById(user_id)
+        if (!super_user.is_superadmin) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+
+        const tempSecret = speakeasy.generateSecret({
+            name: `CoachellaValleySmokersClub(${super_user.username})`
+        });
+
+        await userDB.updateMfaSecret(super_user.id, tempSecret.base32);
+
+        const qrCodeUrl = await QRCode.toDataURL(tempSecret.otpauth_url);
+
+        res.status(200).json({ qrCodeUrl, secret: tempSecret.base32 });
+        
+    } catch (error) {
+        console.error('Error generating MFA secret: ', error);
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
+    }
+})
+
+router.post('/verify-mfa', [validToken], async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded;
+        if (!user_id) throw new Error('invalid_user')
+    
+        const { tempToken } = req.body;
+        const super_user = await userDB.findUserById(user_id)
+
+        const verified = speakeasy.totp.verify({
+            secret: super_user.mfa_secret,
+            encoding: 'base32',
+            token: tempToken
+        })
+
+        console.log(verified)
+        if (!verified) {
+            return res.status(400).json({ message: 'Invalid MFA Token' });
+        }
+
+        await userDB.validateMfaSecret(super_user.id)
+
+        res.status(201).json({ message: 'MFA successfully enabled'})
+    } catch (error) {
+        console.error('Error verifying MFA token: ', error);
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
+    }
 })
 
 router.get('/login/failed', (req, res) => {
