@@ -25,15 +25,15 @@ exports.up = async function (knex) {
 
         events
             .integer('eventstart')
-            // .notNullable()
+            .notNullable()
 
         events
             .integer('eventend')
-            // .notNullable()
+            .notNullable()
 
         events
             .string('eventmedia')
-            .noNullable()
+            .notNullable()
 
         events.text('details', 'longtext')
 

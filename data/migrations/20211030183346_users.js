@@ -23,6 +23,24 @@ exports.up = function (knex) {
             .defaultTo(null)
         
         users
+            .boolean('email_verified')
+            .defaultTo(false)
+        
+        users
+            .string('email_validation_token')
+        
+        users
+            .boolean('is_superadmin')
+            .defaultTo(false)
+        
+        users
+            .string('mfa_secret')
+        
+        users
+            .boolean('mfa_enabled')
+            .defaultTo(false)
+        
+        users
             .string('google_id')
             .defaultTo(null)
         
