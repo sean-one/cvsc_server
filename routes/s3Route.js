@@ -1,5 +1,5 @@
 const express = require('express');
-const { generateUploadURL } = require('../s3');
+const { generateUploadURL } = require('../utils/s3');
 
 const router = express.Router();
 

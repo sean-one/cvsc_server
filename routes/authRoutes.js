@@ -10,7 +10,7 @@ const router = express.Router();
 
 const userErrors = require('../error_messages/userErrors');
 const { createAccessToken, createRefreshToken, validToken } = require('../helpers/jwt_helper');
-const { uploadImageS3Url } = require('../s3');
+const { uploadImageS3Url } = require('../utils/s3');
 const { hashPassword } = require('../helpers/bcrypt_helper');
 const userDB = require('../data/models/user');
 

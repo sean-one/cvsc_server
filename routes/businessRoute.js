@@ -3,7 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const sharp = require('sharp');
 
-const { uploadImageS3Url, deleteImageS3 } = require('../s3');
+const { uploadImageS3Url, deleteImageS3 } = require('../utils/s3');
 const db = require('../data/models/business');
 const { updatedGoogleMapsClient } = require('../helpers/geocoder');
 

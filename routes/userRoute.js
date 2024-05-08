@@ -6,7 +6,7 @@ const db = require('../data/models/user');
 const userErrors = require('../error_messages/userErrors');
 const { hashPassword } = require('../helpers/bcrypt_helper');
 const { validToken } = require('../helpers/jwt_helper')
-const { uploadImageS3Url, deleteImageS3 } = require('../s3');
+const { uploadImageS3Url, deleteImageS3 } = require('../utils/s3');
 
 const { result, updateUserValidator, validateImageFile } = require('../helpers/validators')
 

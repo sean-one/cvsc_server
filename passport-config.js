@@ -6,7 +6,7 @@ const dbUser = require('./data/models/user');
 // const dbRoles = require('./data/models/roles');
 // const dbEvents = require('./data/models/event');
 
-const { processAndUploadImage } = require('./s3')
+const { processAndUploadImage } = require('./utils/s3')
 const { comparePassword } = require('./helpers/bcrypt_helper');
 const { createAccessToken, createRefreshToken } = require('./helpers/jwt_helper');
 const { generateUsername } = require('./helpers/generateUsername');
