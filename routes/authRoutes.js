@@ -118,6 +118,7 @@ router.get('/google/redirect', passport.authenticate("google", {
     failureRedirect: '/auth/login/failed',
     session: true
 }), async (req, res) => {
+    console.log(req.user)
 
     const user = req.user
     // const user_roles = await rolesDB.getAllUserRoles(user.id)

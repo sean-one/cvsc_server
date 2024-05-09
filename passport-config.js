@@ -62,6 +62,7 @@ passport.use(
                     email: profile.emails[0].value,
                     google_id: profile.id,
                     avatar: savedProfileImage,
+                    email_verified: true
 
                 }
                 

@@ -27,6 +27,7 @@ async function createUser(user) {
                 'username',
                 'email',
                 'avatar',
+                'is_superadmin'
             ])
     } catch (error) {
         console.error('Error creating new user:', error);
@@ -66,7 +67,8 @@ function findByUsername(username) {
                     'users.username',
                     'users.avatar',
                     'users.email',
-                    'users.password'
+                    'users.password',
+                    'users.is_superadmin'
                 ]
             )
             .first()
@@ -89,6 +91,7 @@ async function updateUser(user_id, updates) {
                     'users.username',
                     'users.avatar',
                     'users.email',
+                    'users.is_superadmin'
                 ]
             )
             .first()
@@ -108,7 +111,8 @@ async function findByRefresh(token) {
                     'users.id',
                     'users.username',
                     'users.avatar',
-                    'users.email'
+                    'users.email',
+                    'users.is_superadmin'
                 ]
             )
             .first()
@@ -162,6 +166,7 @@ async function getUserAccount(id) {
                 'users.username',
                 'users.avatar',
                 'users.email',
+                'users.is_superadmin'
             ]
         ).first()
     const active_user_roles = await db('roles').where({ 'roles.user_id': id, 'roles.active_role': true }).select(['roles.business_id', 'roles.role_type']).orderBy('role_type', 'desc')
@@ -178,7 +183,8 @@ async function findByGoogleId(google_id) {
                 'users.id',
                 'users.username',
                 'users.avatar',
-                'users.email'
+                'users.email',
+                'users.is_superadmin'
             ]
         )
 }
