@@ -8,6 +8,7 @@ module.exports = {
     addRefreshToken,
     updateMfaSecret,
     validateMfaSecret,
+    validateEmailVerify,
     removeRefreshToken,
     findByRefresh,
     getUserAccount,
@@ -144,6 +145,11 @@ async function updateMfaSecret(user_id, mfa_temp_secret) {
 // authRoute - '/verify-mfa'
 async function validateMfaSecret(user_id) {
     await db('users').where({ id: user_id }).update({ mfa_enabled: true })
+}
+
+// userRoute - '/verify-email
+async function validateEmailVerify(user_id, email) {
+    await db('users').where({ id: user_id }).update({ email: email, email_verified: true })
 }
 
 // passport-config - deserialize user

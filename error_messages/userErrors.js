@@ -23,6 +23,12 @@ const userErrors = {
         message: 'image upload error',
         type: 'avatar'
     },
+    // .get('USERS/verify-email')
+    non_matching_validation: {
+        status: 400,
+        message: 'verification failed. email does not match',
+        type: 'server'
+    },
     // passport-config - local strategy
     incomplete_input: {
         status: 400,

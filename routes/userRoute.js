@@ -1,12 +1,14 @@
 const express = require('express');
 const multer = require('multer');
 const sharp = require('sharp')
+const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/user');
 const userErrors = require('../error_messages/userErrors');
 const { hashPassword } = require('../helpers/bcrypt_helper');
-const { validToken } = require('../helpers/jwt_helper')
+const { validToken, createEmailValidationToken } = require('../helpers/jwt_helper')
 const { uploadImageS3Url, deleteImageS3 } = require('../utils/s3');
+const { sendEmail } = require('../utils/ses.mailer');
 
 const { result, updateUserValidator, validateImageFile } = require('../helpers/validators')
 
@@ -101,5 +103,69 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
     }
 
 })
+
+router.post('/send-verification-email', [validToken], async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded;
+        if (!user_id) throw new Error('invalid_user');
+
+        const user = await db.findUserById(user_id)
+        if (!user || user.email === null) {
+            throw new Error('invalid_user')
+        }
+
+        const email_token = createEmailValidationToken(user_id, user.email)
+        const verificationUrl = `${process.env.FRONTEND_CLIENT}/email-verified?token=${email_token}`;
+
+        const emailHtml = `
+            <h4>Email Verification</h4>
+            <p>Please click on the link below to verify your email address:</p>
+            <a href="${verificationUrl}">${verificationUrl}</a>
+        `;
+
+        await sendEmail('coachellavalleysmokersclub@gmail.com', 'Verify Your Email', emailHtml);
+
+        res.status(200).json({ message: 'Verification email sent.' });
+    } catch (error) {
+        console.error('Failed to send verification email:', error);
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
+    }
+});
+
+// Endpoint to verify the email
+router.get('/verify-email', async (req, res, next) => {
+    try {
+        const { token } = req.query;
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await db.findUserById(payload.userId);
+        if (!user) {
+            throw new Error('invalid_user');
+        }
+
+        if (user.email !== payload.email) {
+            throw new Error('non_matching_validation')
+        }
+
+        await db.validateEmailVerify(payload.userId, user.email);
+
+        res.status(200).json({ message: 'email has been verified' });
+    } catch (error) {
+        console.error('Error verifying email:', error);
+        if (error.name === 'TokenExpiredError') {
+            res.status(400).send('Verification link expired.');
+        } else {
+            next({
+                status: userErrors[error.message]?.status,
+                message: userErrors[error.message]?.message,
+                type: userErrors[error.message]?.type,
+            })
+        }
+    }
+});
 
 module.exports = router;
