@@ -27,7 +27,7 @@ exports.up = function (knex) {
             .defaultTo(false)
         
         users
-            .string('email_validation_pending')
+            .boolean('email_validation_pending')
             .defaultTo(false)
         
         users

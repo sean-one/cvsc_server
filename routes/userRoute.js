@@ -125,6 +125,8 @@ router.post('/send-verification-email', [validToken], async (req, res, next) => 
 
         await sendEmail('coachellavalleysmokersclub@gmail.com', 'Verify Your Email', emailHtml);
 
+        await db.markValidationPending(user_id)
+        
         res.status(200).json({ message: 'Verification email sent.' });
     } catch (error) {
         console.error('Failed to send verification email:', error);

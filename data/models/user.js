@@ -9,6 +9,7 @@ module.exports = {
     updateMfaSecret,
     validateMfaSecret,
     checkMfaSecret,
+    markValidationPending,
     validateEmailVerify,
     removeRefreshToken,
     findByRefresh,
@@ -30,6 +31,7 @@ async function createUser(user) {
                 'avatar',
                 'is_superadmin',
                 'email_verified',
+                'email_validation_pending',
                 'mfa_enabled'
             ])
     } catch (error) {
@@ -50,6 +52,7 @@ async function findUserById(id) {
                 'users.email',
                 'users.is_superadmin',
                 'users.email_verified',
+                'users.email_validation_pending',
                 'users.mfa_enabled',
 
             ])
@@ -74,6 +77,7 @@ function findByUsername(username) {
                     'users.password',
                     'users.is_superadmin',
                     'users.email_verified',
+                    'users.email_validation_pending',
                     'users.mfa_enabled'
                 ]
             )
@@ -99,6 +103,7 @@ async function updateUser(user_id, updates) {
                     'users.email',
                     'users.is_superadmin',
                     'users.email_verified',
+                    'users.email_validation_pending',
                     'users.mfa_enabled'
                 ]
             )
@@ -122,6 +127,7 @@ async function findByRefresh(token) {
                     'users.email',
                     'users.is_superadmin',
                     'users.email_verified',
+                    'users.email_validation_pending',
                     'users.mfa_enabled'
                 ]
             )
@@ -178,9 +184,14 @@ async function checkMfaSecret(user_id) {
     }
 }
 
+// userRoute - '/send-verification-email
+async function markValidationPending(user_id) {
+    await db('users').where({ id: user_id }).update({ email_validation_pending: true })
+}
+
 // userRoute - '/verify-email
 async function validateEmailVerify(user_id, email) {
-    await db('users').where({ id: user_id }).update({ email: email, email_verified: true })
+    await db('users').where({ id: user_id }).update({ email: email, email_verified: true, email_validation_pending: false })
 }
 
 // passport-config - deserialize user
@@ -195,6 +206,7 @@ async function getUserAccount(id) {
                 'users.email',
                 'users.is_superadmin',
                 'users.email_verified',
+                'users.email_validation_pending',
                 'users.mfa_enabled'
             ]
         ).first()
@@ -215,6 +227,7 @@ async function findByGoogleId(google_id) {
                 'users.email',
                 'users.is_superadmin',
                 'users.email_verified',
+                'users.email_validation_pending',
                 'users.mfa_enabled'
             ]
         )

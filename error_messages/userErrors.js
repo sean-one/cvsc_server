@@ -23,6 +23,12 @@ const userErrors = {
         message: 'image upload error',
         type: 'avatar'
     },
+    // .post('USERS/send-verification-email')
+    ses_failed: {
+        status: 400,
+        message: 'error sending verification email',
+        type: 'server'
+    },
     // .get('USERS/verify-email')
     non_matching_validation: {
         status: 400,
