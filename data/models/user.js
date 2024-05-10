@@ -8,6 +8,7 @@ module.exports = {
     addRefreshToken,
     updateMfaSecret,
     validateMfaSecret,
+    checkMfaSecret,
     validateEmailVerify,
     removeRefreshToken,
     findByRefresh,
@@ -27,7 +28,9 @@ async function createUser(user) {
                 'username',
                 'email',
                 'avatar',
-                'is_superadmin'
+                'is_superadmin',
+                'email_verified',
+                'mfa_enabled'
             ])
     } catch (error) {
         console.error('Error creating new user:', error);
@@ -46,7 +49,8 @@ async function findUserById(id) {
                 'users.avatar',
                 'users.email',
                 'users.is_superadmin',
-                'users.mfa_secret',
+                'users.email_verified',
+                'users.mfa_enabled',
 
             ])
             .first()
@@ -68,7 +72,9 @@ function findByUsername(username) {
                     'users.avatar',
                     'users.email',
                     'users.password',
-                    'users.is_superadmin'
+                    'users.is_superadmin',
+                    'users.email_verified',
+                    'users.mfa_enabled'
                 ]
             )
             .first()
@@ -91,7 +97,9 @@ async function updateUser(user_id, updates) {
                     'users.username',
                     'users.avatar',
                     'users.email',
-                    'users.is_superadmin'
+                    'users.is_superadmin',
+                    'users.email_verified',
+                    'users.mfa_enabled'
                 ]
             )
             .first()
@@ -112,7 +120,9 @@ async function findByRefresh(token) {
                     'users.username',
                     'users.avatar',
                     'users.email',
-                    'users.is_superadmin'
+                    'users.is_superadmin',
+                    'users.email_verified',
+                    'users.mfa_enabled'
                 ]
             )
             .first()
@@ -151,6 +161,23 @@ async function validateMfaSecret(user_id) {
     await db('users').where({ id: user_id }).update({ mfa_enabled: true })
 }
 
+// authRoute - '/verify-mfa'
+async function checkMfaSecret(user_id) {
+    try {
+        return await db('users')
+            .where({ 'users.id': user_id })
+            .select([
+                'users.id',
+                'users.mfa_secret',
+
+            ])
+            .first()
+    } catch (error) {
+        console.error('Error finding user MFA:', error)
+        throw new Error('user_find_id_server_error')
+    }
+}
+
 // userRoute - '/verify-email
 async function validateEmailVerify(user_id, email) {
     await db('users').where({ id: user_id }).update({ email: email, email_verified: true })
@@ -166,7 +193,9 @@ async function getUserAccount(id) {
                 'users.username',
                 'users.avatar',
                 'users.email',
-                'users.is_superadmin'
+                'users.is_superadmin',
+                'users.email_verified',
+                'users.mfa_enabled'
             ]
         ).first()
     const active_user_roles = await db('roles').where({ 'roles.user_id': id, 'roles.active_role': true }).select(['roles.business_id', 'roles.role_type']).orderBy('role_type', 'desc')
@@ -184,7 +213,9 @@ async function findByGoogleId(google_id) {
                 'users.username',
                 'users.avatar',
                 'users.email',
-                'users.is_superadmin'
+                'users.is_superadmin',
+                'users.email_verified',
+                'users.mfa_enabled'
             ]
         )
 }

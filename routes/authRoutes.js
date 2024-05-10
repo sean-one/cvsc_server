@@ -170,7 +170,7 @@ router.post('/verify-mfa', [validToken], async (req, res, next) => {
         if (!user_id) throw new Error('invalid_user')
     
         const { tempToken } = req.body;
-        const super_user = await userDB.findUserById(user_id)
+        const super_user = await userDB.checkMfaSecret(user_id)
 
         const verified = speakeasy.totp.verify({
             secret: super_user.mfa_secret,
