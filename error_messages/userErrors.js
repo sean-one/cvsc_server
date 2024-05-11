@@ -29,6 +29,12 @@ const userErrors = {
         message: 'error sending verification email',
         type: 'server'
     },
+    // .post('USERS/send-verification-email)
+    verification_pending: {
+        status: 400,
+        message: 'verification email is currently pending',
+        type: 'server'
+    },
     // .get('USERS/verify-email')
     non_matching_validation: {
         status: 400,

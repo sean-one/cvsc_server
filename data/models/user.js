@@ -17,6 +17,7 @@ module.exports = {
     findByGoogleId,
     findByUsername,
     checkUsernameDuplicate,
+    checkEmailVerifiedStatus,
     removeUser,
 };
 
@@ -31,7 +32,6 @@ async function createUser(user) {
                 'avatar',
                 'is_superadmin',
                 'email_verified',
-                'email_validation_pending',
                 'mfa_enabled'
             ])
     } catch (error) {
@@ -52,7 +52,6 @@ async function findUserById(id) {
                 'users.email',
                 'users.is_superadmin',
                 'users.email_verified',
-                'users.email_validation_pending',
                 'users.mfa_enabled',
 
             ])
@@ -77,7 +76,6 @@ function findByUsername(username) {
                     'users.password',
                     'users.is_superadmin',
                     'users.email_verified',
-                    'users.email_validation_pending',
                     'users.mfa_enabled'
                 ]
             )
@@ -103,7 +101,6 @@ async function updateUser(user_id, updates) {
                     'users.email',
                     'users.is_superadmin',
                     'users.email_verified',
-                    'users.email_validation_pending',
                     'users.mfa_enabled'
                 ]
             )
@@ -127,7 +124,6 @@ async function findByRefresh(token) {
                     'users.email',
                     'users.is_superadmin',
                     'users.email_verified',
-                    'users.email_validation_pending',
                     'users.mfa_enabled'
                 ]
             )
@@ -185,13 +181,13 @@ async function checkMfaSecret(user_id) {
 }
 
 // userRoute - '/send-verification-email
-async function markValidationPending(user_id) {
-    await db('users').where({ id: user_id }).update({ email_validation_pending: true })
+async function markValidationPending(user_id, token) {
+    await db('users').where({ id: user_id }).update({ email_verified_pending: token })
 }
 
 // userRoute - '/verify-email
 async function validateEmailVerify(user_id, email) {
-    await db('users').where({ id: user_id }).update({ email: email, email_verified: true, email_validation_pending: false })
+    await db('users').where({ id: user_id }).update({ email: email, email_verified: true, email_verified_pending: null })
 }
 
 // passport-config - deserialize user
@@ -206,7 +202,6 @@ async function getUserAccount(id) {
                 'users.email',
                 'users.is_superadmin',
                 'users.email_verified',
-                'users.email_validation_pending',
                 'users.mfa_enabled'
             ]
         ).first()
@@ -227,7 +222,6 @@ async function findByGoogleId(google_id) {
                 'users.email',
                 'users.is_superadmin',
                 'users.email_verified',
-                'users.email_validation_pending',
                 'users.mfa_enabled'
             ]
         )
@@ -240,6 +234,11 @@ function checkUsernameDuplicate(username) {
         .select([ 'users.username' ])
         .first()
 }
+
+// check for email_verified_pending
+async function checkEmailVerifiedStatus(user_id) {
+    return await db('users').where({ id: user_id }).select([ 'users.email_verified_pending' ]).first()
+} 
 
 // userRoute - '/users/delete'
 async function removeUser(user_id) {

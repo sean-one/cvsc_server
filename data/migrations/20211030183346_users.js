@@ -27,8 +27,8 @@ exports.up = function (knex) {
             .defaultTo(false)
         
         users
-            .boolean('email_validation_pending')
-            .defaultTo(false)
+            .string('email_verified_pending')
+            .defaultTo(null)
         
         users
             .boolean('is_superadmin')

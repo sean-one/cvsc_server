@@ -10,7 +10,7 @@ const { validToken, createEmailValidationToken } = require('../helpers/jwt_helpe
 const { uploadImageS3Url, deleteImageS3 } = require('../utils/s3');
 const { sendEmail } = require('../utils/ses.mailer');
 
-const { result, updateUserValidator, validateImageFile } = require('../helpers/validators')
+const { result, updateUserValidator, validateImageFile, checkEmailVerificationStatus } = require('../helpers/validators')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -104,7 +104,7 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
 
 })
 
-router.post('/send-verification-email', [validToken], async (req, res, next) => {
+router.post('/send-verification-email', [validToken, checkEmailVerificationStatus], async (req, res, next) => {
     try {
         const user_id = req.user_decoded;
         if (!user_id) throw new Error('invalid_user');
@@ -125,7 +125,7 @@ router.post('/send-verification-email', [validToken], async (req, res, next) => 
 
         await sendEmail('coachellavalleysmokersclub@gmail.com', 'Verify Your Email', emailHtml);
 
-        await db.markValidationPending(user_id)
+        await db.markValidationPending(user_id, email_token)
         
         res.status(200).json({ message: 'Verification email sent.' });
     } catch (error) {

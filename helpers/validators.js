@@ -1,4 +1,6 @@
 const { check, validationResult, oneOf } = require('express-validator');
+const jwt = require('jsonwebtoken');
+
 const userDB = require('../data/models/user');
 const businessDB = require('../data/models/business');
 const eventsDB = require('../data/models/event');
@@ -500,6 +502,34 @@ const updateUserValidator = [
         .escape(),
 ]
 
+// .post('USERS/send-verification-email')
+const checkEmailVerificationStatus = async (req, res, next) => {
+    const user_id = req.user_decoded;
+    try {
+        const user_account = await userDB.checkEmailVerifiedStatus(user_id)
+    
+        if (!user_account || !user_account.email_verified_pending) {
+            next()
+        }
+
+        try {
+            jwt.verify(user_account.email_verified_pending, process.env.JWT_SECRET)
+            return res.status(400).json({ message: 'minimum 15min. between validation emails' });
+            
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                next()
+            } else {
+                return res.status(400).json({ message: 'invalid token error' });
+            }
+            
+        }
+    } catch (error) {
+        console.error('database error:', error)
+        return res.status(404).json({ message: 'invalid user / user not found' })
+    }
+}
+
 // .post('BUSINESSES/')
 const newBusinessValidator = [
     check('business_name').trim().not().isEmpty().withMessage('business name is required')
@@ -642,6 +672,7 @@ module.exports = {
     validateEventUpdate,
     updateBusinessValidator,
     updateUserValidator,
+    checkEmailVerificationStatus,
     newEventValidator,
     updateEventValidator,
     result
