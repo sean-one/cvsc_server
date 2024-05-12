@@ -58,7 +58,9 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
         }
 
         if(req.body?.email) {
-            user_changes.email = req.body.email
+            user_changes.email = req.body.email;
+            user_changes.email_verified = false;
+            user_changes.email_verified_pending = null
         }
 
         if(req.body?.password) {

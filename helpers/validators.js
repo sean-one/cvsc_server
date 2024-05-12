@@ -508,21 +508,20 @@ const checkEmailVerificationStatus = async (req, res, next) => {
     try {
         const user_account = await userDB.checkEmailVerifiedStatus(user_id)
     
-        if (!user_account || !user_account.email_verified_pending) {
-            next()
-        }
-
-        try {
-            jwt.verify(user_account.email_verified_pending, process.env.JWT_SECRET)
-            return res.status(400).json({ message: 'minimum 15min. between validation emails' });
-            
-        } catch (error) {
-            if (error.name === 'TokenExpiredError') {
-                next()
-            } else {
-                return res.status(400).json({ message: 'invalid token error' });
+        if (user_account.email_verified_pending !== null) {
+            try {
+                jwt.verify(user_account.email_verified_pending, process.env.JWT_SECRET)
+                return res.status(400).json({ message: 'minimum 15m between validation emails' });
+                
+            } catch (error) {
+                if (error.name === 'TokenExpiredError') {
+                    next()
+                } else {
+                    return res.status(400).json({ message: 'invalid token error' });
+                }
             }
-            
+        } else {
+            next()
         }
     } catch (error) {
         console.error('database error:', error)
