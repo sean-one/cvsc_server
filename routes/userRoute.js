@@ -127,7 +127,7 @@ router.post('/send-verification-email', [validToken, checkEmailVerificationStatu
 
         await db.markValidationPending(user_id, email_token)
         
-        res.status(200).json({ message: 'Verification email sent.' });
+        res.status(200).json({ message: 'Verification email sent. Click the link in your email' });
     } catch (error) {
         console.error('Failed to send verification email:', error);
         next({
@@ -155,11 +155,11 @@ router.get('/verify-email', async (req, res, next) => {
 
         await db.validateEmailVerify(payload.userId, user.email);
 
-        res.status(200).json({ message: 'email has been verified' });
+        res.status(200).json({ message: 'email has been successfully verified' });
     } catch (error) {
         console.error('Error verifying email:', error);
         if (error.name === 'TokenExpiredError') {
-            res.status(400).send('Verification link expired.');
+            res.status(400).json({ message: 'Verification link expired or invalid' });
         } else {
             next({
                 status: userErrors[error.message]?.status,
