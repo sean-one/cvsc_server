@@ -529,6 +529,37 @@ const checkEmailVerificationStatus = async (req, res, next) => {
     }
 }
 
+// .post('USERS/forgot-password')
+const checkPasswordResetStatus = async (req, res, next) => {
+    try {
+        const { useremail } = req.body;
+        const reseting_user = await userDB.checkResetStatus(useremail)
+        
+        if (!reseting_user) {
+            return res.status(404).json({ error: { message: 'an account with that email was not found', type: 'server' } });
+        }
+
+        if (reseting_user.reset_password_token !== null) {
+            try {
+                jwt.verify(reseting_user.reset_password_token, process.env.JWT_SECRET)
+                return res.status(400).json({ error: { message: 'minimum 1h between password reset', type: 'server' } })
+
+            } catch (error) {
+                if (error.name === 'TokenExpiredError') {
+                    next()
+                } else {
+                    return res.status(400).json({ error: { message: 'invalid token error', type: 'server' } })
+                }
+            }
+        } else {
+            next()
+        }
+    } catch (error) {
+        console.error('Error in checkPasswordResetStatus validator:', error)
+        return res.status(404).json({ error: { message: 'invalid user / user not found', type: 'server' } })
+    }
+}
+
 // .post('BUSINESSES/')
 const newBusinessValidator = [
     check('business_name').trim().not().isEmpty().withMessage('business name is required')
@@ -672,6 +703,7 @@ module.exports = {
     updateBusinessValidator,
     updateUserValidator,
     checkEmailVerificationStatus,
+    checkPasswordResetStatus,
     newEventValidator,
     updateEventValidator,
     result

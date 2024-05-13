@@ -6,11 +6,11 @@ const jwt = require('jsonwebtoken');
 const db = require('../data/models/user');
 const userErrors = require('../error_messages/userErrors');
 const { hashPassword } = require('../helpers/bcrypt_helper');
-const { validToken, createEmailValidationToken } = require('../helpers/jwt_helper')
+const { validToken, createEmailValidationToken, createResetPasswordToken } = require('../helpers/jwt_helper')
 const { uploadImageS3Url, deleteImageS3 } = require('../utils/s3');
 const { sendEmail } = require('../utils/ses.mailer');
 
-const { result, updateUserValidator, validateImageFile, checkEmailVerificationStatus } = require('../helpers/validators')
+const { result, updateUserValidator, validateImageFile, checkEmailVerificationStatus, checkPasswordResetStatus } = require('../helpers/validators')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -129,7 +129,7 @@ router.post('/send-verification-email', [validToken, checkEmailVerificationStatu
 
         await db.markValidationPending(user_id, email_token)
         
-        res.status(200).json({ message: 'Verification email sent. Click the link in your email' });
+        res.status(200).json({ message: 'verification email sent' });
     } catch (error) {
         console.error('Failed to send verification email:', error);
         next({
@@ -139,6 +139,81 @@ router.post('/send-verification-email', [validToken, checkEmailVerificationStatu
         })
     }
 });
+
+router.post('/forgot-password', [ checkPasswordResetStatus ], async (req, res, next) => {
+    try {
+        const { useremail } = req.body
+        if (!useremail) { throw new Error('incomplete_input') };
+        
+        const forgetful_user = await db.findByEmail(useremail)
+        if (!forgetful_user) {
+            throw new Error('invalid_user')
+        }
+
+        if (forgetful_user.email_verified === false) {
+            throw new Error('email_not_validated')
+        }
+
+        const resetToken = createResetPasswordToken(forgetful_user.email)
+        const resetUrl = `${process.env.FRONTEND_CLIENT}/reset-password?token=${resetToken}`
+
+        const emailHtml = `
+            <h4>Reset Password</h4>
+            <p>Please click the link below to reset your password:</p>
+            <a href="${resetUrl}">Reset password link</a>
+        `
+
+        await sendEmail('coachellavalleysmokersclub@gmail.com', 'Reset your password.', emailHtml);
+
+        await db.markResetPasswordPending(forgetful_user.email, resetToken)
+
+        res.status(200).json({ message: 'password reset email sent'});
+        
+    } catch (error) {
+        console.error('Failed to send reset email:', error);
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
+    }
+
+})
+
+router.post('/reset-password', async (req, res, next) => {
+    const { token } = req.query;
+    const { password } = req.body;
+
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await db.findByResetToken(token)
+        if (!user) { throw new Error('invalid_user') }
+        if (user.email !== payload.email) { throw new Error('non_matching_email') }
+
+        // hash and save password
+        const hashed_password = await hashPassword(password)
+
+        const { username } = await db.validatePasswordReset(user.email, hashed_password)
+
+        res.status(201).json({ username: username, message: `password for ${username} has been updated`})
+    } catch (error) {
+        console.error('Error resetting password:', error)
+        if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
+            next({
+                status: 400,
+                message: 'password reset link expired or invalid',
+                type: 'server'
+            })
+        } else {
+            next({
+                status: userErrors[error.message]?.status,
+                message: userErrors[error.message]?.message,
+                type: userErrors[error.message]?.type
+            })
+        }
+    }
+})
 
 // Endpoint to verify the email
 router.get('/verify-email', async (req, res, next) => {
@@ -152,7 +227,7 @@ router.get('/verify-email', async (req, res, next) => {
         }
 
         if (user.email !== payload.email) {
-            throw new Error('non_matching_validation')
+            throw new Error('non_matching_email')
         }
 
         await db.validateEmailVerify(payload.userId, user.email);
@@ -160,8 +235,12 @@ router.get('/verify-email', async (req, res, next) => {
         res.status(200).json({ message: 'email has been successfully verified' });
     } catch (error) {
         console.error('Error verifying email:', error);
-        if (error.name === 'TokenExpiredError') {
-            res.status(400).json({ message: 'Verification link expired or invalid' });
+        if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
+            next({
+                status: 400,
+                message: 'verification link expired or invalid',
+                type: 'server'
+            })
         } else {
             next({
                 status: userErrors[error.message]?.status,

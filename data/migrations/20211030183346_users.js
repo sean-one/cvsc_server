@@ -21,6 +21,7 @@ exports.up = function (knex) {
         users
             .string('email')
             .defaultTo(null)
+            .unique()
         
         users
             .boolean('email_verified')
@@ -29,6 +30,10 @@ exports.up = function (knex) {
         users
             .string('email_verified_pending')
             .defaultTo(null)
+        
+        users
+            .string('reset_password_token')
+            .nullable()
         
         users
             .boolean('is_superadmin')

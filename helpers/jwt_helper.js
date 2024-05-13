@@ -32,6 +32,11 @@ const createEmailValidationToken = (user_id, email) => {
     return jwt.sign({ userId: user_id, email: email }, process.env.JWT_SECRET, { expiresIn: expiresIn });
 }
 
+const createResetPasswordToken = (email) => {
+    const expiresIn = '1h'
+    return jwt.sign({ email: email }, process.env.JWT_SECRET, { expiresIn: expiresIn });
+}
+
 const validToken = (req, res, next) => {
     try {
         const cookies = req.cookies
@@ -65,5 +70,6 @@ module.exports = {
     createAccessToken,
     createRefreshToken,
     createEmailValidationToken,
+    createResetPasswordToken,
     validToken,
 }

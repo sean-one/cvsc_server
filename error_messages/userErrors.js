@@ -36,9 +36,21 @@ const userErrors = {
         type: 'server'
     },
     // .get('USERS/verify-email')
-    non_matching_validation: {
+    non_matching_email: {
         status: 400,
-        message: 'verification failed. email does not match',
+        message: 'failed. email does not match',
+        type: 'server'
+    },
+    // .post('USERS/forgot-password')
+    email_not_validated: {
+        status: 400,
+        message: 'email validation is required for password reset',
+        type: 'server'
+    },
+    // .post('USERS/forgot-password')
+    pending_reset: {
+        status: 400,
+        message: 'email reset already pending',
         type: 'server'
     },
     // passport-config - local strategy
@@ -84,6 +96,16 @@ const userErrors = {
         message: 'server error finding user by username',
         type: 'server'
     },
+    user_find_email_server_error: {
+        status: 400,
+        message: 'server error finding user by email',
+        type: 'server'
+    },
+    user_find_reset_token_server_error: {
+        status: 400,
+        message: 'server error finding user by reset password token',
+        type: 'server'
+    },
     user_find_refresh_server_error: {
         status: 400,
         message: 'server error finding user by refresh',
@@ -93,7 +115,7 @@ const userErrors = {
         status: 400,
         message: 'server error remove user refresh',
         type: 'server'
-    }
+    },
 }
 
 module.exports = userErrors;

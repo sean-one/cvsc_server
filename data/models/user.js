@@ -10,14 +10,19 @@ module.exports = {
     validateMfaSecret,
     checkMfaSecret,
     markValidationPending,
+    markResetPasswordPending,
     validateEmailVerify,
+    validatePasswordReset,
     removeRefreshToken,
     findByRefresh,
     getUserAccount,
     findByGoogleId,
     findByUsername,
+    findByEmail,
+    findByResetToken,
     checkUsernameDuplicate,
     checkEmailVerifiedStatus,
+    checkResetStatus,
     removeUser,
 };
 
@@ -83,6 +88,43 @@ function findByUsername(username) {
     } catch (error) {
         console.error('Error finding user by username:', error)
         throw new Error('user_find_username_server_error')
+    }
+}
+
+// userRoute - '.post(/users/forgot-password)'
+function findByEmail(email) {
+    try {
+        return db('users')
+            .where({ email: email })
+            .select(
+                [
+                    'users.id',
+                    'users.email_verified',
+                    'users.email',
+                ]
+            )
+            .first()
+    } catch (error) {
+        console.error('Error finding user by email:', error)
+        throw new Error('user_find_email_server_error')
+    }
+}
+
+// userRoute - '.post(/users/reset-password/:token)
+async function findByResetToken(token) {
+    try {
+        return db('users')
+            .where({ reset_password_token: token })
+            .select(
+                [
+                    'users.id',
+                    'users.email'
+                ]
+            )
+            .first()
+    } catch (error) {
+        console.error('Error finding user by reset password token:', error)
+        throw new Error('user_find_reset_token_server_error')
     }
 }
 
@@ -185,9 +227,28 @@ async function markValidationPending(user_id, token) {
     await db('users').where({ id: user_id }).update({ email_verified_pending: token })
 }
 
+// userRoute - '/forgot-password
+async function markResetPasswordPending(email, token) {
+    await db('users').where({ email: email }).update({ reset_password_token: token })
+}
+
 // userRoute - '/verify-email
 async function validateEmailVerify(user_id, email) {
     await db('users').where({ id: user_id }).update({ email: email, email_verified: true, email_verified_pending: null })
+}
+
+// userRoute - '/reset-password/:token
+async function validatePasswordReset(email, password) {
+    await db('users').where({ email: email }).update({ password: password, reset_password_token: null })
+
+    return await db('users')
+        .where({ 'users.email': email })
+        .select(
+            [
+                'users.username',
+            ]
+        )
+        .first()
 }
 
 // passport-config - deserialize user
@@ -238,7 +299,12 @@ function checkUsernameDuplicate(username) {
 // check for email_verified_pending
 async function checkEmailVerifiedStatus(user_id) {
     return await db('users').where({ id: user_id }).select([ 'users.email_verified_pending' ]).first()
-} 
+}
+
+// check for password reset pending
+async function checkResetStatus(email) {
+    return await db('users').where({ email: email }).select([ 'users.reset_password_token' ]).first()
+}
 
 // userRoute - '/users/delete'
 async function removeUser(user_id) {
