@@ -12,6 +12,7 @@ const userErrors = require('../error_messages/userErrors');
 const { createAccessToken, createRefreshToken, validToken } = require('../helpers/jwt_helper');
 const { uploadImageS3Url } = require('../utils/s3');
 const { hashPassword } = require('../helpers/bcrypt_helper');
+const { normalizeEmail } = require('../helpers/normalizeEmail');
 const userDB = require('../data/models/user');
 
 const { loginUserValidator, registerUserValidator, result, validateImageFile } = require('../helpers/validators')
@@ -27,7 +28,7 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
         }
 
         // create new user
-        const new_user = { username: req.body.username, email: req.body.email }
+        const new_user = { username: req.body.username, email: normalizeEmail(req.body.email) }
     
         // check for attached image, upload to s3 bucket or delete the field so that db will add default
         if(req.file) {   
@@ -113,26 +114,33 @@ router.get('/refresh', async (req, res) => {
 // call google api for profile, email & google_id
 router.get('/google', passport.authenticate("google", { scope: ["profile", "email"] }));
 
-router.get('/google/redirect', passport.authenticate("google", {
-    // successRedirect: `${process.env.FRONTEND_CLIENT}/profile`,
-    failureRedirect: '/auth/login/failed',
-    session: true
-}), async (req, res) => {
-    console.log(req.user)
+router.get('/google/redirect', (req, res, next) => {
+    passport.authenticate("google", (err, user, info) => {
+        if (err) {
+            console.error('authentication error: ', err)
+            return res.redirect(`/auth/login/failed?error=${encodeURIComponent(err.message)}`);
+        }
 
-    const user = req.user
-    // const user_roles = await rolesDB.getAllUserRoles(user.id)
-    // const filter_inactive = user_roles.filter(role => role.active_role)
-    // user.account_type = filter_inactive[0]?.role_type || process.env.BASIC_ACCOUNT
+        if (!user) {
+            console.log('no user found or authentication failed: ', info);
+            return res.redirect('/auth/login/failed');
+        }
 
-    res.cookie('jwt', user.refreshToken)
-    // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
+        // user found and authenticated, continue with session setup
+        req.logIn(user, function(loginError) {
+            if (loginError) {
+                console.error('session login error: ', loginError);
+                return next(loginError);
+            }
 
-    delete user['refreshToken']
+            res.cookie('jwt', user.refreshToken) // { httpOnly: true, secure: true}
 
-    res.redirect(`${process.env.FRONTEND_CLIENT}/profile`)
-    // res.status(200).json({ user: user, roles: user_roles })
-})
+            delete user['refreshToken'];
+
+            res.redirect(`${process.env.FRONTEND_CLIENT}/profile`)
+        });
+    })(req, res, next);
+});
 
 router.get('/generate-mfa', [validToken], async (req, res, next) => {
     try {
@@ -197,7 +205,12 @@ router.post('/verify-mfa', [validToken], async (req, res, next) => {
 })
 
 router.get('/login/failed', (req, res) => {
-    res.status(401).redirect(`${process.env.FRONTEND_CLIENT}/login`)
+    const errorMessage = req.query.error;
+    const redirectUrl = errorMessage
+        ? `${process.env.FRONTEND_CLIENT}/login?error=${encodeURIComponent(errorMessage)}`
+        : `${process.env.FRONTEND_CLIENT}/login`
+        
+    res.status(401).redirect(redirectUrl)
 })
 
 router.get('/logout', async (req, res, next) => {

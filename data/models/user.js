@@ -286,6 +286,7 @@ async function findByGoogleId(google_id) {
                 'users.mfa_enabled'
             ]
         )
+        .first()
 }
 
 // check for username duplicate and retur username if found

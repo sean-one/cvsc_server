@@ -53,6 +53,12 @@ const userErrors = {
         message: 'email reset already pending',
         type: 'server'
     },
+    // passport-config - google strategy
+    google_verified: {
+        status: 400,
+        message: 'google email is already in use',
+        type: 'server'
+    },
     // passport-config - local strategy
     incomplete_input: {
         status: 400,

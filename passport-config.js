@@ -3,14 +3,12 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy
 const LocalStrategy = require('passport-local').Strategy
 
 const dbUser = require('./data/models/user');
-// const dbRoles = require('./data/models/roles');
-// const dbEvents = require('./data/models/event');
 
 const { processAndUploadImage } = require('./utils/s3')
 const { comparePassword } = require('./helpers/bcrypt_helper');
+const { normalizeEmail } = require('./helpers/normalizeEmail');
 const { createAccessToken, createRefreshToken } = require('./helpers/jwt_helper');
 const { generateUsername } = require('./helpers/generateUsername');
-const authErrors = require('./error_messages/authErrors');
 const userErrors = require('./error_messages/userErrors');
 
 passport.serializeUser(async (user, done) => {
@@ -30,49 +28,51 @@ passport.deserializeUser(async (id, done) => {
     done(null, user)
 })
 
-
 // Google login strategy
 passport.use(
     new GoogleStrategy(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: process.env.GOOGLE_CALLBACK_URL
+            callbackURL: process.env.GOOGLE_CALLBACK_URL,
+            passReqToCallback: true,
         },
-        async (accessToken, refreshToken, profile, done) => {
+        async (req, accessToken, refreshToken, profile, done) => {
             // check for user to log in
             const google_user = await dbUser.findByGoogleId(profile.id)
-            // no user found - register user
-            if (google_user.length === 0) {
-                let username = generateUsername();
-                // let username = profile.displayName
-                
-                // check for username duplicate
-                const found = await dbUser.checkUsernameDuplicate(username)
-                
-                // if duplicate generate username
-                if(found !== undefined) {
-                    username = generateUsername()
-                }
 
-                const savedProfileImage = await processAndUploadImage(profile.photos[0].value)
-
-                const new_user = {
-                    username: username,
-                    email: profile.emails[0].value,
-                    google_id: profile.id,
-                    avatar: savedProfileImage,
-                    email_verified: true
-
-                }
-                
-                // create new user with google information
-                const created_user = await dbUser.createUser(new_user)
-                
-                done(null, created_user[0])
-            } else {
-                done(null, google_user[0])
+            if (google_user) {
+                return done(null, google_user);
             }
+            
+            // check for email in database
+            const normalizedEmail = normalizeEmail(profile.emails[0].value)
+            const emailCheck = await dbUser.findByEmail(normalizedEmail)
+            if (emailCheck) {
+                if (emailCheck.email_verified) {
+                    // const emailCheckError = new Error('google_verified')
+                    return done({ status: 400, message: 'google_email_duplicate', type: 'server'}, false)
+                } else {
+                    await dbUser.removeUser(emailCheck.id)
+                }
+            }
+
+            // no user found - register user
+            const savedProfileImage = await processAndUploadImage(profile.photos[0].value)
+            const username = await generateUsername()
+
+            const new_user = {
+                username: username,
+                email: normalizedEmail,
+                google_id: profile.id,
+                avatar: savedProfileImage,
+                email_verified: true
+            }
+            
+            // create new user with google information
+            const created_user = await dbUser.createUser(new_user)
+            
+            done(null, created_user[0])
         }
     )
 )

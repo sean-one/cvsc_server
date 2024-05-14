@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../data/models/user');
 const userErrors = require('../error_messages/userErrors');
 const { hashPassword } = require('../helpers/bcrypt_helper');
+const { normalizeEmail } = require('../helpers/normalizeEmail');
 const { validToken, createEmailValidationToken, createResetPasswordToken } = require('../helpers/jwt_helper')
 const { uploadImageS3Url, deleteImageS3 } = require('../utils/s3');
 const { sendEmail } = require('../utils/ses.mailer');
@@ -58,7 +59,7 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
         }
 
         if(req.body?.email) {
-            user_changes.email = req.body.email;
+            user_changes.email = normalizeEmail(req.body.email);
             user_changes.email_verified = false;
             user_changes.email_verified_pending = null
         }
@@ -106,6 +107,7 @@ router.post('/update', [ upload.single('avatar'), validToken, updateUserValidato
 
 })
 
+// user.account - verifyEmailButton
 router.post('/send-verification-email', [validToken, checkEmailVerificationStatus], async (req, res, next) => {
     try {
         const user_id = req.user_decoded;
@@ -122,7 +124,7 @@ router.post('/send-verification-email', [validToken, checkEmailVerificationStatu
         const emailHtml = `
             <h4>Email Verification</h4>
             <p>Please click on the link below to verify your email address:</p>
-            <a href="${verificationUrl}">${verificationUrl}</a>
+            <a href="${verificationUrl}">Email Validation link</a>
         `;
 
         await sendEmail('coachellavalleysmokersclub@gmail.com', 'Verify Your Email', emailHtml);
@@ -140,12 +142,14 @@ router.post('/send-verification-email', [validToken, checkEmailVerificationStatu
     }
 });
 
+// forgotPassword.js
 router.post('/forgot-password', [ checkPasswordResetStatus ], async (req, res, next) => {
     try {
         const { useremail } = req.body
         if (!useremail) { throw new Error('incomplete_input') };
+        let normalizedEmail = normalizeEmail(useremail)
         
-        const forgetful_user = await db.findByEmail(useremail)
+        const forgetful_user = await db.findByEmail(normalizedEmail)
         if (!forgetful_user) {
             throw new Error('invalid_user')
         }
@@ -154,7 +158,7 @@ router.post('/forgot-password', [ checkPasswordResetStatus ], async (req, res, n
             throw new Error('email_not_validated')
         }
 
-        const resetToken = createResetPasswordToken(forgetful_user.email)
+        const resetToken = createResetPasswordToken(normalizedEmail)
         const resetUrl = `${process.env.FRONTEND_CLIENT}/reset-password?token=${resetToken}`
 
         const emailHtml = `
@@ -165,9 +169,9 @@ router.post('/forgot-password', [ checkPasswordResetStatus ], async (req, res, n
 
         await sendEmail('coachellavalleysmokersclub@gmail.com', 'Reset your password.', emailHtml);
 
-        await db.markResetPasswordPending(forgetful_user.email, resetToken)
+        await db.markResetPasswordPending(normalizedEmail, resetToken)
 
-        res.status(200).json({ message: 'password reset email sent'});
+        res.status(200).json({ message: 'password reset email sent, close this window and check email'});
         
     } catch (error) {
         console.error('Failed to send reset email:', error);
@@ -180,6 +184,7 @@ router.post('/forgot-password', [ checkPasswordResetStatus ], async (req, res, n
 
 })
 
+// resetPassword.js
 router.post('/reset-password', async (req, res, next) => {
     const { token } = req.query;
     const { password } = req.body;
@@ -215,7 +220,7 @@ router.post('/reset-password', async (req, res, next) => {
     }
 })
 
-// Endpoint to verify the email
+// emailVerificationPage - to verify the users email
 router.get('/verify-email', async (req, res, next) => {
     try {
         const { token } = req.query;
