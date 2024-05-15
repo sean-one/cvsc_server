@@ -11,7 +11,7 @@ const { validToken, createEmailValidationToken, createResetPasswordToken, Squirr
 const { uploadImageS3Url, deleteImageS3 } = require('../utils/s3');
 const { sendEmail } = require('../utils/ses.mailer');
 
-const { result, updateUserValidator, validateImageFile, checkEmailVerificationStatus, checkPasswordResetStatus } = require('../helpers/validators')
+const { result, updateUserValidator, validateImageFile, checkEmailVerificationStatus, checkPasswordResetStatus, uuidValidation } = require('../helpers/validators')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -231,6 +231,27 @@ router.post('/reset-password', async (req, res, next) => {
                 type: userErrors[error.message]?.type
             })
         }
+    }
+})
+
+router.delete('/squirrel-user-ban/:user_id', [SquirrelCheck, uuidValidation, result], async (req, res, next) => {
+    try {
+        const { user_id } = req.params;
+        if (!user_id) { throw new Error('invalid_user') }
+
+        const userbanned = await db.removeUser(user_id)
+
+        if (userbanned >= 1) {
+            res.status(204).json({ success: 'ok' });
+        } else {
+            throw new Error('delete_failed');
+        }
+    } catch (error) {
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
     }
 })
 
