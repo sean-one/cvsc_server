@@ -149,7 +149,7 @@ router.get('/generate-mfa', [validToken], async (req, res, next) => {
         
         const super_user = await userDB.findUserById(user_id)
         if (!super_user.is_superadmin) {
-            return res.status(403).json({ message: 'Unauthorized' });
+            return res.status(403).json({ error: { message: 'Unauthorized' } });
         }
 
         const tempSecret = speakeasy.generateSecret({
@@ -186,9 +186,8 @@ router.post('/verify-mfa', [validToken], async (req, res, next) => {
             token: tempToken
         })
 
-        console.log(verified)
         if (!verified) {
-            return res.status(400).json({ message: 'Invalid MFA Token' });
+            return res.status(400).json({ error: { message: 'Invalid MFA Token' } });
         }
 
         await userDB.validateMfaSecret(super_user.id)

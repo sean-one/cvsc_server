@@ -7,7 +7,7 @@ const db = require('../data/models/user');
 const userErrors = require('../error_messages/userErrors');
 const { hashPassword } = require('../helpers/bcrypt_helper');
 const { normalizeEmail } = require('../helpers/normalizeEmail');
-const { validToken, createEmailValidationToken, createResetPasswordToken } = require('../helpers/jwt_helper')
+const { validToken, createEmailValidationToken, createResetPasswordToken, SquirrelCheck } = require('../helpers/jwt_helper')
 const { uploadImageS3Url, deleteImageS3 } = require('../utils/s3');
 const { sendEmail } = require('../utils/ses.mailer');
 
@@ -17,6 +17,20 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
 const router = express.Router();
+
+router.get('/', [SquirrelCheck], async (req, res, next) => {
+    try {
+        const users = await db.getAllUsers()
+        
+        res.status(200).json(users)
+    } catch (error) {
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
+    }
+})
 
 // user.account - delete_account
 router.delete('/delete', [ validToken ], async (req, res, next) => {

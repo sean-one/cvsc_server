@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const tokenErrors = require('../error_messages/tokenErrors');
+const db = require('../data/models/user');
 
 const createAccessToken = (user_id) => {
     const payload = {
@@ -66,10 +67,48 @@ const validToken = (req, res, next) => {
     }
 }
 
+const SquirrelCheck = async (req, res, next) => {
+    try {
+        const cookies = req.cookies
+
+        if (!cookies.jwt) throw new Error('no_token')
+        
+        const user_decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESHTOKEN_SECRET, 'invalid_token')
+
+        const squirrelmaster = await db.findUserById(user_decoded.user)
+        if (!squirrelmaster) {
+            throw new Error('invalid_token')
+        }
+
+        if (!squirrelmaster.is_superadmin) {
+            throw new Error('invalid_credentials')
+        } else {
+            next()
+        }
+    } catch (error) {
+        console.log(error)
+        if (error?.name === 'TokenExpiredError' || error?.name === 'JsonWebTokenError') {
+            next({
+                status: tokenErrors[error.name]?.status,
+                message: tokenErrors[error.name]?.message,
+                type: tokenErrors[error.name]?.type,
+            })
+        } else {
+            next({
+                status: tokenErrors[error.message]?.status,
+                message: tokenErrors[error.message]?.message,
+                type: tokenErrors[error.message]?.type,
+            })
+
+        }
+    }
+}
+
 module.exports = {
     createAccessToken,
     createRefreshToken,
     createEmailValidationToken,
     createResetPasswordToken,
     validToken,
+    SquirrelCheck,
 }

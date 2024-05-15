@@ -1,6 +1,11 @@
 
 // used in jwt_helper -> validToken
 const tokenErrors = {
+    invalid_credentials: {
+        status: 403,
+        message: 'incorrect permissions set',
+        type: 'credentials'
+    },
     // missing token return 401
     no_token: {
         status: 401,
@@ -18,6 +23,11 @@ const tokenErrors = {
         message: 'token has expired, please log in',
         type: 'token'
     },
+    JsonWebTokenError: {
+        status: 403,
+        message: 'token is invalid',
+        type: 'token'
+    }
 }
 
 module.exports = tokenErrors;

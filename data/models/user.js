@@ -2,6 +2,7 @@ const db = require('../dbConfig');
 const { deleteImageS3 } = require('../../utils/s3');
 
 module.exports = {
+    getAllUsers,
     createUser,
     findUserById,
     updateUser,
@@ -25,6 +26,17 @@ module.exports = {
     checkResetStatus,
     removeUser,
 };
+
+async function getAllUsers() {
+    return await db('users')
+        .select([
+            'users.id',
+            'users.username',
+            'users.email',
+            'users.email_verified',
+            'users.mfa_enabled',
+        ])
+}
 
 // register - createUser
 async function createUser(user) {
