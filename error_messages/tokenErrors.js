@@ -27,6 +27,24 @@ const tokenErrors = {
         status: 403,
         message: 'token is invalid',
         type: 'token'
+    },
+    // no user_id found on token
+    no_user_id: {
+        status: 400,
+        message: 'user identifier not valid',
+        type: 'server'
+    },
+    // no user found by id
+    user_not_found: {
+        status: 404,
+        message: 'unable to find user',
+        type: 'server'
+    },
+    // user email is not verified
+    not_verified: {
+        status: 400,
+        message: 'user email must be verified to create business',
+        type: 'server'
     }
 }
 

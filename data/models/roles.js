@@ -316,6 +316,7 @@ function checkForDuplicate(business_id, user_id) {
 
 // validators.js - validateEventBusinessRoles (TRUE/FALSE) - checks for ACTIVE role
 function checkForRole(business_id, user_id) {
+    console.log('I AM THE PROBLEM!')
     return db('roles')
         .where({ user_id: user_id, business_id: business_id, active_role: true })
         .select(['roles.id'])

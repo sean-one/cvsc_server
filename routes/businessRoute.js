@@ -8,7 +8,7 @@ const db = require('../data/models/business');
 const { updatedGoogleMapsClient } = require('../helpers/geocoder');
 
 const businessErrors = require('../error_messages/businessErrors');
-const { validToken } = require('../helpers/jwt_helper');
+const { validToken, emailVerified } = require('../helpers/jwt_helper');
 
 const {
     formatValidationCheck,
@@ -41,7 +41,8 @@ router.get('/', async (req, res, next) => {
 });
 
 // useCreateBusinessMutation - createBusiness - useBusinessApi - CREATE BUSINESS
-router.post('/', [upload.single('business_avatar'), validToken, newBusinessValidator, validateImageFile, result], async (req, res, next) => {
+router.post('/', [upload.single('business_avatar'), validToken, emailVerified, newBusinessValidator, validateImageFile, result], async (req, res, next) => {
+    console.log('made it in!')
     let image_key
     try {
         const new_business = {
@@ -124,6 +125,7 @@ router.post('/', [upload.single('business_avatar'), validToken, newBusinessValid
         res.status(201).json(created_business);
 
     } catch (error) {
+        console.log('does it hit here?????')
         // errors returned from created_business database call - invalid input errors
         if (error.constraint) {
             // error return from database after image creation, remove image from s3

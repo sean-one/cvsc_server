@@ -2,7 +2,7 @@ const express = require('express');
 
 const db = require('../data/models/roles');
 const roleErrors = require('../error_messages/roleErrors');
-const { validToken } = require('../helpers/jwt_helper');
+const { validToken, emailVerified } = require('../helpers/jwt_helper');
 const {
     formatValidationCheck,
     validateBusinessAdmin,
@@ -89,7 +89,7 @@ router.get('/users/:user_id/account-role', [validToken, uuidValidation, result],
 })
 
 // useRolesApi - useCreateRoleMutation
-router.post('/businesses/:business_id/role-requests', [validToken, uuidValidation, formatValidationCheck, validateRoleRequest, result], async (req, res, next) => {
+router.post('/businesses/:business_id/role-requests', [validToken, emailVerified, uuidValidation, formatValidationCheck, validateRoleRequest, result], async (req, res, next) => {
     try {
         const { business_id } = req.params
         const role_request = await db.createRoleRequest(business_id, req.user_decoded)
@@ -151,6 +151,7 @@ router.put('/:role_id/actions', [validToken, uuidValidation, formatValidationChe
 
 // useRolesApi - useRoleDelete
 router.delete('/:role_id', [validToken, uuidValidation, formatValidationCheck, validateRoleDelete, result], async (req, res, next) => {
+    console.log('inside the delete route')
     try {
         const { role_id } = req.params;
         const deletedRole = await db.deleteRole(role_id)

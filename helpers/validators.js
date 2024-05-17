@@ -17,6 +17,7 @@ const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4
 //! ==================
 // loginUserValidator, registerUserValidator
 const isUsernameValid = (value) => {
+    console.log(value)
     if (!/^[a-zA-Z0-9*_\-.$!@]+$/.test(value)) {
         throw new Error('Username can only contain letters, numbers, *, _, -, ., $, !, @');
     }
@@ -276,21 +277,23 @@ const validateRoleRequest = async (req, res, next) => {
     const isAcceptingRequest = await businessDB.validateBusinessRequestOpen(business_id)
 
     if (!isAcceptingRequest) {
-        next({
-            status: 400,
-            message: 'business request is closed or not found',
-            type: 'server'
-        })
+        return res.status(400).json({ error: { message: 'business request is closed not found', type: 'server' } });
+        // next({
+            //     status: 400,
+            //     message: 'business request is closed or not found',
+            //     type: 'server'
+            // })
     }
     
     // confirm non duplicate
     const hasDuplicate = await rolesDB.checkForDuplicate(business_id, user_id)
     if(hasDuplicate) {
-        next({
-            status: 400,
-            message: 'duplicate business request are not allowed',
-            type: 'server'
-        })
+        return res.status(400).json({ error: { message: 'duplicate business request are not allowed', type: 'server' } });
+        // next({
+        //     status: 400,
+        //     message: 'duplicate business request are not allowed',
+        //     type: 'server'
+        // })
     }
 
     next()
@@ -298,6 +301,7 @@ const validateRoleRequest = async (req, res, next) => {
 
 // .delete('ROLES/:role_id)
 const validateRoleDelete = async (req, res, next) => {
+    console.log('inside the role delete')
     const user_id = req.user_decoded
     const { role_id } = req.params
 
@@ -424,6 +428,7 @@ const validateEventCreator = async (req, res, next) => {
 
 // .post('EVENTS/'), .put('EVENTS/:event_id') - validate user roles for at least one event business
 const validateEventBusinessRoles = async (req, res, next) => {
+    console.log('inside validateEventBusinessRoles')
     const user_id = req.user_decoded;
     const business_id = req.body.host_business;
 
@@ -441,6 +446,7 @@ const validateEventBusinessRoles = async (req, res, next) => {
 }
 
 const validateEventUpdate = async (req, res, next) => {
+    console.log('inside validateEventUpdate')
     const user_id = req.user_decoded;
 
 

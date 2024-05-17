@@ -77,7 +77,6 @@ router.post('/login', loginUserValidator, result, passport.authenticate('local',
 }), async (req, res) => {
 
     const user = req.user
-    
     res.cookie('jwt', user.refreshToken)
     // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
     

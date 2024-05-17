@@ -70,6 +70,33 @@ app.get('/', (req, res) => {
     res.send('WELCOME TO THE ROOT OF IT ALL')
 })
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server running...`);
-})
+const serverStartMessage = () => {
+    const now = new Date();
+    
+    const asciiArt = `
+      /$$$$$$  /$$    /$$  /$$$$$$   /$$$$$$ 
+     /$$__  $$| $$   | $$ /$$__  $$ /$$__  $$
+    | $$  \\__/| $$   | $$| $$  \\__/| $$  \\__/
+    | $$      |  $$ / $$/|  $$$$$$ | $$      
+    | $$       \\  $$ $$/  \\____  $$| $$      
+    | $$    $$  \\  $$$/   /$$  \\ $$| $$    $$
+    |  $$$$$$/   \\  $/   |  $$$$$$/|  $$$$$$/
+     \\______/     \\_/     \\______/  \\______/                                         
+    `
+    console.log(`
+    ==========================================
+    ${asciiArt}
+
+    Server is running!
+
+    URL: http://localhost:${process.env.PORT}
+
+    Time: ${now.toLocaleString()}
+
+    ==========================================
+    `)
+}
+
+
+
+app.listen(process.env.PORT, serverStartMessage);

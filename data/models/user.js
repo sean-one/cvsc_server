@@ -67,8 +67,8 @@ async function findUserById(id) {
                 'users.username',
                 'users.avatar',
                 'users.email',
-                'users.is_superadmin',
                 'users.email_verified',
+                'users.is_superadmin',
                 'users.mfa_enabled',
 
             ])

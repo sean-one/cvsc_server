@@ -67,6 +67,29 @@ const validToken = (req, res, next) => {
     }
 }
 
+const emailVerified = async (req, res, next) => {
+    try {
+        const user_id = req.user_decoded;
+        if (!user_id) { throw new Error('no_user_id') }
+
+        const verified_user = await db.findUserById(user_id)
+        if (!verified_user) { throw new Error('user_not_found') }
+
+        if (verified_user?.email_verified) {
+            next()
+        } else {
+            throw new Error('not_verified')
+        }
+    } catch (error) {
+        console.log(error)
+        next({
+            status: tokenErrors[error.message]?.status,
+            message: tokenErrors[error.message]?.message,
+            type: tokenErrors[error.message]?.type,
+        })
+    }
+}
+
 const SquirrelCheck = async (req, res, next) => {
     try {
         const cookies = req.cookies
@@ -86,7 +109,6 @@ const SquirrelCheck = async (req, res, next) => {
             next()
         }
     } catch (error) {
-        console.log(error)
         if (error?.name === 'TokenExpiredError' || error?.name === 'JsonWebTokenError') {
             next({
                 status: tokenErrors[error.name]?.status,
@@ -110,5 +132,6 @@ module.exports = {
     createEmailValidationToken,
     createResetPasswordToken,
     validToken,
+    emailVerified,
     SquirrelCheck,
 }
