@@ -51,15 +51,15 @@ module.exports = {
     useNullAsDefault: true,
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migration: {
-      directory: './data/migrations',
+      directory: './data/migrations/',
     },
     seeds: {
-      directory: './data/seeds'
-    }
-  }
+      directory: './data/migrations/',
+    },
+  },
 
 
 };
