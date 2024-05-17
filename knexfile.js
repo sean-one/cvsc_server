@@ -49,6 +49,11 @@ module.exports = {
       database: process.env.DB_DATABASE,
       ssl: { rejectUnauthorized: false },
     },
+    useNullAsDefault: true,
+    pool: {
+      min: 2,
+      max: 10
+    },
     migration: {
       directory: './data/migrations',
     },
