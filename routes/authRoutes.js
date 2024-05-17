@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken')
 const router = express.Router();
 
 const userErrors = require('../error_messages/userErrors');
-const { createAccessToken, createRefreshToken, validToken } = require('../helpers/jwt_helper');
+const { createAccessToken, createRefreshToken, validToken, SquirrelCheck } = require('../helpers/jwt_helper');
 const { uploadImageS3Url } = require('../utils/s3');
 const { hashPassword } = require('../helpers/bcrypt_helper');
 const { normalizeEmail } = require('../helpers/normalizeEmail');
@@ -109,6 +109,20 @@ router.get('/refresh', async (req, res) => {
             res.json(user_found)
         }
     )
+})
+
+router.get('/modlogs', [SquirrelCheck], async (req, res, next) => {
+    try {
+        const modlogs = await modLogDB.getModLogs()
+        return res.status(200).json(modlogs)
+    } catch (error) {
+        console.error('Error getting all mod logs')
+        next({
+            status: userErrors[error.message]?.status,
+            message: userErrors[error.message]?.message,
+            type: userErrors[error.message]?.type,
+        })
+    }
 })
 
 // call google api for profile, email & google_id
