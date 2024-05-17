@@ -91,10 +91,11 @@ passport.use(
                 const check_user = await dbUser.findByUsername(username)
                 
                 // if no user is found then return error
-                if (check_user === undefined) {
+                if (check_user === undefined || check_user.password === null) {
                     throw new Error('invalid_credentials')
                 }
 
+                console.log(check_user)
                 // if a user is found, verify the user passowrd
                 const password_verify = await comparePassword(password, check_user.password)
                 if (!password_verify) { throw new Error('invalid_credentials') }

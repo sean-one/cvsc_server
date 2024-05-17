@@ -4,6 +4,7 @@ const sharp = require('sharp')
 const jwt = require('jsonwebtoken');
 
 const db = require('../data/models/user');
+const modLogsDB = require('../data/models/modlog');
 const userErrors = require('../error_messages/userErrors');
 const { hashPassword } = require('../helpers/bcrypt_helper');
 const { normalizeEmail } = require('../helpers/normalizeEmail');
@@ -242,6 +243,12 @@ router.delete('/squirrel-user-ban/:user_id', [SquirrelCheck, uuidValidation, res
         const userbanned = await db.removeUser(user_id)
 
         if (userbanned >= 1) {
+            await modLogsDB.createModLog({
+                action: `user has been removed by moderator`,
+                target_id: `${user_id}`,
+                target_type: 'user_removed'
+            })
+
             res.status(204).json({ success: 'ok' });
         } else {
             throw new Error('delete_failed');

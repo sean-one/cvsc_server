@@ -224,6 +224,7 @@ async function checkMfaSecret(user_id) {
             .where({ 'users.id': user_id })
             .select([
                 'users.id',
+                'users.username',
                 'users.mfa_secret',
 
             ])

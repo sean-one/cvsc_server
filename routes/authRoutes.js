@@ -14,6 +14,7 @@ const { uploadImageS3Url } = require('../utils/s3');
 const { hashPassword } = require('../helpers/bcrypt_helper');
 const { normalizeEmail } = require('../helpers/normalizeEmail');
 const userDB = require('../data/models/user');
+const modLogDB = require('../data/models/modlog.js');
 
 const { loginUserValidator, registerUserValidator, result, validateImageFile } = require('../helpers/validators')
 
@@ -159,6 +160,12 @@ router.get('/generate-mfa', [validToken], async (req, res, next) => {
 
         const qrCodeUrl = await QRCode.toDataURL(tempSecret.otpauth_url);
 
+        await modLogDB.createModLog({
+            action: `${super_user?.username} generated a new MFA token`,
+            target_id: `${user_id}`,
+            target_type: 'mfaGenerate'
+        })
+
         res.status(200).json({ qrCodeUrl, secret: tempSecret.base32 });
         
     } catch (error) {
@@ -190,6 +197,12 @@ router.post('/verify-mfa', [validToken], async (req, res, next) => {
         }
 
         await userDB.validateMfaSecret(super_user.id)
+
+        await modLogDB.createModLog({
+            action: `${super_user?.username} verified their MFA token and signed in`,
+            target_id: `${user_id}`,
+            target_type: 'mfaVerify'
+        })
 
         res.status(201).json({ message: 'MFA successfully enabled'})
     } catch (error) {

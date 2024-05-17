@@ -81,7 +81,7 @@ const emailVerified = async (req, res, next) => {
             throw new Error('not_verified')
         }
     } catch (error) {
-        console.log(error)
+        console.error(`Error checking valid email: `,error)
         next({
             status: tokenErrors[error.message]?.status,
             message: tokenErrors[error.message]?.message,

@@ -9,7 +9,6 @@ const sesClient = new SESClient({
 });
 
 async function sendEmail(to, subject, htmlContent) {
-    console.log('inside the send email - ses.mailer')
     const params = {
         Source: 'coachellavalleysmokersclub@gmail.com', // SES verified email
         Destination: {

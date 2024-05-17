@@ -151,7 +151,6 @@ router.put('/:role_id/actions', [validToken, uuidValidation, formatValidationChe
 
 // useRolesApi - useRoleDelete
 router.delete('/:role_id', [validToken, uuidValidation, formatValidationCheck, validateRoleDelete, result], async (req, res, next) => {
-    console.log('inside the delete route')
     try {
         const { role_id } = req.params;
         const deletedRole = await db.deleteRole(role_id)
