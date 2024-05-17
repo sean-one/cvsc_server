@@ -52,7 +52,7 @@ app.use(passport.initialize());
 app.use(passport.session())
 
 app.use(cors({
-    origin: [process.env.FRONTEND_CLIENT, "http://192.168.1.36:3000", /\.localhost:3000/ ],
+    origin: process.env.FRONTEND_CLIENT,
     methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
     credentials: true,
 }));
