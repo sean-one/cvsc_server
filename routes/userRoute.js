@@ -142,7 +142,7 @@ router.post('/send-verification-email', [validToken, checkEmailVerificationStatu
             <a href="${verificationUrl}">Email Validation link</a>
         `;
 
-        await sendEmail('coachellavalleysmokersclub@gmail.com', 'Verify Your Email', emailHtml);
+        await sendEmail(user.email, 'Verify Your Email', emailHtml);
 
         await db.markValidationPending(user_id, email_token)
         
@@ -182,7 +182,7 @@ router.post('/forgot-password', [ checkPasswordResetStatus ], async (req, res, n
             <a href="${resetUrl}">Reset password link</a>
         `
 
-        await sendEmail('coachellavalleysmokersclub@gmail.com', 'Reset your password.', emailHtml);
+        await sendEmail(useremail, 'Reset your password.', emailHtml);
 
         await db.markResetPasswordPending(normalizedEmail, resetToken)
 
