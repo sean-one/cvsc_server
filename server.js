@@ -108,7 +108,7 @@ const serverStartMessage = () => {
 
     Server is running!
 
-    URL: http://localhost:${process.env.PORT}
+    URL: api.coachellavalleysmokersclub.com
 
     Time: ${now.toLocaleString()}
 
