@@ -76,14 +76,18 @@ router.post('/login', loginUserValidator, result, passport.authenticate('local',
     failWithError: true,
     session: true
 }), async (req, res) => {
-
-    const user = req.user
-    res.cookie('jwt', user.refreshToken)
-    // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
+    try {
+        const user = req.user
+        res.cookie('jwt', user.refreshToken)
+        // res.cookie('jwt', user.refreshToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 24 * 60 * 60 * 1000 })
+        
+        delete user['refreshToken']
     
-    delete user['refreshToken']
+        res.status(200).json(user)
+    } catch (error) {
+        next(error)
+    }
 
-    res.status(200).json(user)
 })
 
 router.get('/refresh', async (req, res) => {

@@ -10,7 +10,6 @@ const DynamoDBStore = require('connect-dynamodb')({session: session});
 const cookieParser = require('cookie-parser');
 
 const passport = require('passport')
-// const fileUpload = require('express-fileupload');
 
 // routes
 const authRouter = require('./routes/authRoutes')
@@ -23,10 +22,6 @@ const errorHandler = require('./helpers/errorHandler');
 
 const passportSetup = require('./passport-config');
 
-// REMOVED SO THAT MULTER WOULD WORK
-// app.use(fileUpload({
-//     createParentPath: true
-// }))
 
 app.use(morgan(':date[clf] :method :url :status :response-time ms - :res[content-length]'));
 
@@ -34,6 +29,13 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use(cookieParser())
+
+app.use(cors({
+    origin: `${process.env.FRONTEND_CLIENT}`,
+    optionsSuccessStatus: 200,
+    methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+    credentials: true,
+}));
 
 const dynamoDBClient = new DynamoDBClient({
     region: process.env.AWS_REGION,
@@ -43,7 +45,6 @@ const dynamoDBClient = new DynamoDBClient({
     }
 
 })
-
 
 app.use(
     session({
@@ -68,12 +69,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session())
 
-app.use(cors({
-    origin: `${process.env.FRONTEND_CLIENT}`,
-    optionsSuccessStatus: 200,
-    methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-    credentials: true,
-}));
+
 
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
@@ -82,11 +78,13 @@ app.use('/businesses', businessRouter);
 app.use('/roles', roleRouter);
 app.use('/s3', s3Router);
 
-app.use(errorHandler)
 
 app.get('/', (req, res) => {
     res.send('WELCOME TO THE ROOT OF IT ALL')
 })
+
+app.use(errorHandler)
+
 
 const serverStartMessage = () => {
     const now = new Date();

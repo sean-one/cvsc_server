@@ -277,22 +277,12 @@ const validateRoleRequest = async (req, res, next) => {
 
     if (!isAcceptingRequest) {
         return res.status(400).json({ error: { message: 'business request is closed not found', type: 'server' } });
-        // next({
-            //     status: 400,
-            //     message: 'business request is closed or not found',
-            //     type: 'server'
-            // })
     }
     
     // confirm non duplicate
     const hasDuplicate = await rolesDB.checkForDuplicate(business_id, user_id)
     if(hasDuplicate) {
         return res.status(400).json({ error: { message: 'duplicate business request are not allowed', type: 'server' } });
-        // next({
-        //     status: 400,
-        //     message: 'duplicate business request are not allowed',
-        //     type: 'server'
-        // })
     }
 
     next()
