@@ -5,6 +5,8 @@ const app = express()
 const morgan = require('morgan')
 const cors = require('cors');
 const session = require('express-session');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const DynamoDBStore = require('connect-dynamodb')({session: session});
 const cookieParser = require('cookie-parser');
 
 const passport = require('passport')
@@ -33,16 +35,31 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use(cookieParser())
 
+const dynamoDBClient = new DynamoDBClient({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    }
+
+})
+
+
 app.use(
     session({
         name: 'cv_smoker',
         secret: process.env.COOKIE_SECRET,
         cookie: {
             maxAge: 60 * 60 * 24 * 1000,
-            // secure: process.env.NODE_ENV === "production" ? "true" : "auto",
-            secure: true,
+            secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         },
+        store: process.env.NODE_ENV === 'production' ? new DynamoDBStore({
+            client: dynamoDBClient,
+            table: process.env.AWS_DYNAMODB_TABLE,
+            TTL: 86400,
+            ttlAttributeName: 'expiresAt'
+        }) : undefined,
         resave: false,
         saveUninitialized: true,
     })
