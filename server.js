@@ -59,7 +59,10 @@ app.use(
             client: dynamoDBClient,
             table: process.env.AWS_DYNAMODB_TABLE,
             TTL: 86400,
-            ttlAttributeName: 'expiresAt'
+            hashKey: 'sessionId',
+            ttlAttributeName: 'expiresAt',
+            readCapacityUnits: 5,
+            writeCapacityUnits: 5,
         }) : undefined,
         resave: false,
         saveUninitialized: true,
