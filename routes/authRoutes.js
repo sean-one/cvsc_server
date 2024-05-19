@@ -56,7 +56,7 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
             const refreshToken = createRefreshToken(user.id)
             await userDB.addRefreshToken(user.id, refreshToken)
 
-            res.cookie('jwt', refreshToken, { sameSite: 'none', secure: true });
+            res.cookie('jwt', refreshToken, { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' });
             
             res.status(201).json(user)
         })
@@ -81,7 +81,7 @@ router.post('/login', loginUserValidator, result, passport.authenticate('local',
             if (error) { return next(error) }
             const user = req.user
             
-            res.cookie('jwt', user.refreshToken, { sameSite: 'none', secure: true });
+            res.cookie('jwt', user.refreshToken, { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' });
             
             delete user['refreshToken']
             
@@ -154,7 +154,7 @@ router.get('/google/redirect', (req, res, next) => {
                 return next(loginError);
             }
 
-            res.cookie('jwt', refreshToken, { sameSite: 'none', secure: true });
+            res.cookie('jwt', refreshToken, { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' });
 
             delete user['refreshToken'];
 
@@ -257,14 +257,14 @@ router.get('/logout', async (req, res, next) => {
         
         if(!user_found) {
             // refresh token not found, remove cookie and send 204
-            res.clearCookie('jwt', { sameSite: 'none', secure: true });
+            res.clearCookie('jwt', { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' });
             return res.sendStatus(204)
         }
     
         // user found, removed from selected user and clear cookie
         await userDB.removeRefreshToken(user_found.id)
 
-        res.clearCookie('jwt', { sameSite: 'none', secure: true })
+        res.clearCookie('jwt', { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' })
 
         res.sendStatus(204)
     } catch (error) {
