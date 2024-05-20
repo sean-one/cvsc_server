@@ -108,7 +108,7 @@ const serverStartMessage = () => {
 
     Server is running!
 
-    URL: api.coachellavalleysmokersclub.com
+    URL: ${process.env.NODE_ENV === 'production' ? 'api.coachellavalleysmokersclub.com' : 'localhost:3333'}
 
     Time: ${now.toLocaleString()}
 

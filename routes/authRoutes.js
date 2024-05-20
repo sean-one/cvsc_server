@@ -21,6 +21,7 @@ const { loginUserValidator, registerUserValidator, result, validateImageFile } =
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
+
 // register.jsx
 router.post('/register', [upload.single('avatar'), registerUserValidator, validateImageFile, result], async (req, res, next) => {
     try {
@@ -56,7 +57,16 @@ router.post('/register', [upload.single('avatar'), registerUserValidator, valida
             const refreshToken = createRefreshToken(user.id)
             await userDB.addRefreshToken(user.id, refreshToken)
 
-            res.cookie('jwt', refreshToken, { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' });
+            const cookieOptions = {
+                sameSite: 'none',
+                secure: true
+            };
+
+            if (process.env.NODE_ENV === 'production') {
+                cookieOptions.domain = 'coachellavalleysmokersclub.com'
+            }
+
+            res.cookie('jwt', refreshToken, cookieOptions);
             
             res.status(201).json(user)
         })
@@ -80,14 +90,30 @@ router.post('/login', loginUserValidator, result, passport.authenticate('local',
         req.login(req.user, { session: true }, async (error) => {
             if (error) { return next(error) }
             const user = req.user
+
+            const accessToken = createAccessToken(user.id)
+            user.accessToken = accessToken
+
+            const refreshToken = createRefreshToken(user.id)
+            await userDB.addRefreshToken(user.id, refreshToken)
+
+            const cookieOptions = {
+                sameSite: 'none',
+                secure: true
+            };
+
+            if (process.env.NODE_ENV === 'production') {
+                cookieOptions.domain = 'coachellavalleysmokersclub.com'
+            }
             
-            res.cookie('jwt', user.refreshToken, { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' });
+            res.cookie('jwt', user.refreshToken, cookieOptions);
             
             delete user['refreshToken']
             
             res.status(200).json(user)
         })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 
@@ -148,13 +174,28 @@ router.get('/google/redirect', (req, res, next) => {
         }
 
         // user found and authenticated, continue with session setup
-        req.logIn(user, function(loginError) {
+        req.logIn(user, async function(loginError) {
             if (loginError) {
                 console.error('session login error: ', loginError);
                 return next(loginError);
             }
 
-            res.cookie('jwt', refreshToken, { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' });
+            const accessToken = createAccessToken(user.id)
+            user.accessToken = accessToken
+
+            const refreshToken = createRefreshToken(user.id)
+            await userDB.addRefreshToken(user.id, refreshToken)
+
+            const cookieOptions = {
+                sameSite: 'none',
+                secure: true
+            };
+
+            if (process.env.NODE_ENV === 'production') {
+                cookieOptions.domain = 'coachellavalleysmokersclub.com'
+            };
+
+            res.cookie('jwt', refreshToken, cookieOptions);
 
             delete user['refreshToken'];
 
@@ -248,6 +289,14 @@ router.get('/login/failed', (req, res) => {
 router.get('/logout', async (req, res, next) => {
     try {
         const cookies = req.cookies;
+        const cookieOPtions = {
+            sameSite: 'none',
+            secure: true
+        };
+
+        if (process.env.NODE_ENV === 'production') {
+            cookieOPtions.domain = 'coachellavalleysmokersclub.com'
+        }
     
         // no jwt cookie was found so no need to erase
         if(!cookies?.jwt) return res.sendStatus(204)
@@ -257,14 +306,14 @@ router.get('/logout', async (req, res, next) => {
         
         if(!user_found) {
             // refresh token not found, remove cookie and send 204
-            res.clearCookie('jwt', { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' });
+            res.clearCookie('jwt', cookieOPtions);
             return res.sendStatus(204)
         }
     
         // user found, removed from selected user and clear cookie
         await userDB.removeRefreshToken(user_found.id)
 
-        res.clearCookie('jwt', { sameSite: 'none', secure: true, domain: 'coachellavalleysmokersclub.com' })
+        res.clearCookie('jwt', cookieOPtions)
 
         res.sendStatus(204)
     } catch (error) {
