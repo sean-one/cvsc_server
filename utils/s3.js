@@ -122,6 +122,7 @@ const deleteImageS3 = async(image_key) => {
         return
 
     } catch (error) {
+        console.error('Failed to delete s3 image from bucket: ', error);
         throw new Error('aws_delete_error');
     }
 }

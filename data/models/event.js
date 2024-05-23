@@ -39,7 +39,7 @@ async function getBusinessEvents(business_id) {
                 'b.business_name',
                 'b.business_avatar',
             ])
-            .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+            .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventend::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere({ 'e.host_business': business_id, 'e.active_event': true })
             .groupBy('e.id', 'u.username', 'b.business_name', 'b.business_avatar')
             // Order by combined timestamp of eventdate and reformatted eventstart
@@ -58,7 +58,7 @@ async function getEventRelatedEvents(event_id) {
         
         return await db('events')
             // Ensure eventdate and eventstart are in the future
-            .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+            .whereRaw(`(events.eventdate || ' ' || LPAD(events.eventend::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere('events.place_id', '=', place_id)
             .andWhere('events.active_event', true)
             .andWhereNot('events.id', event_id)
@@ -117,7 +117,7 @@ async function getUserEvents(user_id) {
                 'b.business_name',
                 'b.business_avatar',
             ])
-            .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+            .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventend::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere({ 'e.created_by': user_id })
             .groupBy('e.id', 'u.username', 'b.business_name', 'b.business_avatar')
             .orderByRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp`)
@@ -150,7 +150,7 @@ async function getAllEvents() {
                 'b.business_avatar',
                 'b.business_name',
             ])
-            .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
+            .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventend::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere({ 'e.active_event': true })
             .orderByRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp`);
     } catch (error) {
