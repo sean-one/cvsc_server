@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 app.use(cors({
-    origin: `${process.env.FRONTEND_CLIENT}`,
+    origin: process.env.FRONTEND_CLIENT,
     optionsSuccessStatus: 200,
     methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
     credentials: true,

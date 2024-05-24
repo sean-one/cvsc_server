@@ -38,41 +38,64 @@ passport.use(
             passReqToCallback: true,
         },
         async (req, accessToken, refreshToken, profile, done) => {
-            // check for user to log in
-            const google_user = await dbUser.findByGoogleId(profile.id)
-
-            if (google_user) {
-                return done(null, google_user);
-            }
-            
-            // check for email in database
-            const normalizedEmail = normalizeEmail(profile.emails[0].value)
-            const emailCheck = await dbUser.findByEmail(normalizedEmail)
-            if (emailCheck) {
-                if (emailCheck.email_verified) {
-                    // const emailCheckError = new Error('google_verified')
-                    return done({ status: 400, message: 'google_email_duplicate', type: 'server'}, false)
-                } else {
-                    await dbUser.removeUser(emailCheck.id)
+            try {
+                // check for user to log in
+                const google_user = await dbUser.findByGoogleId(profile.id)
+                
+                if (google_user) {
+                    return done(null, google_user);
                 }
-            }
 
-            // no user found - register user
-            const savedProfileImage = await processAndUploadImage(profile.photos[0].value)
-            const username = await generateUsername()
+                // check for email in database
+                const normalizedEmail = normalizeEmail(profile.emails[0].value)
+                const emailCheck = await dbUser.findByEmail(normalizedEmail)
 
-            const new_user = {
-                username: username,
-                email: normalizedEmail,
-                google_id: profile.id,
-                avatar: savedProfileImage,
-                email_verified: true
+                if (emailCheck) {
+                    if (!emailCheck.email_verified) {
+                        // user email found but is unverified
+                        await dbUser.removeUser(emailCheck.id)
+
+                        // create new user with google return
+                        const savedProfileImage = await processAndUploadImage(profile.photos[0].value)
+                        const username = await generateUsername();
+
+                        const new_user = {
+                            username: username,
+                            email: normalizedEmail,
+                            google_id: profile.id,
+                            avatar: savedProfileImage,
+                            email_verified: true
+                        }
+
+                        // create new user with google information
+                        const created_user = await dbUser.createUser(new_user)
+
+                        done(null, created_user[0])
+                    } else {
+                        // user email found and verified, add google id to the user
+                        const updated_user = await dbUser.updateUser(emailCheck.id, { google_id: profile.id })
+
+                        return done(null, updated_user)
+                    }
+                } else {
+                    // no user found by google id or google email
+                    const savedProfileImage = await processAndUploadImage(profile.photos[0].value)
+                    const username = await generateUsername();
+
+                    const new_user = {
+                        username: username,
+                        email: normalizedEmail,
+                        google_id: profile.id,
+                        avatar: savedProfileImage,
+                        email_verified: true
+                    };
+
+                    const created_user = await dbUser.createUser(new_user);
+                    return done(null, created_user[0]);
+                }
+            } catch (error) {
+                return done(error)
             }
-            
-            // create new user with google information
-            const created_user = await dbUser.createUser(new_user)
-            
-            done(null, created_user[0])
         }
     )
 )
