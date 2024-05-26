@@ -137,10 +137,13 @@ router.post('/send-verification-email', [validToken, checkEmailVerificationStatu
         const verificationUrl = `${process.env.FRONTEND_CLIENT}/email-verified?token=${email_token}`;
 
         const emailHtml = `
-            <h4>Email Verification</h4>
-            <p>Please click on the link below to verify your email address:</p>
-            <a href="${verificationUrl}">Email Validation link</a>
+            <p>Hi ${user.username},</p>
+            <p>Thank you for registering with Coachella Valley Smokers Club! Please click the link below to verify your email address:</p>
+            <p><a href="${verificationUrl}">[Verification Link]</a></p>
+            <p>If you did not create an account, please ignore this email.</p>
+            <p>Best regards,<br>Coachella Valley Smokers Club Team</p>
         `;
+
 
         await sendEmail(user.email, 'Verify Your Email', emailHtml);
 
@@ -177,12 +180,14 @@ router.post('/forgot-password', [ checkPasswordResetStatus ], async (req, res, n
         const resetUrl = `${process.env.FRONTEND_CLIENT}/reset-password?token=${resetToken}`
 
         const emailHtml = `
-            <h4>Reset Password</h4>
-            <p>Please click the link below to reset your password:</p>
-            <a href="${resetUrl}">Reset password link</a>
-        `
+            <p>Hi ${normalizedEmail},</p>
+            <p>We received a request to reset your password. Please click the link below to reset your password:</p>
+            <p><a href="${resetUrl}">[Reset Link]</a></p>
+            <p>If you did not request a password reset, please ignore this email or contact support.</p>
+            <p>Best regards,<br>Coachella Valley Smokers Club Team</p>
+        `;
 
-        await sendEmail(useremail, 'Reset your password.', emailHtml);
+        await sendEmail(useremail, 'Password Reset Request', emailHtml);
 
         await db.markResetPasswordPending(normalizedEmail, resetToken)
 
