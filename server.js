@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const express = require('express');
 const app = express()
+const cron = require('./cronJobs');
 const morgan = require('morgan')
 const cors = require('cors');
 const session = require('express-session');
