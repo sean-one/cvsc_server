@@ -18,8 +18,14 @@ module.exports = {
 // .get('EVENTS/business/:business_id') - returns array of ACTIVE events for specific business id
 async function getBusinessEvents(business_id) {
     try {
-        // Fetch the complete event records matching the combined list of event IDs
-        return await db('events as e')
+        // First, fetch the place_id for the given business_id
+        const business = await db('businesses')
+            .select('place_id')
+            .where({ id: business_id })
+            .first();
+
+        // Prepare the base query
+        let query = db('events as e')
             .join('users as u', 'e.created_by', 'u.id')
             .join('businesses as b', 'e.host_business', 'b.id')
             .select([
@@ -42,14 +48,22 @@ async function getBusinessEvents(business_id) {
             .whereRaw(`(e.eventdate || ' ' || LPAD(e.eventend::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`)
             .andWhere({ 'e.host_business': business_id, 'e.active_event': true })
             .groupBy('e.id', 'u.username', 'b.business_name', 'b.business_avatar')
-            // Order by combined timestamp of eventdate and reformatted eventstart
             .orderByRaw(`(e.eventdate || ' ' || LPAD(e.eventstart::text, 4, '0')::time)::timestamp`);
 
+        // If the business has a place_id, add additional filtering to include events with that place_id
+        if (business && business.place_id) {
+            query = query.orWhere({ 'e.place_id': business.place_id, 'e.active_event': true });
+        }
+
+        // Execute and return the query results
+        return await query;
+
     } catch (error) {
-        console.error('Error fetching business events:', Object.keys(error));
+        console.error('Error fetching business events:', error);
         throw new Error('fetch_business_events_server_error');
     }
 }
+
 
 // .get('EVENTS/event-related/:event_id) - returns array of ACTIVE events for specific event id (all events that include venue and brand)
 async function getEventRelatedEvents(event_id) {
