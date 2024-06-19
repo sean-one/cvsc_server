@@ -60,7 +60,7 @@ async function sendDailyRecap() {
 
         await sendEmail('coachellavalleysmokersclub@gmail.com', '6 Hour Recap', emailBody);
         
-        console.log('6 Hour recap email sent successfully');
+        console.log('Recap email sent successfully');
     
     } catch (error) {
         console.error('Error sending 6 Hour recap email:', error);

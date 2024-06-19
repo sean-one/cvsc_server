@@ -23,7 +23,6 @@ const errorHandler = require('./helpers/errorHandler');
 
 const passportSetup = require('./passport-config');
 
-
 app.use(morgan(':date[clf] :method :url :status :response-time ms - :res[content-length]'));
 
 app.use(express.json())
@@ -116,7 +115,5 @@ const serverStartMessage = () => {
     ==========================================
     `)
 }
-
-
 
 app.listen(process.env.PORT, serverStartMessage);

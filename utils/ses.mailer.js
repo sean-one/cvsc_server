@@ -29,8 +29,8 @@ async function sendEmail(to, subject, htmlContent) {
     };
 
     try {
-        const data = await sesClient.send(new SendEmailCommand(params));
-        console.log("Email sent successfully:", data);
+        await sesClient.send(new SendEmailCommand(params));
+        // console.log("Email sent successfully:", data);
     } catch (error) {
         console.error("Detailed Error Logging:");
         console.error("Error sending email:", error);

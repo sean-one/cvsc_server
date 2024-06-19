@@ -52,7 +52,10 @@ async function getBusinessEvents(business_id) {
 
         // If the business has a place_id, add additional filtering to include events with that place_id
         if (business && business.place_id) {
-            query = query.orWhere({ 'e.place_id': business.place_id, 'e.active_event': true });
+            query = query.orWhere(function () {
+                this.where({ 'e.place_id': business.place_id, 'e.active_event': true })
+                    .andWhereRaw(`(e.eventdate || ' ' || LPAD(e.eventend::text, 4, '0')::time)::timestamp >= CURRENT_TIMESTAMP`);
+            });
         }
 
         // Execute and return the query results
