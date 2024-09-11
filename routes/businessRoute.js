@@ -29,10 +29,25 @@ const router = express.Router()
 
 // useBusinessesQuery - return a list of all businesses
 router.get('/', async (req, res, next) => {
+    const { business_name } = req.query
+    
     try {
         let businesses = await db.getAllBusinesses()
+
+        if (business_name) {
+            const named_business = businesses.filter(business => business.business_name === business_name)
+
+            if (named_business.length <= 0) {
+                res.status(404).json({ message: 'business name not found' });
+            } else {
+                res.status(200).json(named_business[0])
+            }
+
+        } else {
+            res.status(200).json(businesses)
+
+        }
        
-        res.status(200).json(businesses)
         
     } catch (error) {
         console.error('Error fetching all businesses:', error)

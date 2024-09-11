@@ -24,7 +24,7 @@ module.exports = {
 async function getAllBusinesses() {
     try {
         const all_business_list = await db('businesses')
-            // .where({ active_business: true })
+            .where({ active_business: true })
             .leftJoin('users', 'businesses.business_admin', '=', 'users.id')
             .select(
                 [
