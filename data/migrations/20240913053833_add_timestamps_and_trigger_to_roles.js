@@ -1,4 +1,9 @@
 exports.up = async function (knex) {
+    // add created_at and updated_at columns to roles table
+    await knex.schema.alterTable('roles', roles => {
+        roles.timestamps(true, true);
+    });
+
     // create a trigger function to update updated_at when changes are made
     await knex.raw(`
         CREATE OR REPLACE FUNCTION update_modified_column()
@@ -19,9 +24,18 @@ exports.up = async function (knex) {
 };
 
 exports.down = async function (knex) {
-    // drop the trigger from the roles table
+    // Drop the trigger from the roles table
     await knex.raw(`DROP TRIGGER IF EXISTS set_updated_at ON roles`);
-    
-    // drop the trigger function
+
+    // Drop the trigger from the users table
+    await knex.raw(`DROP TRIGGER IF EXISTS set_updated_at ON users`);
+
+    // Drop the trigger from the businesses table
+    await knex.raw(`DROP TRIGGER IF EXISTS set_updated_at ON businesses`);
+
+    // Drop the trigger from the events table
+    await knex.raw(`DROP TRIGGER IF EXISTS set_updated_at ON events`);
+
+    // After dropping all dependent triggers, drop the function
     await knex.raw(`DROP FUNCTION IF EXISTS update_modified_column`);
 };
