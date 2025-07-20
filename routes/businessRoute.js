@@ -341,10 +341,30 @@ router.put('/:business_id', [upload.single('business_avatar'), validToken, uuidV
             business_update['business_avatar'] = image_key
         }
 
-        // if remove address flag is true update place_id & formatted_address
+        // remove_instagram flag true updates business_instagram to null
+        if (req.body.remove_instagram) {
+            business_update.business_instagram = null;
+        }
+
+        // remove_address flag true updates place_id & formatted_address to null
         if (req.body.remove_address) {
             business_update.place_id = null;
             business_update.formatted_address = null;
+        }
+
+        // remove_website flag true updates business_website to null
+        if (req.body.remove_website) {
+            business_update.business_website = null;
+        }
+
+        // remove_phone flag true updates business_phone to null
+        if (req.body.remove_phone) {
+            business_update.business_phone = null
+        }
+
+        // remove_twitter flag true updates business_twitter to null
+        if (req.body.remove_twitter) {
+            business_update.business_twitter = null
         }
 
         // if there are no changes in the update there is no need to hit the database
